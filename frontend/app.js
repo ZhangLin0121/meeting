@@ -16,6 +16,6 @@ App({
     },
     globalData: {
         userInfo: null,
-        apiBaseUrl: 'http://localhost:3000'
+        apiBaseUrl: 'http://47.122.68.192'
     }
 })
