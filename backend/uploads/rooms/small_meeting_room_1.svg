@@ -1,0 +1,7 @@
+
+            <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="500" height="300" fill="#fce4ec"/>
+                <rect x="100" y="75" width="300" height="150" rx="8" fill="#ffffff" stroke="#e91e63"/>
+                <text x="250" y="150" text-anchor="middle" font-family="Arial" font-size="14" fill="#c2185b">小型洽谈室</text>
+                <text x="250" y="170" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Small Meeting Room</text>
+            </svg>

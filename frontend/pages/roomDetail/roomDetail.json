@@ -1,0 +1,7 @@
+{
+    "usingComponents": {},
+    "navigationStyle": "custom",
+    "enablePullDownRefresh": false,
+    "backgroundTextStyle": "dark",
+    "backgroundColor": "#f7f7f7"
+}

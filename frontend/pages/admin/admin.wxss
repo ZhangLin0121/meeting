@@ -1,0 +1,1153 @@
+/* 管理员后台页面样式 - 最简单布局 */
+
+
+/* 基础页面样式 - 按照roomList的正确方式 */
+
+page {
+    background-color: #F2F2F7;
+    /* 自定义导航栏模式，不在page层处理安全区域 */
+}
+
+.container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #F2F2F7 0%, #E5E5EA 100%);
+    padding-bottom: 40rpx;
+    box-sizing: border-box;
+    /* 移除padding-top，让导航栏自己处理 */
+}
+
+
+/* 自定义导航栏 - 按照roomList的正确方式 */
+
+.page-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx) saturate(180%);
+    -webkit-backdrop-filter: blur(20rpx) saturate(180%);
+    border-bottom: 0.5rpx solid rgba(0, 0, 0, 0.04);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    /* 在导航栏内处理安全区域 */
+    padding-top: env(safe-area-inset-top, 0);
+}
+
+.navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 88rpx;
+    padding: 0 24rpx;
+}
+
+.header-left {
+    flex: 0 0 auto;
+    width: 120rpx;
+}
+
+.header-right {
+    flex: 0 0 auto;
+    width: 120rpx;
+}
+
+.header-center {
+    flex: 1;
+    text-align: center;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    padding: 6rpx 0;
+    background: transparent;
+    transition: opacity 0.2s ease-out;
+    min-width: 80rpx;
+}
+
+.back-button:active {
+    opacity: 0.6;
+}
+
+.back-icon {
+    width: 16rpx;
+    height: 16rpx;
+    margin-right: 8rpx;
+    filter: brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1757%) hue-rotate(204deg) brightness(97%) contrast(101%);
+    transition: all 0.2s ease-out;
+}
+
+.back-text {
+    font-size: 30rpx;
+    color: #007AFF;
+    font-weight: 400;
+    letter-spacing: -0.24rpx;
+    line-height: 1.2;
+}
+
+.header-title {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #1D1D1F;
+    letter-spacing: 0.5rpx;
+}
+
+
+/* 选项卡样式 - 正常文档流 */
+
+.tab-bar {
+    display: flex;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx) saturate(180%);
+    -webkit-backdrop-filter: blur(20rpx) saturate(180%);
+    border-bottom: 0.5rpx solid rgba(0, 0, 0, 0.06);
+    /* 移除sticky定位，让元素自然排列 */
+    margin: 0;
+    border-radius: 0;
+    box-shadow: 0 0.5rpx 0 rgba(0, 0, 0, 0.04);
+}
+
+.tab-item {
+    flex: 1;
+    padding: 20rpx 0;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tab-item.active {
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.06) 0%, rgba(0, 102, 204, 0.02) 100%);
+}
+
+.tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60rpx;
+    height: 4rpx;
+    background: linear-gradient(90deg, #0066CC 0%, #004499 100%);
+    border-radius: 2rpx;
+    box-shadow: 0 1rpx 6rpx rgba(0, 102, 204, 0.3);
+}
+
+.tab-text {
+    font-size: 28rpx;
+    font-weight: 500;
+    color: #515154;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5rpx;
+}
+
+.tab-item.active .tab-text {
+    color: #0066CC;
+    font-weight: 600;
+    transform: scale(1.02);
+}
+
+
+/* 内容区域 - 最简单版本 */
+
+.tab-content {
+    padding: 20rpx;
+    background: linear-gradient(180deg, #FAFAFA 0%, #F5F5F7 100%);
+    /* 不设置固定高度，让内容自然展开 */
+    min-height: 400rpx;
+}
+
+
+/* 操作按钮区域 */
+
+.action-bar {
+    margin-bottom: 20rpx;
+}
+
+.add-room-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    color: #ffffff;
+    padding: 28rpx 48rpx;
+    border-radius: 24rpx;
+    box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin: 32rpx;
+}
+
+.add-room-button:active {
+    transform: scale(0.96);
+    box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+}
+
+.add-icon {
+    width: 36rpx;
+    height: 36rpx;
+    margin-right: 20rpx;
+    filter: brightness(0) invert(1);
+}
+
+.add-text {
+    font-size: 32rpx;
+    font-weight: 600;
+    letter-spacing: 1rpx;
+}
+
+
+/* 会议室管理卡片 - 简化版 */
+
+.room-management-list {
+    /* 简单列表，不设置固定高度 */
+    padding: 0;
+}
+
+.room-management-card {
+    background-color: #ffffff;
+    border-radius: 16rpx;
+    margin-bottom: 20rpx;
+    overflow: hidden;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08), 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.room-management-card:hover {
+    transform: translateY(-4rpx);
+    box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.12), 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.room-management-card:active {
+    transform: scale(0.99) translateY(-2rpx);
+}
+
+
+/* 会议室图片容器 */
+
+.room-image-container {
+    position: relative;
+    height: 260rpx;
+    width: 100%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #F5F7FA 0%, #E8EBF0 100%);
+}
+
+.room-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.room-image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);
+}
+
+.placeholder-icon {
+    font-size: 80rpx;
+    margin-bottom: 16rpx;
+    opacity: 0.6;
+}
+
+.placeholder-text {
+    font-size: 28rpx;
+    color: #999999;
+    font-weight: 500;
+}
+
+
+/* 悬浮操作按钮 */
+
+.room-actions-overlay {
+    position: absolute;
+    top: 16rpx;
+    right: 16rpx;
+    display: flex;
+    gap: 12rpx;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+
+.action-button-new {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 28rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(40rpx);
+    -webkit-backdrop-filter: blur(40rpx);
+    background: rgba(255, 255, 255, 0.95);
+    border: 0.5rpx solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.action-button-new.edit {
+    background: rgba(0, 122, 255, 0.9);
+}
+
+.action-button-new.delete {
+    background: rgba(255, 59, 48, 0.9);
+}
+
+.action-button-new:active {
+    transform: scale(0.9);
+}
+
+.action-icon-new {
+    width: 32rpx;
+    height: 32rpx;
+    filter: brightness(0) invert(1);
+}
+
+
+/* 会议室内容区域 */
+
+.room-content {
+    padding: 32rpx;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+
+/* 标题区域 */
+
+.room-title-section {
+    margin-bottom: 20rpx;
+}
+
+.room-name-new {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #1D1D1F;
+    display: block;
+    margin-bottom: 6rpx;
+    line-height: 1.3;
+    letter-spacing: 0.5rpx;
+}
+
+.room-id-new {
+    font-size: 22rpx;
+    color: #8E8E93;
+    font-weight: 400;
+    letter-spacing: 0.5rpx;
+}
+
+
+/* 快速信息栏 */
+
+.room-quick-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20rpx;
+    background: rgba(0, 102, 204, 0.03);
+    border-radius: 12rpx;
+    padding: 16rpx 20rpx;
+    border: 0.5rpx solid rgba(0, 102, 204, 0.08);
+}
+
+.quick-info-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+}
+
+.info-icon {
+    font-size: 26rpx;
+    margin-right: 8rpx;
+}
+
+.info-text {
+    font-size: 22rpx;
+    color: #515154;
+    font-weight: 500;
+    letter-spacing: 0.5rpx;
+}
+
+
+/* 描述信息 */
+
+.room-description {
+    margin-bottom: 20rpx;
+}
+
+.description-text {
+    font-size: 24rpx;
+    color: #6D6D72;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: 0.5rpx;
+}
+
+
+/* 状态指示器 */
+
+.room-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12rpx 20rpx;
+    background: rgba(52, 199, 89, 0.08);
+    border-radius: 20rpx;
+    border: 0.5rpx solid rgba(52, 199, 89, 0.15);
+}
+
+.status-indicator {
+    width: 12rpx;
+    height: 12rpx;
+    border-radius: 6rpx;
+    margin-right: 8rpx;
+}
+
+.status-indicator.available {
+    background-color: #30D158;
+    box-shadow: 0 0 6rpx rgba(48, 209, 88, 0.3);
+}
+
+.status-indicator.unavailable {
+    background-color: #FF453A;
+    box-shadow: 0 0 6rpx rgba(255, 69, 58, 0.3);
+}
+
+.status-text {
+    font-size: 22rpx;
+    color: #30D158;
+    font-weight: 500;
+    letter-spacing: 0.5rpx;
+}
+
+
+/* 卡片加载动画 */
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(40rpx);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* 预约记录筛选器 */
+
+.booking-filter {
+    display: flex;
+    gap: 20rpx;
+    margin-bottom: 20rpx;
+}
+
+.date-filter,
+.status-filter {
+    flex: 1;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 24rpx 30rpx;
+    border-radius: 12rpx;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.filter-label {
+    font-size: 28rpx;
+    color: #666666;
+    margin-right: 16rpx;
+}
+
+.filter-value {
+    font-size: 28rpx;
+    color: #333333;
+    flex: 1;
+}
+
+.filter-arrow {
+    width: 24rpx;
+    height: 24rpx;
+    margin-left: 16rpx;
+}
+
+
+/* 预约记录列表 */
+
+.booking-list {
+    /* 简单的预约列表，不设置固定高度 */
+}
+
+.booking-card {
+    background-color: #ffffff;
+    border-radius: 16rpx;
+    margin-bottom: 20rpx;
+    padding: 30rpx;
+    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20rpx;
+}
+
+.booking-room-info {
+    flex: 1;
+}
+
+.booking-room-name {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8rpx;
+    display: block;
+}
+
+.booking-date-time {
+    font-size: 26rpx;
+    color: #666666;
+}
+
+.booking-status {
+    padding: 8rpx 16rpx;
+    border-radius: 8rpx;
+    font-size: 24rpx;
+}
+
+.booking-status.booked {
+    background-color: #e8f5e8;
+    color: #2d7d32;
+}
+
+.booking-status.cancelled {
+    background-color: #ffeaea;
+    color: #d32f2f;
+}
+
+.booking-details {
+    border-top: 1rpx solid #f0f0f0;
+    padding-top: 20rpx;
+    margin-bottom: 20rpx;
+}
+
+.booking-topic,
+.booking-contact,
+.booking-attendees {
+    display: flex;
+    margin-bottom: 12rpx;
+    align-items: flex-start;
+}
+
+.booking-topic:last-child,
+.booking-contact:last-child,
+.booking-attendees:last-child {
+    margin-bottom: 0;
+}
+
+.topic-label,
+.contact-label,
+.attendees-label {
+    font-size: 28rpx;
+    color: #666666;
+    width: 140rpx;
+    flex-shrink: 0;
+}
+
+.topic-text,
+.contact-text,
+.attendees-text {
+    font-size: 28rpx;
+    color: #333333;
+    flex: 1;
+    line-height: 1.5;
+}
+
+.booking-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cancel-booking-button {
+    background-color: #ff3b30;
+    color: #ffffff;
+    padding: 16rpx 32rpx;
+    border-radius: 12rpx;
+    font-size: 26rpx;
+    transition: all 0.3s ease;
+}
+
+.cancel-booking-button:active {
+    transform: scale(0.95);
+    background-color: #e6342a;
+}
+
+
+/* 加载和空状态 */
+
+.loading-container,
+.empty-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 500rpx;
+    margin: 40rpx 32rpx;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20rpx);
+    border-radius: 24rpx;
+    border: 1rpx solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.08);
+}
+
+.loading-spinner {
+    width: 80rpx;
+    height: 80rpx;
+    margin-bottom: 32rpx;
+    opacity: 0.8;
+    animation: pulse 2s infinite;
+}
+
+.loading-text {
+    font-size: 30rpx;
+    color: #666666;
+    font-weight: 500;
+}
+
+.empty-icon {
+    width: 120rpx;
+    height: 120rpx;
+    margin-bottom: 32rpx;
+    opacity: 0.7;
+    animation: pulse 2s infinite;
+}
+
+.empty-text {
+    font-size: 32rpx;
+    color: #666666;
+    font-weight: 500;
+    margin-bottom: 40rpx;
+}
+
+.add-first-room-button {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    color: #ffffff;
+    padding: 28rpx 56rpx;
+    border-radius: 24rpx;
+    font-size: 32rpx;
+    font-weight: 600;
+    letter-spacing: 1rpx;
+    box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.add-first-room-button:active {
+    transform: scale(0.96);
+    box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+}
+
+.add-first-text {
+    font-size: 32rpx;
+    font-weight: 600;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+}
+
+
+/* 弹窗样式 */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20rpx;
+    box-sizing: border-box;
+}
+
+.room-modal {
+    background-color: #ffffff;
+    border-radius: 20rpx;
+    width: 100%;
+    max-width: 680rpx;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30rpx 25rpx 20rpx;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+    font-size: 36rpx;
+    font-weight: 600;
+    color: #333333;
+}
+
+.modal-close {
+    width: 48rpx;
+    height: 48rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24rpx;
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+}
+
+.modal-close:active {
+    transform: scale(0.9);
+    background-color: #e5e5e5;
+}
+
+.close-icon {
+    width: 24rpx;
+    height: 24rpx;
+}
+
+.modal-content {
+    flex: 1;
+    padding: 24rpx 20rpx;
+    min-height: 0;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.form-group {
+    margin-bottom: 32rpx;
+}
+
+.form-group:last-child {
+    margin-bottom: 20rpx;
+}
+
+.form-label {
+    font-size: 30rpx;
+    color: #333333;
+    margin-bottom: 16rpx;
+    display: block;
+    font-weight: 500;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    max-width: 100%;
+    border: 2rpx solid #e5e5e5;
+    border-radius: 16rpx;
+    font-size: 30rpx;
+    color: #333333;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.form-input {
+    height: 88rpx;
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
+}
+
+.form-textarea {
+    padding: 16rpx 24rpx;
+    line-height: 1.4;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    border-color: #007AFF;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2rpx rgba(0, 122, 255, 0.2);
+}
+
+.form-textarea {
+    min-height: 120rpx;
+    resize: none;
+}
+
+.equipment-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12rpx;
+    margin-top: 16rpx;
+    width: 100%;
+    box-sizing: border-box;
+    /* 确保设备选项不会超出容器 */
+    padding: 0;
+}
+
+.equipment-option {
+    padding: 18rpx 24rpx;
+    border: 2rpx solid #e5e5e5;
+    border-radius: 25rpx;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+    min-height: 44rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 999;
+    box-sizing: border-box;
+    /* 允许设备选项灵活调整大小 */
+    flex-shrink: 1;
+    max-width: calc(50% - 6rpx);
+}
+
+
+/* 默认未选中状态 */
+
+.equipment-option:not(.selected) {
+    border-color: #e5e5e5;
+    background-color: #fafafa;
+    color: #666666;
+    opacity: 0.8;
+}
+
+.equipment-option:active {
+    transform: scale(0.95);
+    background-color: #f0f0f0;
+}
+
+
+/* 选中状态样式 - 强制优先级 */
+
+.equipment-option.selected,
+.equipment-option.selected:not(.unselected) {
+    border-color: #007aff !important;
+    background-color: #e8f4ff !important;
+    color: #007aff !important;
+    box-shadow: 0 2rpx 8rpx rgba(0, 122, 255, 0.15) !important;
+    opacity: 1 !important;
+}
+
+.equipment-option.selected .equipment-text,
+.equipment-option.selected:not(.unselected) .equipment-text {
+    color: #007aff !important;
+    font-weight: 500 !important;
+}
+
+.equipment-option.selected:active {
+    background-color: #d1e9ff !important;
+    transform: scale(0.95);
+}
+
+.equipment-text {
+    font-size: 26rpx;
+    color: #333333;
+    white-space: nowrap;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.equipment-option.selected .equipment-text {
+    color: #007aff;
+    font-weight: 500;
+}
+
+.equipment-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6rpx;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.equipment-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: checkIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.check-icon {
+    width: 24rpx;
+    height: 24rpx;
+    opacity: 0.8;
+}
+
+@keyframes checkIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+
+/* 设备选择选项的悬停效果增强 */
+
+.equipment-option:active {
+    transform: scale(0.95);
+    background-color: #f0f0f0;
+}
+
+.equipment-option.selected:active {
+    background-color: #d1e9ff;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 20rpx;
+    padding: 20rpx 25rpx 30rpx;
+    border-top: 1rpx solid #f0f0f0;
+}
+
+.modal-button {
+    flex: 1;
+    padding: 28rpx;
+    border-radius: 16rpx;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.modal-button.cancel {
+    background-color: #f5f5f5;
+    color: #666666;
+}
+
+.modal-button.confirm {
+    background-color: #007aff;
+    color: #ffffff;
+}
+
+.modal-button:active {
+    transform: scale(0.98);
+}
+
+.button-text {
+    font-size: 32rpx;
+    font-weight: 500;
+}
+
+
+/* 图片上传样式 */
+
+.image-upload-container {
+    margin-top: 16rpx;
+}
+
+.current-image-preview,
+.new-image-preview {
+    position: relative;
+    border-radius: 12rpx;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+.preview-image {
+    width: 100%;
+    height: 300rpx;
+    border-radius: 12rpx;
+}
+
+.image-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 40rpx 20rpx 20rpx;
+    display: flex;
+    gap: 20rpx;
+    justify-content: center;
+}
+
+.change-image-button,
+.remove-image-button {
+    padding: 12rpx 24rpx;
+    border-radius: 20rpx;
+    transition: all 0.3s ease;
+}
+
+.change-image-button {
+    background-color: rgba(0, 122, 255, 0.9);
+}
+
+.remove-image-button {
+    background-color: rgba(255, 59, 48, 0.9);
+}
+
+.change-image-button:active {
+    transform: scale(0.95);
+    background-color: rgba(0, 122, 255, 1);
+}
+
+.remove-image-button:active {
+    transform: scale(0.95);
+    background-color: rgba(255, 59, 48, 1);
+}
+
+.action-text {
+    font-size: 24rpx;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.upload-progress {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    padding: 16rpx 32rpx;
+    border-radius: 20rpx;
+}
+
+.choose-image-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60rpx 40rpx;
+    border: 2rpx dashed #d1d1d1;
+    border-radius: 12rpx;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+}
+
+.choose-image-button:active {
+    transform: scale(0.98);
+    background-color: #f0f0f0;
+    border-color: #007aff;
+}
+
+.upload-icon {
+    width: 48rpx;
+    height: 48rpx;
+    margin-bottom: 16rpx;
+    opacity: 0.6;
+}
+
+.upload-text {
+    font-size: 30rpx;
+    color: #666666;
+    margin-bottom: 8rpx;
+    font-weight: 500;
+}
+
+.upload-hint {
+    font-size: 24rpx;
+    color: #999999;
+    text-align: center;
+    line-height: 1.4;
+}
+
+
+/* 浮动添加按钮 */
+
+.floating-add-button {
+    position: fixed;
+    bottom: 60rpx;
+    right: 40rpx;
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: 48rpx;
+    background: linear-gradient(135deg, #0066CC 0%, #004499 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8rpx 24rpx rgba(0, 102, 204, 0.3), 0 2rpx 8rpx rgba(0, 102, 204, 0.15);
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 999;
+    animation: floatIn 0.5s ease-out;
+}
+
+.floating-add-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 6rpx 20rpx rgba(0, 102, 204, 0.25), 0 1rpx 6rpx rgba(0, 102, 204, 0.1);
+}
+
+.floating-add-icon {
+    width: 36rpx;
+    height: 36rpx;
+    filter: brightness(0) invert(1);
+    transition: transform 0.25s ease;
+}
+
+.floating-add-button:active .floating-add-icon {
+    transform: rotate(90deg);
+}
+
+
+/* 浮动按钮动画 */
+
+@keyframes floatIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.4) translateY(80rpx);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.08) translateY(-12rpx);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+
+/* 动画效果 */
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

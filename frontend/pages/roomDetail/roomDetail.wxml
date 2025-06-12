@@ -1,0 +1,242 @@
+<!--会议室详情页面 - Apple Design风格-->
+<view class="container fade-in">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="navbar-left" bindtap="goBack">
+        <image class="back-icon" src="/images/icons/back.svg" mode="aspectFit"></image>
+      </view>
+      <text class="navbar-title">会议室详情</text>
+      <view class="navbar-right"></view>
+    </view>
+  </view>
+
+  <!-- 主内容区域 -->
+  <scroll-view class="main-content" scroll-y wx:if="{{!loading && roomDetails.id}}">
+    
+    <!-- 会议室基本信息展示区 -->
+    <view class="room-info-section">
+      <!-- 会议室图片 -->
+      <view class="room-image-container">
+        <image 
+          wx:if="{{!imageError}}"
+          class="room-image" 
+          src="{{roomDetails.displayImage}}" 
+          mode="aspectFill" 
+          lazy-load
+          binderror="onImageError"
+          bindload="onImageLoad"
+        ></image>
+        <view wx:else class="room-image-placeholder">
+          <image 
+            class="room-default-image" 
+            src="/images/default_room.svg" 
+            mode="aspectFit"
+          ></image>
+        </view>
+        <!-- 加载状态 -->
+        <view wx:if="{{imageLoading}}" class="image-loading-overlay">
+          <image class="image-loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+
+      <!-- 会议室基本信息 -->
+      <view class="room-basic-info">
+        <text class="room-name">{{roomDetails.name}}</text>
+        <view class="room-meta">
+          <view class="meta-item">
+            <text class="meta-label">容纳人数:</text>
+            <text class="meta-value">{{roomDetails.capacity}}人</text>
+          </view>
+          <view class="meta-item">
+            <text class="meta-label">位置:</text>
+            <text class="meta-value">{{roomDetails.location}}</text>
+          </view>
+        </view>
+        
+        <!-- 设备列表 -->
+        <view class="equipment-section" wx:if="{{roomDetails.equipment && roomDetails.equipment.length > 0}}">
+          <text class="equipment-title">配备设备</text>
+          <view class="equipment-tags">
+            <view class="equipment-tag" wx:for="{{roomDetails.equipment}}" wx:key="index">
+              <text class="equipment-text">{{item}}</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 会议室描述 -->
+        <view class="description-section" wx:if="{{roomDetails.description}}">
+          <text class="description-title">会议室描述</text>
+          <text class="description-text">{{roomDetails.description}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 预约功能区 -->
+    <view class="booking-section">      
+      <!-- 日期选择器 -->
+      <view class="date-picker-container">
+        <text class="picker-label">预约日期</text>
+        <picker
+          mode="date"
+          value="{{selectedDate}}"
+          start="{{minDate}}"
+          end="{{maxDate}}"
+          bindchange="bindDateChange"
+          class="date-picker"
+        >
+          <view class="picker-display">
+            <text class="picker-text">{{selectedDate}}</text>
+            <image class="picker-arrow" src="/images/icons/arrow-down.svg" mode="aspectFit"></image>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 时间段选择网格 -->
+      <view class="time-slots-container">
+        <text class="time-slots-title">选择时间段</text>
+        <view class="time-slots-grid">
+          <view 
+            wx:for="{{timeSlots}}" 
+            wx:key="index"
+            class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
+            data-index="{{index}}"
+            bindtap="onTimeSlotTap"
+          >
+            <text class="time-slot-text">{{item.time}}</text>
+          </view>
+        </view>
+        
+        <!-- 时间段说明 -->
+        <view class="time-slots-legend">
+          <view class="legend-item">
+            <view class="legend-color available"></view>
+            <text class="legend-text">可预约</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-color booked"></view>
+            <text class="legend-text">已预约</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-color closed"></view>
+            <text class="legend-text">临时关闭</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 移除页面内的预约表单，改用弹窗模式 -->
+    </view>
+  </scroll-view>
+
+  <!-- 提交预约按钮 -->
+  <view 
+    class="submit-button-container" 
+    wx:if="{{!loading && roomDetails.id && selectedStartIndex >= 0 && selectedEndIndex >= 0}}"
+  >
+    <view class="submit-button" bindtap="showBookingModal">
+      <text class="submit-text">提交预约</text>
+    </view>
+  </view>
+
+  <!-- 页面加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <image class="loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
+    <text class="loading-text">加载中，请稍候...</text>
+  </view>
+
+  <!-- 无数据状态 -->
+  <view wx:elif="{{!loading && !roomDetails.id}}" class="no-data-placeholder">
+    <image class="empty-icon" src="/images/icons/empty.svg" mode="aspectFit"></image>
+    <text class="empty-text">未找到会议室信息</text>
+    <text class="empty-subtext">请检查会议室ID是否正确</text>
+    <view class="back-button" bindtap="goBack">
+      <text class="back-text">返回列表</text>
+    </view>
+  </view>
+
+  <!-- 预约信息弹窗 -->
+  <view class="booking-modal-overlay" wx:if="{{showBookingModal}}" bindtap="hideBookingModal">
+    <view class="booking-modal" catchtap="preventClose">
+      <!-- 弹窗头部 -->
+      <view class="modal-header">
+        <text class="modal-title">填写预约信息</text>
+        <view class="modal-close" bindtap="hideBookingModal">
+          <image class="close-icon" src="/images/icons/close.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+      
+      <!-- 弹窗内容 -->
+      <view class="modal-content">
+        <!-- 预约时间提醒 -->
+        <view class="booking-summary">
+          <text class="summary-title">预约时间</text>
+          <text class="summary-time">{{selectedDate}} {{selectedTimeText}}</text>
+        </view>
+        
+        <!-- 预约表单 -->
+        <view class="form-group">
+          <text class="form-label">会议主题 *</text>
+          <input
+            class="form-input"
+            placeholder="请输入会议主题"
+            placeholder-class="form-placeholder"
+            bindinput="onFormInput"
+            data-field="topic"
+            value="{{bookingForm.topic}}"
+            maxlength="50"
+          />
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">联系人 *</text>
+          <input
+            class="form-input"
+            placeholder="请输入联系人姓名"
+            placeholder-class="form-placeholder"
+            bindinput="onFormInput"
+            data-field="contactName"
+            value="{{bookingForm.contactName}}"
+            maxlength="20"
+          />
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">联系方式 *</text>
+          <input
+            class="form-input"
+            placeholder="请输入手机号码"
+            placeholder-class="form-placeholder"
+            bindinput="onFormInput"
+            data-field="contactPhone"
+            value="{{bookingForm.contactPhone}}"
+            type="number"
+            maxlength="11"
+          />
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">参会人数</text>
+          <input
+            class="form-input"
+            placeholder="请输入参会人数（可选）"
+            placeholder-class="form-placeholder"
+            bindinput="onFormInput"
+            data-field="attendeesCount"
+            value="{{bookingForm.attendeesCount}}"
+            type="number"
+          />
+        </view>
+      </view>
+      
+      <!-- 弹窗底部按钮 -->
+      <view class="modal-footer">
+        <view class="modal-button cancel" bindtap="hideBookingModal">
+          <text class="button-text">取消</text>
+        </view>
+        <view class="modal-button confirm" bindtap="submitBooking">
+          <text class="button-text">确认预约</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view> 

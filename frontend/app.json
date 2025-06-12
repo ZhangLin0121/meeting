@@ -1,0 +1,18 @@
+{
+    "pages": [
+        "pages/roomList/roomList",
+        "pages/roomDetail/roomDetail",
+        "pages/admin/admin"
+    ],
+    "window": {
+        "backgroundTextStyle": "dark",
+        "navigationBarBackgroundColor": "#ffffff",
+        "navigationBarTitleText": "会议室预约",
+        "navigationBarTextStyle": "black",
+        "navigationStyle": "custom",
+        "backgroundColor": "#f7f7f7"
+    },
+    "style": "v2",
+    "sitemapLocation": "sitemap.json",
+    "lazyCodeLoading": "requiredComponents"
+}
