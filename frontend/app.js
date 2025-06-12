@@ -88,13 +88,21 @@ App({
      * 执行登录
      */
     performLogin() {
+        // 先检查是否已有登录信息
+        const userInfo = wx.getStorageSync('userInfo');
+        if (userInfo && userInfo.openid) {
+            console.log('📱 使用缓存的用户信息:', userInfo);
+            this.globalData.userInfo = userInfo;
+            return;
+        }
+
         wx.login({
             success: (res) => {
                 console.log('✅ 微信登录成功，code:', res.code);
                 this.globalData.loginCode = res.code;
 
-                // 获取用户信息
-                this.getUserProfile();
+                // 获取用户信息并登录
+                this.loginToServer(res.code);
             },
             fail: (error) => {
                 console.error('❌ 微信登录失败:', error);
@@ -108,34 +116,107 @@ App({
     },
 
     /**
-     * 获取用户信息
+     * 登录到服务器
      */
-    getUserProfile() {
-        // 检查是否已有用户信息
-        const userInfo = wx.getStorageSync('userInfo');
-        if (userInfo) {
-            console.log('📱 使用缓存的用户信息:', userInfo);
-            this.globalData.userInfo = userInfo;
-            return;
-        }
+    async loginToServer(code, userProfile = null) {
+        try {
+            const request = require('./utils/request.js');
 
-        // 静默获取用户信息（不弹窗）
-        wx.getUserProfile({
-            desc: '用于完善会议室预约功能',
-            success: (res) => {
-                console.log('✅ 获取用户信息成功:', res.userInfo);
-                this.globalData.userInfo = res.userInfo;
-                wx.setStorageSync('userInfo', res.userInfo);
-            },
-            fail: (error) => {
-                console.log('ℹ️ 用户未授权获取信息，使用默认配置');
-                // 不强制要求用户信息，使用默认配置
-                this.globalData.userInfo = {
-                    nickName: '用户',
-                    avatarUrl: '/images/default-avatar.png'
-                };
+            const loginData = {
+                code: code
+            };
+
+            // 如果有用户授权信息，一并发送
+            if (userProfile) {
+                loginData.nickname = userProfile.nickName;
+                loginData.avatarUrl = userProfile.avatarUrl;
             }
+
+            console.log('🔐 发送登录请求到服务器...');
+            const result = await request.post('/api/user/wechat-login', loginData);
+
+            if (result.success) {
+                console.log('✅ 服务器登录成功:', result.data);
+                this.globalData.userInfo = result.data;
+                wx.setStorageSync('userInfo', result.data);
+
+                // 如果是新用户，提示完善信息
+                if (result.data.isNewUser) {
+                    setTimeout(() => {
+                        wx.showToast({
+                            title: '请完善个人信息',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }, 1000);
+                }
+            } else {
+                throw new Error(result.message || '服务器登录失败');
+            }
+
+        } catch (error) {
+            console.error('❌ 服务器登录失败:', error);
+
+            // 显示错误信息
+            wx.showToast({
+                title: error.message || '登录失败',
+                icon: 'none',
+                duration: 3000
+            });
+        }
+    },
+
+    /**
+     * 获取用户信息（需要用户授权）
+     */
+    getUserProfileWithAuth() {
+        return new Promise((resolve, reject) => {
+            wx.getUserProfile({
+                desc: '用于完善会议室预约功能',
+                success: (res) => {
+                    console.log('✅ 获取用户信息成功:', res.userInfo);
+                    resolve(res.userInfo);
+                },
+                fail: (error) => {
+                    console.log('ℹ️ 用户拒绝授权获取信息');
+                    reject(error);
+                }
+            });
         });
+    },
+
+    /**
+     * 强制登录（用于页面调用）
+     */
+    async forceLogin() {
+        try {
+            // 重新获取登录码
+            const loginRes = await new Promise((resolve, reject) => {
+                wx.login({
+                    success: resolve,
+                    fail: reject
+                });
+            });
+
+            console.log('🔄 重新登录，code:', loginRes.code);
+
+            // 尝试获取用户授权信息
+            let userProfile = null;
+            try {
+                userProfile = await this.getUserProfileWithAuth();
+            } catch (error) {
+                console.log('ℹ️ 未获取到用户授权信息，使用默认配置');
+            }
+
+            // 登录到服务器
+            await this.loginToServer(loginRes.code, userProfile);
+
+            return this.globalData.userInfo;
+
+        } catch (error) {
+            console.error('❌ 强制登录失败:', error);
+            throw error;
+        }
     },
 
     /**
@@ -155,7 +236,7 @@ App({
 
     globalData: {
         userInfo: null,
-        apiBaseUrl: 'http://47.122.68.192',
+        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
         networkType: 'unknown',
         isConnected: true,
         loginCode: null

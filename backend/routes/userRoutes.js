@@ -8,6 +8,11 @@ const { validate, schemas } = require('../utils/validation');
  * 用户相关路由
  */
 
+// 微信小程序登录（不需要认证）
+router.post('/wechat-login',
+    UserController.wechatLogin
+);
+
 // 用户登录/注册（不需要认证）
 router.post('/login',
     validate(schemas.user.login),
