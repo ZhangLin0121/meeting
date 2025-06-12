@@ -42,8 +42,8 @@ class RequestUtil {
 
             // 添加用户标识（如果存在）
             const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo && userInfo.openId) {
-                requestHeader['X-User-Openid'] = userInfo.openId;
+            if (userInfo && userInfo.openid) {
+                requestHeader['X-User-Openid'] = userInfo.openid;
             }
 
             console.log(`🌐 发起请求: ${method} ${fullUrl}`, {
@@ -184,8 +184,8 @@ class RequestUtil {
 
             // 添加用户标识
             const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo && userInfo.openId) {
-                formData['X-User-Openid'] = userInfo.openId;
+            if (userInfo && userInfo.openid) {
+                formData['X-User-Openid'] = userInfo.openid;
             }
 
             console.log(`📤 上传文件: ${fullUrl}`, { filePath, name, formData });
