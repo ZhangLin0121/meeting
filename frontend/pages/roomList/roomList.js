@@ -13,14 +13,24 @@ Page({
         searchKeyword: '',
         isAdmin: false,
         statusBarHeight: 0,
-        userOpenId: 'test_user_001' // 模拟用户openid，实际应通过微信登录获取
+        userOpenId: 'test_user_001', // 模拟用户openid，实际应通过微信登录获取
+        apiBaseUrl: ''
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad() {
+        console.log('会议室列表页面加载');
+
+        // 获取API基础URL
+        const app = getApp();
+        this.setData({
+            apiBaseUrl: app.globalData.apiBaseUrl
+        });
+
         this.getSystemInfo();
+        this.loginUser();
     },
 
     /**
@@ -235,7 +245,7 @@ Page({
                     if (room.images && room.images.length > 0) {
                         // 构建完整的图片URL
                         const imageUrl = room.images[0];
-                        displayImage = imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}${imageUrl}`;
+                        displayImage = imageUrl.startsWith('http') ? imageUrl : `${this.data.apiBaseUrl}${imageUrl}`;
                     }
 
                     return {
@@ -292,8 +302,6 @@ Page({
         }
     },
 
-
-
     /**
      * 清除搜索
      */
@@ -310,7 +318,7 @@ Page({
     requestAPI(method, url, data = {}) {
         return new Promise((resolve, reject) => {
             const requestConfig = {
-                url: `${API_BASE_URL}${url}`,
+                url: `${this.data.apiBaseUrl}${url}`,
                 method: method,
                 header: {
                     'Content-Type': 'application/json',

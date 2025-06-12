@@ -50,7 +50,7 @@ Page({
 
         // 图片上传相关
         imageUploading: false,
-        apiBaseUrl: API_BASE_URL,
+        apiBaseUrl: '',
 
         // 设备选项
         equipmentOptions: [
@@ -71,6 +71,13 @@ Page({
      */
     onLoad(options) {
         console.log('管理员后台页面加载');
+
+        // 获取API基础URL
+        const app = getApp();
+        this.setData({
+            apiBaseUrl: app.globalData.apiBaseUrl
+        });
+
         this.loadRooms();
     },
 
@@ -657,7 +664,7 @@ Page({
 
             const uploadResult = await new Promise((resolve, reject) => {
                 wx.uploadFile({
-                    url: `${API_BASE_URL}/api/upload/room-image`,
+                    url: `${this.data.apiBaseUrl}/api/upload/room-image`,
                     filePath: filePath,
                     name: 'image',
                     header: {
@@ -971,7 +978,7 @@ Page({
     async requestAPI(method, url, data = {}) {
         return new Promise((resolve, reject) => {
             const requestConfig = {
-                url: `${API_BASE_URL}${url}`,
+                url: `${this.data.apiBaseUrl}${url}`,
                 method: method,
                 header: {
                     'Content-Type': 'application/json',

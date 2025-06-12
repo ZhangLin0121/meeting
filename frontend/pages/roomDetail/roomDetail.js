@@ -7,11 +7,11 @@ Page({
      * 页面的初始数据
      */
     data: {
-        // 基础数据
-        roomId: null,
-        roomDetails: {},
+        roomId: '',
+        roomDetails: null,
         statusBarHeight: 0,
-        userOpenId: 'test_user_001', // 模拟用户openid，实际应通过微信登录获取
+        userOpenId: 'test_user_001', // 暂时硬编码，实际应从登录获取
+        apiBaseUrl: '',
 
         // 日期选择相关
         selectedDate: '',
@@ -28,7 +28,11 @@ Page({
             topic: '',
             contactName: '',
             contactPhone: '',
-            attendeesCount: ''
+            date: '',
+            startTime: '',
+            endTime: '',
+            attendeeCount: 1,
+            requirements: ''
         },
 
         // 页面状态
@@ -38,26 +42,30 @@ Page({
 
         // 弹窗状态
         showBookingModal: false,
-        selectedTimeText: ''
+        selectedTimeText: '',
+        submitting: false
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad(options) {
-        console.log('页面加载参数:', options);
+        console.log('会议室详情页面加载，参数:', options);
+
+        // 获取API基础URL
+        const app = getApp();
+        this.setData({
+            apiBaseUrl: app.globalData.apiBaseUrl
+        });
 
         if (options.roomId) {
-            this.setData({
-                roomId: options.roomId
-            });
+            this.setData({ roomId: options.roomId });
+            this.fetchRoomDetails();
         } else {
-            console.error('缺少roomId参数');
-            wx.showToast({
-                title: '参数错误',
-                icon: 'none'
+            this.setData({
+                loading: false,
+                error: '缺少会议室ID参数'
             });
-            return;
         }
 
         this.getSystemInfo();
@@ -129,7 +137,7 @@ Page({
                 // 处理图片路径
                 const roomDetails = result.data;
                 if (roomDetails.images && roomDetails.images.length > 0) {
-                    roomDetails.displayImage = `${API_BASE_URL}${roomDetails.images[0]}`;
+                    roomDetails.displayImage = `${this.data.apiBaseUrl}${roomDetails.images[0]}`;
                 } else {
                     roomDetails.displayImage = '/images/default_room.svg';
                 }
@@ -145,7 +153,7 @@ Page({
             console.error('获取会议室详情失败:', error);
             this.setData({
                 loading: false,
-                roomDetails: {}
+                roomDetails: null
             });
 
             wx.showToast({
@@ -426,7 +434,11 @@ Page({
                 topic: '',
                 contactName: '',
                 contactPhone: '',
-                attendeesCount: ''
+                date: '',
+                startTime: '',
+                endTime: '',
+                attendeeCount: 1,
+                requirements: ''
             }
         });
     },
@@ -580,8 +592,8 @@ Page({
         };
 
         // 只有当参会人数有值时才添加该字段
-        if (this.data.bookingForm.attendeesCount && this.data.bookingForm.attendeesCount.trim()) {
-            bookingData.attendeesCount = parseInt(this.data.bookingForm.attendeesCount);
+        if (this.data.bookingForm.attendeeCount && this.data.bookingForm.attendeeCount.trim()) {
+            bookingData.attendeesCount = parseInt(this.data.bookingForm.attendeeCount);
         }
 
         try {
@@ -656,7 +668,7 @@ Page({
     async requestAPI(method, url, data = {}) {
         return new Promise((resolve, reject) => {
             const requestConfig = {
-                url: `${API_BASE_URL}${url}`,
+                url: `${this.data.apiBaseUrl}${url}`,
                 method: method,
                 header: {
                     'Content-Type': 'application/json',

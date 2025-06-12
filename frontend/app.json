@@ -1,6 +1,5 @@
 {
     "pages": [
-        "pages/test/test",
         "pages/roomList/roomList",
         "pages/roomDetail/roomDetail",
         "pages/admin/admin"
