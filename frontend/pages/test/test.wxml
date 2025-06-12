@@ -1,0 +1,37 @@
+<!--pages/test/test.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">🧪 网络连接测试</text>
+    <text class="subtitle">诊断小程序网络连接问题</text>
+  </view>
+
+  <view class="actions">
+    <button class="btn-primary" bindtap="onRetryTests" disabled="{{testing}}">
+      {{testing ? '测试中...' : '重新测试'}}
+    </button>
+    <button class="btn-secondary" bindtap="onViewLogs">查看日志</button>
+    <button class="btn-secondary" bindtap="onClearCache">清除缓存</button>
+  </view>
+
+  <view class="test-results">
+    <view class="result-item" wx:for="{{testResults}}" wx:key="name">
+      <view class="result-header">
+        <text class="result-icon">{{item.success ? '✅' : '❌'}}</text>
+        <text class="result-name">{{item.name}}</text>
+        <text class="result-time">{{item.timestamp}}</text>
+      </view>
+      <view class="result-message {{item.success ? 'success' : 'error'}}">
+        {{item.message}}
+      </view>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{testing}}">
+    <view class="loading-spinner"></view>
+    <text>正在运行测试...</text>
+  </view>
+
+  <view class="empty" wx:if="{{!testing && testResults.length === 0}}">
+    <text>暂无测试结果</text>
+  </view>
+</view> 

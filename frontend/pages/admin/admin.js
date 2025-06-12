@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://47.122.68.192';
+const request = require('../../utils/request.js');
 
 Page({
 

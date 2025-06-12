@@ -1,5 +1,5 @@
 // pages/roomList/roomList.js
-const API_BASE_URL = 'http://47.122.68.192';
+const request = require('../../utils/request.js');
 
 Page({
 
@@ -153,7 +153,10 @@ Page({
         this.setData({ loading: true });
 
         try {
-            const result = await this.requestAPI('GET', '/api/rooms');
+            console.log('🏢 开始获取会议室列表...');
+            const result = await request.get('/api/rooms');
+
+            console.log('✅ 获取会议室列表成功:', result);
 
             if (result.success && result.data) {
                 // 处理会议室数据，添加状态判断
@@ -163,20 +166,45 @@ Page({
                     rooms: processedRooms,
                     loading: false
                 });
+
+                wx.showToast({
+                    title: `加载了${processedRooms.length}个会议室`,
+                    icon: 'success',
+                    duration: 1500
+                });
             } else {
                 throw new Error(result.message || '获取会议室列表失败');
             }
         } catch (error) {
-            console.error('获取会议室列表失败:', error);
+            console.error('❌ 获取会议室列表失败:', error);
             this.setData({
                 loading: false,
                 rooms: []
             });
 
-            wx.showToast({
-                title: '加载失败，请重试',
-                icon: 'none',
-                duration: 2000
+            // 显示详细错误信息
+            let errorMessage = '加载失败，请重试';
+            if (error.message) {
+                if (error.message.includes('网络')) {
+                    errorMessage = '网络连接失败，请检查网络设置';
+                } else if (error.message.includes('超时')) {
+                    errorMessage = '请求超时，请重试';
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+
+            wx.showModal({
+                title: '加载失败',
+                content: errorMessage,
+                showCancel: true,
+                cancelText: '取消',
+                confirmText: '重试',
+                success: (res) => {
+                    if (res.confirm) {
+                        this.fetchRooms();
+                    }
+                }
             });
         }
     },
