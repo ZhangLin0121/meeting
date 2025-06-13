@@ -258,7 +258,7 @@ Page({
     initializeDates() {
         const today = new Date();
         const maxDate = new Date(today);
-        maxDate.setDate(today.getDate() + 30); // 最多可预约未来30天
+        maxDate.setDate(today.getDate() + 3); // 修改为只能预约未来3天
 
         this.setData({
             selectedDate: this.formatDate(today),
@@ -473,15 +473,15 @@ Page({
         const selectedDate = e.detail.value;
         const selectedDateObj = new Date(selectedDate);
 
-        // 检查是否选择了周末
-        if (this.isWeekend(selectedDate)) {
-            wx.showToast({
-                title: '周末暂不可预约',
-                icon: 'none',
-                duration: 2000
-            });
-            return;
-        }
+        // 移除周末限制，允许周末预约
+        // if (this.isWeekend(selectedDate)) {
+        //     wx.showToast({
+        //         title: '周末暂不可预约',
+        //         icon: 'none',
+        //         duration: 2000
+        //     });
+        //     return;
+        // }
 
         this.setData({
             selectedDate: selectedDate,
@@ -669,12 +669,14 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 计算结束时间
+        // 修正结束时间计算：应该是最后选中时间段的结束时间
+        // 每个时间段代表30分钟，所以结束时间就是该时间段+30分钟
         const lastSelectedSlot = timeSlots[selectedEndIndex];
         const endTimeParts = lastSelectedSlot.time.split(':');
         const endHour = parseInt(endTimeParts[0]);
         const endMinute = parseInt(endTimeParts[1]) + 30;
 
+        // 处理分钟进位
         let actualEndHour = endHour;
         let actualEndMinute = endMinute;
         if (actualEndMinute >= 60) {
@@ -761,7 +763,8 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 计算结束时间：选中的最后一个时间段 + 30分钟
+        // 修正结束时间计算：应该是最后选中时间段的结束时间
+        // 每个时间段代表30分钟，所以结束时间就是该时间段+30分钟
         const lastSelectedSlot = timeSlots[selectedEndIndex];
         const endTimeParts = lastSelectedSlot.time.split(':');
         const endHour = parseInt(endTimeParts[0]);

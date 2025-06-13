@@ -30,6 +30,7 @@ Page({
         statusOptions: [
             { value: '', text: '全部状态' },
             { value: 'booked', text: '已预约' },
+            { value: 'completed', text: '已完成' },
             { value: 'cancelled', text: '已取消' }
         ],
 
@@ -530,7 +531,34 @@ Page({
             const result = await this.requestAPI('GET', url);
 
             if (result.success && result.data) {
-                const newBookings = this.data.bookingsPage === 1 ? result.data : [...this.data.bookings, ...result.data];
+                // 处理预约记录，检查是否已过期
+                const processedBookings = result.data.map(booking => {
+                    // 检查预约是否已过期
+                    const now = new Date();
+                    const bookingDate = new Date(booking.bookingDate);
+                    const endTime = booking.endTime || '23:59';
+                    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+                    // 设置预约结束的完整时间
+                    const bookingEndTime = new Date(bookingDate);
+                    bookingEndTime.setHours(endHour, endMinute, 0, 0);
+
+                    // 如果当前时间已过预约结束时间，且状态为已预约，则标记为已完成
+                    if (now > bookingEndTime && booking.status === 'booked') {
+                        return {
+                            ...booking,
+                            status: 'completed',
+                            isExpired: true
+                        };
+                    }
+
+                    return {
+                        ...booking,
+                        isExpired: false
+                    };
+                });
+
+                const newBookings = this.data.bookingsPage === 1 ? processedBookings : [...this.data.bookings, ...processedBookings];
 
                 this.setData({
                     bookings: newBookings,

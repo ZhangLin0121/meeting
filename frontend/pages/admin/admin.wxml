@@ -171,7 +171,11 @@
             <text class="booking-date-time">{{item.bookingDate}} {{item.startTime}}-{{item.endTime}}</text>
           </view>
           <view class="booking-status {{item.status}}">
-            <text class="status-text">{{item.status === 'booked' ? '已预约' : '已取消'}}</text>
+            <text class="status-text">
+              {{item.status === 'booked' ? '已预约' : 
+                item.status === 'completed' ? '已完成' : 
+                item.status === 'cancelled' ? '已取消' : '未知状态'}}
+            </text>
           </view>
         </view>
         
@@ -190,7 +194,7 @@
           </view>
         </view>
         
-        <view class="booking-actions" wx:if="{{item.status === 'booked'}}">
+        <view class="booking-actions" wx:if="{{item.status === 'booked' && !item.isExpired}}">
           <view class="cancel-booking-button" bindtap="cancelBooking" data-booking-id="{{item.id}}" data-booking-info="{{item}}">
             <text class="cancel-text">取消预约</text>
           </view>

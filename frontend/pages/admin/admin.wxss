@@ -529,6 +529,11 @@ page {
     color: #2d7d32;
 }
 
+.booking-status.completed {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
 .booking-status.cancelled {
     background-color: #ffeaea;
     color: #d32f2f;
