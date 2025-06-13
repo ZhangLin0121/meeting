@@ -351,7 +351,7 @@ Page({
         let currentHour = morningStart.hour;
         let currentMinute = morningStart.minute;
 
-        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute < morningEnd.minute)) {
+        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute <= morningEnd.minute)) {
             const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
             timeSlots.push({
                 time: timeStr,
