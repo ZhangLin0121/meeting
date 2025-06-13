@@ -77,7 +77,11 @@ Page({
             imageUrl: ''
         },
         editingRoom: null,
-        statusBarHeight: 0
+        statusBarHeight: 0,
+
+        // 系统信息相关
+        menuButtonInfo: null,
+        customNavBarHeight: 0
     },
 
     /**
@@ -186,6 +190,44 @@ Page({
         } catch (error) {
             console.error('❌ 获取用户openid失败:', error);
             // 不影响页面正常加载，只是没有用户信息
+        }
+    },
+
+    /**
+     * 获取系统信息，计算状态栏高度和导航栏安全区域
+     */
+    getSystemInfo() {
+        try {
+            const systemInfo = wx.getSystemInfoSync();
+            const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+
+            console.log('📱 系统信息:', systemInfo);
+            console.log('🔘 胶囊按钮信息:', menuButtonInfo);
+
+            const statusBarHeight = systemInfo.statusBarHeight || 20;
+
+            // 计算自定义导航栏的安全高度
+            // 胶囊按钮顶部到状态栏底部的距离 * 2 + 胶囊按钮高度
+            const customNavBarHeight = menuButtonInfo.top && menuButtonInfo.height ?
+                (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height : 44;
+
+            this.setData({
+                statusBarHeight: statusBarHeight,
+                menuButtonInfo: menuButtonInfo,
+                customNavBarHeight: customNavBarHeight
+            });
+
+            console.log('✅ 导航栏信息设置完成:', {
+                statusBarHeight,
+                customNavBarHeight,
+                menuButtonInfo
+            });
+        } catch (error) {
+            console.error('❌ 获取系统信息失败:', error);
+            this.setData({
+                statusBarHeight: 20, // 默认值
+                customNavBarHeight: 44 // 默认值
+            });
         }
     },
 
