@@ -209,16 +209,16 @@ class RoomController {
             const startOfDay = TimeHelper.getStartOfDay(queryDate);
             const endOfDay = TimeHelper.getEndOfDay(queryDate);
 
-            // 检查是否为工作日
-            if (!TimeHelper.isWorkday(queryDate)) {
-                return ResponseHelper.success(res, {
-                    date: TimeHelper.formatDate(queryDate),
-                    isWorkday: false,
-                    timeSlots: [],
-                    temporaryClosures: [],
-                    message: '非工作日，会议室不开放'
-                }, '获取会议室可用性成功');
-            }
+            // 检查是否为工作日 - 现已开放周末预约，所以注释掉工作日限制
+            // if (!TimeHelper.isWorkday(queryDate)) {
+            //     return ResponseHelper.success(res, {
+            //         date: TimeHelper.formatDate(queryDate),
+            //         isWorkday: false,
+            //         timeSlots: [],
+            //         temporaryClosures: [],
+            //         message: '非工作日，会议室不开放'
+            //     }, '获取会议室可用性成功');
+            // }
 
             // 获取该会议室在指定日期的所有预约
             const bookings = await Booking.find({
@@ -244,7 +244,7 @@ class RoomController {
 
             return ResponseHelper.success(res, {
                 date: TimeHelper.formatDate(queryDate),
-                isWorkday: true,
+                isWorkday: TimeHelper.isWorkday(queryDate), // 保留工作日标识，但不限制预约
                 timeSlots,
                 temporaryClosures: closures.map(closure => ({
                     startTime: closure.startTime,
@@ -485,10 +485,10 @@ class RoomController {
             const startOfDay = TimeHelper.getStartOfDay(date);
             const endOfDay = TimeHelper.getEndOfDay(date);
 
-            // 检查是否为工作日
-            if (!TimeHelper.isWorkday(date)) {
-                return { availability: 'unavailable', reason: 'non_workday' };
-            }
+            // 检查是否为工作日 - 现已开放周末预约，所以注释掉工作日限制
+            // if (!TimeHelper.isWorkday(date)) {
+            //     return { availability: 'unavailable', reason: 'non_workday' };
+            // }
 
             // 检查是否全天临时关闭
             const allDayClosure = await TemporaryClosure.findOne({

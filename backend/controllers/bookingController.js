@@ -42,10 +42,10 @@ class BookingController {
                 return ResponseHelper.error(res, `只能预约未来${config.booking.maxAdvanceDays}天内的会议室`);
             }
 
-            // 验证是否为工作日
-            if (!TimeHelper.isWorkday(bookingDate)) {
-                return ResponseHelper.error(res, '只能预约工作日的会议室');
-            }
+            // 验证是否为工作日 - 现已开放周末预约
+            // if (!TimeHelper.isWorkday(bookingDate)) {
+            //     return ResponseHelper.error(res, '只能预约工作日的会议室');
+            // }
 
             // 验证时间是否在办公时间内
             if (!TimeHelper.isOfficeTime(startTime) || !TimeHelper.isOfficeTime(endTime)) {
@@ -413,9 +413,10 @@ class BookingController {
                 return ResponseHelper.error(res, `只能预约未来${config.booking.maxAdvanceDays}天内的会议室`);
             }
 
-            if (!TimeHelper.isWorkday(bookingDate)) {
-                return ResponseHelper.error(res, '只能预约工作日的会议室');
-            }
+            // 验证是否为工作日 - 现已开放周末预约
+            // if (!TimeHelper.isWorkday(bookingDate)) {
+            //     return ResponseHelper.error(res, '只能预约工作日的会议室');
+            // }
 
             if (!TimeHelper.isOfficeTime(startTime) || !TimeHelper.isOfficeTime(endTime)) {
                 return ResponseHelper.error(res, '预约时间必须在办公时间内');
