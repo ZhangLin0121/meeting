@@ -702,22 +702,10 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 修正结束时间计算：应该是最后选中时间段的结束时间
-        // 每个时间段代表30分钟，所以结束时间就是该时间段+30分钟
+        // 修正结束时间计算：结束时间就是用户选择的最后一个时间槽的时间
+        // 用户选择的时间槽就是他们期望的结束时间，不需要额外加30分钟
         const lastSelectedSlot = timeSlots[selectedEndIndex];
-        const endTimeParts = lastSelectedSlot.time.split(':');
-        const endHour = parseInt(endTimeParts[0]);
-        const endMinute = parseInt(endTimeParts[1]) + 30;
-
-        // 处理分钟进位
-        let actualEndHour = endHour;
-        let actualEndMinute = endMinute;
-        if (actualEndMinute >= 60) {
-            actualEndHour += 1;
-            actualEndMinute -= 60;
-        }
-
-        const actualEndTime = `${String(actualEndHour).padStart(2, '0')}:${String(actualEndMinute).padStart(2, '0')}`;
+        const actualEndTime = lastSelectedSlot.time;
         const selectedTimeText = `${startTime} - ${actualEndTime}`;
 
         this.setData({
@@ -796,22 +784,10 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 修正结束时间计算：应该是最后选中时间段的结束时间
-        // 每个时间段代表30分钟，所以结束时间就是该时间段+30分钟
+        // 修正结束时间计算：结束时间就是用户选择的最后一个时间槽的时间
+        // 用户选择的时间槽就是他们期望的结束时间，不需要额外加30分钟
         const lastSelectedSlot = timeSlots[selectedEndIndex];
-        const endTimeParts = lastSelectedSlot.time.split(':');
-        const endHour = parseInt(endTimeParts[0]);
-        const endMinute = parseInt(endTimeParts[1]) + 30;
-
-        // 处理分钟进位
-        let actualEndHour = endHour;
-        let actualEndMinute = endMinute;
-        if (actualEndMinute >= 60) {
-            actualEndHour += 1;
-            actualEndMinute -= 60;
-        }
-
-        const actualEndTime = `${String(actualEndHour).padStart(2, '0')}:${String(actualEndMinute).padStart(2, '0')}`;
+        const actualEndTime = lastSelectedSlot.time;
 
         // 构建预约数据 - 注意日期格式转换
         const bookingData = {

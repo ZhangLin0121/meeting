@@ -274,9 +274,6 @@
             >
               <view class="equipment-inner">
                 <text class="equipment-text">{{item}}</text>
-                <view wx:if="{{equipmentSelection[item]}}" class="equipment-check">
-                  <image class="check-icon" src="/images/icons/check.svg" mode="aspectFit"></image>
-                </view>
               </view>
             </view>
           </view>
