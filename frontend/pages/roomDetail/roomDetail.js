@@ -24,6 +24,7 @@ Page({
 
         // 日期选择相关
         selectedDate: '',
+        selectedDateWithWeekday: '', // 带有周几信息的日期显示
         minDate: '',
         maxDate: '',
 
@@ -213,6 +214,7 @@ Page({
 
         this.setData({
             selectedDate: this.formatDate(today),
+            selectedDateWithWeekday: this.formatDateWithWeekday(today),
             minDate: this.formatDate(today),
             maxDate: this.formatDate(maxDate)
         });
@@ -226,6 +228,25 @@ Page({
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    },
+
+    /**
+     * 格式化日期为YYYY-MM-DD格式，并添加周几信息
+     */
+    formatDateWithWeekday(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const weekday = this.getWeekdayName(date.getDay());
+        return `${year}-${month}-${day} (${weekday})`;
+    },
+
+    /**
+     * 获取周几的中文名称
+     */
+    getWeekdayName(day) {
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        return weekdays[day];
     },
 
     /**
@@ -402,11 +423,12 @@ Page({
      */
     bindDateChange(e) {
         const selectedDate = e.detail.value;
+        const selectedDateObj = new Date(selectedDate);
 
         // 检查是否选择了周末
         if (this.isWeekend(selectedDate)) {
             wx.showToast({
-                title: '周末不可预约，请选择工作日',
+                title: '周末暂不可预约',
                 icon: 'none',
                 duration: 2000
             });
@@ -414,10 +436,11 @@ Page({
         }
 
         this.setData({
-            selectedDate: selectedDate
+            selectedDate: selectedDate,
+            selectedDateWithWeekday: this.formatDateWithWeekday(selectedDateObj)
         });
 
-        // 重新获取该日期的可用性
+        // 获取新日期的可用性信息
         this.fetchRoomAvailability(selectedDate);
     },
 

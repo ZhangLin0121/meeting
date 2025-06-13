@@ -704,6 +704,7 @@ page {
     overflow: hidden;
     margin: 0 auto;
     box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
 .modal-header {
@@ -747,6 +748,9 @@ page {
     min-height: 0;
     overflow-y: auto;
     box-sizing: border-box;
+    /* 优化滚动体验 */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
 
 .form-group {
@@ -789,6 +793,8 @@ page {
 .form-textarea {
     padding: 16rpx 24rpx;
     line-height: 1.4;
+    /* 确保textareas在键盘弹出时有足够的底部边距 */
+    margin-bottom: 30rpx;
 }
 
 .form-input:focus,
@@ -806,21 +812,20 @@ page {
 .equipment-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 12rpx;
+    gap: 8rpx;
     margin-top: 16rpx;
     width: 100%;
     box-sizing: border-box;
-    /* 确保设备选项不会超出容器 */
     padding: 0;
 }
 
 .equipment-option {
-    padding: 18rpx 24rpx;
-    border: 2rpx solid #e5e5e5;
-    border-radius: 25rpx;
+    padding: 12rpx 16rpx;
+    border: 1rpx solid #e5e5e5;
+    border-radius: 16rpx;
     background-color: #fafafa;
-    transition: all 0.3s ease;
-    min-height: 44rpx;
+    transition: all 0.25s ease;
+    min-height: 32rpx;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -828,9 +833,9 @@ page {
     position: relative;
     z-index: 999;
     box-sizing: border-box;
-    /* 允许设备选项灵活调整大小 */
     flex-shrink: 1;
-    max-width: calc(50% - 6rpx);
+    max-width: calc(33.33% - 6rpx);
+    font-size: 24rpx;
 }
 
 
@@ -872,7 +877,7 @@ page {
 }
 
 .equipment-text {
-    font-size: 26rpx;
+    font-size: 24rpx;
     color: #333333;
     white-space: nowrap;
     line-height: 1.2;
@@ -890,7 +895,7 @@ page {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6rpx;
+    gap: 4rpx;
     width: 100%;
     min-width: 0;
     overflow: hidden;
@@ -904,8 +909,8 @@ page {
 }
 
 .check-icon {
-    width: 24rpx;
-    height: 24rpx;
+    width: 20rpx;
+    height: 20rpx;
     opacity: 0.8;
 }
 
@@ -979,6 +984,13 @@ page {
     border-radius: 12rpx;
     overflow: hidden;
     background-color: #f5f5f5;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.current-image-preview:active,
+.new-image-preview:active {
+    transform: scale(0.98);
 }
 
 .preview-image {
@@ -987,46 +999,41 @@ page {
     border-radius: 12rpx;
 }
 
-.image-actions {
+.image-overlay {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-    padding: 40rpx 20rpx 20rpx;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
-    gap: 20rpx;
+    align-items: center;
     justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.change-image-button,
-.remove-image-button {
-    padding: 12rpx 24rpx;
-    border-radius: 20rpx;
-    transition: all 0.3s ease;
+.current-image-preview:active .image-overlay,
+.new-image-preview:active .image-overlay {
+    opacity: 1;
 }
 
-.change-image-button {
-    background-color: rgba(0, 122, 255, 0.9);
+.overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8rpx;
 }
 
-.remove-image-button {
-    background-color: rgba(255, 59, 48, 0.9);
+.overlay-icon {
+    width: 48rpx;
+    height: 48rpx;
+    filter: brightness(0) invert(1);
 }
 
-.change-image-button:active {
-    transform: scale(0.95);
-    background-color: rgba(0, 122, 255, 1);
-}
-
-.remove-image-button:active {
-    transform: scale(0.95);
-    background-color: rgba(255, 59, 48, 1);
-}
-
-.action-text {
-    font-size: 24rpx;
+.overlay-text {
     color: #ffffff;
+    font-size: 24rpx;
     font-weight: 500;
 }
 
@@ -1150,4 +1157,11 @@ page {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+opacity: 1;
+transform: translateY(0);
+
+}
+
 }

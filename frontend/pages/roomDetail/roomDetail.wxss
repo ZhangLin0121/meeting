@@ -224,6 +224,9 @@ page {
     font-weight: 600;
     color: #333333;
     margin-bottom: 8px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    display: block;
 }
 
 .description-text {

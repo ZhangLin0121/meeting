@@ -282,18 +282,16 @@
           <text class="form-label">会议室图片</text>
           <view class="image-upload-container">
             <!-- 新图片预览 - 最高优先级 -->
-            <view wx:if="{{roomForm.newImagePath}}" class="new-image-preview">
+            <view wx:if="{{roomForm.newImagePath}}" class="new-image-preview" bindtap="chooseImage">
               <image 
                 class="preview-image" 
                 src="{{roomForm.newImagePath}}" 
                 mode="aspectFill"
               ></image>
-              <view class="image-actions">
-                <view class="change-image-button" bindtap="chooseImage">
-                  <text class="action-text">重新选择</text>
-                </view>
-                <view class="remove-image-button" bindtap="removeNewImage">
-                  <text class="action-text">移除图片</text>
+              <view class="image-overlay">
+                <view class="overlay-content">
+                  <image class="overlay-icon" src="/images/icons/camera.svg" mode="aspectFit"></image>
+                  <text class="overlay-text">点击更换图片</text>
                 </view>
               </view>
               <view wx:if="{{imageUploading}}" class="upload-progress">
@@ -302,18 +300,16 @@
             </view>
             
             <!-- 当前图片预览 - 仅在没有新图片且没有被移除时显示 -->
-            <view wx:elif="{{roomForm.currentImage && !roomForm.removedCurrentImage}}" class="current-image-preview">
+            <view wx:elif="{{roomForm.currentImage && !roomForm.removedCurrentImage}}" class="current-image-preview" bindtap="chooseImage">
               <image 
                 class="preview-image" 
                 src="{{apiBaseUrl}}{{roomForm.currentImage}}" 
                 mode="aspectFill"
               ></image>
-              <view class="image-actions">
-                <view class="change-image-button" bindtap="chooseImage">
-                  <text class="action-text">更换图片</text>
-                </view>
-                <view class="remove-image-button" bindtap="removeCurrentImage">
-                  <text class="action-text">移除图片</text>
+              <view class="image-overlay">
+                <view class="overlay-content">
+                  <image class="overlay-icon" src="/images/icons/camera.svg" mode="aspectFit"></image>
+                  <text class="overlay-text">点击更换图片</text>
                 </view>
               </view>
             </view>

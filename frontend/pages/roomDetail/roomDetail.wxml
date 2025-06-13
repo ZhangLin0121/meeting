@@ -86,7 +86,7 @@
           class="date-picker"
         >
           <view class="picker-display">
-            <text class="picker-text">{{selectedDate}}</text>
+            <text class="picker-text">{{selectedDateWithWeekday}}</text>
             <image class="picker-arrow" src="/images/icons/arrow-down.svg" mode="aspectFit"></image>
           </view>
         </picker>
