@@ -102,18 +102,15 @@ Page({
                     userOpenId: userInfo.openid
                 });
                 console.log('✅ 从本地存储获取用户openid:', userInfo.openid);
+
+                // 同时更新全局数据
+                if (app) {
+                    app.globalData.userInfo = userInfo;
+                }
                 return;
             }
 
-            // 如果都没有，尝试重新登录
-            console.log('⚠️ 未找到用户openid，尝试重新登录');
-            if (app && app.forceLogin) {
-                app.forceLogin().then(() => {
-                    this.getUserOpenId();
-                }).catch(error => {
-                    console.error('强制登录失败:', error);
-                });
-            }
+            console.log('ℹ️ 未找到用户openid，等待页面初始化登录流程处理');
         } catch (error) {
             console.error('❌ 获取用户openid失败:', error);
             // 不影响页面正常加载，只是没有用户信息
@@ -128,33 +125,67 @@ Page({
     },
 
     /**
-     * 生命周期函数--监听页面显示
+     * 生命周期函数--监听页面显示 - 优化版本，确保登录后再获取数据
      */
     onShow() {
-        // 先确保有用户openid
-        if (!this.data.userOpenId) {
-            this.getUserOpenId();
-        }
+        console.log('📱 页面显示，开始初始化...');
 
-        // 等待一下确保openid已获取
-        setTimeout(() => {
-            if (this.data.userOpenId) {
-                this.loginUser().then(() => {
-                    this.checkUserRole();
-                    this.fetchRooms();
-                }).catch(error => {
-                    console.error('用户登录失败:', error);
-                    wx.showToast({
-                        title: '登录失败，请重试',
-                        icon: 'none',
-                        duration: 2000
-                    });
+        // 使用智能登录流程，确保用户已登录后再获取数据
+        this.initializePageWithLogin();
+    },
+
+    /**
+     * 智能初始化页面 - 确保登录后再加载数据
+     */
+    async initializePageWithLogin() {
+        try {
+            console.log('🔐 开始页面初始化登录流程...');
+
+            // 直接执行智能登录，不需要等待应用级登录
+            const userInfo = await this.loginUser();
+
+            if (userInfo && userInfo.openid) {
+                console.log('✅ 用户登录成功，开始加载页面数据...');
+
+                // 更新页面数据
+                this.setData({
+                    userOpenId: userInfo.openid
                 });
+
+                // 并行执行用户角色检查和会议室列表获取
+                await Promise.all([
+                    this.checkUserRole().catch(error => {
+                        console.warn('⚠️ 用户角色检查失败，使用默认权限:', error);
+                    }),
+                    this.fetchRooms().catch(error => {
+                        console.error('❌ 获取会议室列表失败:', error);
+                        // 不抛出错误，让页面继续显示
+                    })
+                ]);
+
+                console.log('✅ 页面初始化完成');
             } else {
-                // 如果还是没有openid，直接获取房间列表
-                this.fetchRooms();
+                throw new Error('登录失败：无法获取用户信息');
             }
-        }, 500);
+
+        } catch (error) {
+            console.error('❌ 页面初始化失败:', error);
+
+            // 显示友好的错误提示
+            wx.showModal({
+                title: '初始化失败',
+                content: '页面加载失败，请检查网络连接后重试',
+                showCancel: true,
+                cancelText: '取消',
+                confirmText: '重试',
+                success: (res) => {
+                    if (res.confirm) {
+                        // 用户选择重试
+                        this.initializePageWithLogin();
+                    }
+                }
+            });
+        }
     },
 
     /**
@@ -175,9 +206,21 @@ Page({
      * 页面相关事件处理函数--监听用户下拉动作
      */
     onPullDownRefresh() {
-        this.fetchRooms().finally(() => {
-            wx.stopPullDownRefresh();
-        });
+        console.log('🔄 用户下拉刷新');
+
+        // 确保用户已登录后再刷新数据
+        this.fetchRooms()
+            .catch(error => {
+                console.error('❌ 下拉刷新失败:', error);
+                wx.showToast({
+                    title: '刷新失败',
+                    icon: 'none',
+                    duration: 2000
+                });
+            })
+            .finally(() => {
+                wx.stopPullDownRefresh();
+            });
     },
 
     /**
@@ -240,13 +283,9 @@ Page({
         try {
             const WechatAuth = require('../../utils/auth.js');
 
-            // 检查登录状态
-            let userInfo = WechatAuth.checkLoginStatus();
-
-            if (!userInfo || !userInfo.openid) {
-                console.log('🔐 未找到用户信息，尝试重新登录...');
-                userInfo = await WechatAuth.performWechatLogin();
-            }
+            // 使用智能登录，避免重复弹窗
+            console.log('🔐 页面级智能登录...');
+            const userInfo = await WechatAuth.smartLogin();
 
             if (userInfo && userInfo.openid) {
                 // 更新页面的用户ID
@@ -269,14 +308,29 @@ Page({
      */
     async checkUserRole() {
         try {
+            // 检查是否有用户ID
+            if (!this.data.userOpenId) {
+                console.log('ℹ️ 用户ID未设置，默认为普通用户');
+                this.setData({
+                    isAdmin: false
+                });
+                return;
+            }
+
             const result = await this.requestAPI('GET', '/api/user/role');
             if (result.success) {
                 this.setData({
                     isAdmin: result.data.role === 'admin'
                 });
+                console.log('✅ 用户角色检查完成:', result.data.role);
+            } else {
+                console.warn('⚠️ 用户角色检查失败，使用默认权限');
+                this.setData({
+                    isAdmin: false
+                });
             }
         } catch (error) {
-            console.error('检查用户角色失败:', error);
+            console.error('❌ 检查用户角色失败:', error);
             // 默认为普通用户
             this.setData({
                 isAdmin: false
@@ -285,13 +339,23 @@ Page({
     },
 
     /**
-     * 获取会议室列表
+     * 获取会议室列表 - 增强版本，确保用户已登录
      */
     async fetchRooms() {
+        // 检查页面是否有用户ID
+        if (!this.data.userOpenId) {
+            console.warn('⚠️ 页面用户ID未设置，跳过获取会议室列表');
+            this.setData({
+                loading: false,
+                rooms: []
+            });
+            return;
+        }
+
         this.setData({ loading: true });
 
         try {
-            console.log('🏢 开始获取会议室列表...');
+            console.log('🏢 开始获取会议室列表...', { userOpenId: this.data.userOpenId.substring(0, 8) + '...' });
             const result = await request.get('/api/rooms');
 
             console.log('✅ 获取会议室列表成功:', result);

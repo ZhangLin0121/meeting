@@ -1,0 +1,309 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Deployment Guide and Server Management
+
+## Server Environment
+
+### Production Server Details
+- **IP Address**: 47.122.68.192
+- **Domain**: www.cacophonyem.me
+- **OS**: Linux (CentOS/Ubuntu)
+- **Web Server**: Nginx
+- **Process Manager**: PM2
+- **Database**: MongoDB
+- **SSL**: Let's Encrypt Certificate
+
+### Directory Structure on Server
+```
+/root/meeting/                    # Main project directory
+├── backend/                      # Node.js backend
+│   ├── server.js                # Main server file
+│   ├── package.json             # Dependencies
+│   └── ...                      # Other backend files
+├── frontend/                     # WeChat mini-program source (not served)
+├── meeting-nginx-fixed.conf      # Nginx configuration
+└── deploy-admin-fix.sh           # Deployment script
+```
+
+## Deployment Process
+
+### 1. Git Repository Management
+**Repository**: https://github.com/ZhangLin0121/meeting.git
+
+```bash
+# Commit changes with descriptive messages
+git add .
+git commit -m "Fix: Resolved filter parameter mismatch and navigation bar overlap issues
+
+- Updated room list filtering to use correct API parameters (capacityMin/Max)
+- Fixed navigation bar icon positioning to avoid WeChat system button overlap
+- Implemented safe global data access with retry mechanism
+- Corrected attendee count display field name consistency"
+
+# Push to GitHub
+git push origin main
+```
+
+### 2. Server Deployment Steps
+
+#### Connect to Server
+```bash
+ssh root@47.122.68.192
+```
+
+#### Update Project Code
+```bash
+cd /root/meeting
+git pull origin main
+```
+
+#### Install/Update Dependencies
+```bash
+cd backend
+npm install
+# If package-lock.json conflicts occur:
+rm package-lock.json
+npm install
+```
+
+#### Restart Services
+```bash
+# Check current PM2 processes
+pm2 status
+
+# Restart backend service
+pm2 restart meeting-backend
+
+# If service doesn't exist, start it:
+pm2 start server.js --name meeting-backend
+
+# Check logs for errors
+pm2 logs meeting-backend
+```
+
+### 3. Nginx Configuration
+
+#### Configuration File Location
+Configuration is in [meeting-nginx-fixed.conf](mdc:meeting-nginx-fixed.conf)
+
+#### Apply Nginx Configuration
+```bash
+# Test configuration
+sudo nginx -t
+
+# Reload configuration
+sudo nginx -s reload
+
+# If reload fails, restart nginx
+sudo systemctl restart nginx
+
+# Check nginx status
+sudo systemctl status nginx
+```
+
+#### Key Configuration Points
+- **Port**: Backend runs on port 3000 (not 3001)
+- **SSL**: HTTPS certificate for www.cacophonyem.me
+- **API Proxy**: `/meeting/api/` proxies to `localhost:3000`
+- **CORS**: Configured for WeChat mini-program requests
+
+### 4. Process Management with PM2
+
+#### Basic PM2 Commands
+```bash
+# Check all processes
+pm2 status
+
+# View specific process logs
+pm2 logs meeting-backend
+
+# Monitor processes in real-time
+pm2 monit
+
+# Restart a process
+pm2 restart meeting-backend
+
+# Stop a process
+pm2 stop meeting-backend
+
+# Delete a process (removes from PM2 list)
+pm2 delete meeting-backend
+
+# Save current PM2 configuration
+pm2 save
+
+# Setup startup script (run once)
+pm2 startup
+```
+
+#### PM2 Configuration Example
+```javascript
+// ecosystem.config.js (if needed)
+module.exports = {
+  apps: [{
+    name: 'meeting-backend',
+    script: './server.js',
+    cwd: '/root/meeting/backend',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    }
+  }]
+};
+```
+
+## Troubleshooting Deployment Issues
+
+### Common Port Conflicts
+```bash
+# Find process using port 3000
+sudo lsof -i :3000
+# or
+sudo netstat -tulpn | grep :3000
+
+# Kill process by PID
+sudo kill -9 <PID>
+
+# Alternative: Kill all node processes
+sudo pkill -f node
+```
+
+### Nginx 502 Bad Gateway Issues
+1. **Check Backend Service**:
+   ```bash
+   curl http://localhost:3000/api/health
+   pm2 status
+   pm2 logs meeting-backend
+   ```
+
+2. **Check Nginx Configuration**:
+   ```bash
+   sudo nginx -t
+   tail -f /var/log/nginx/error.log
+   ```
+
+3. **Verify Port Configuration**:
+   - Ensure nginx proxies to port 3000 (not 3001)
+   - Check [meeting-nginx-fixed.conf](mdc:meeting-nginx-fixed.conf)
+
+### SSL Certificate Issues
+```bash
+# Check certificate status
+sudo certbot certificates
+
+# Renew certificate if needed
+sudo certbot renew
+
+# Test SSL configuration
+openssl s_client -connect www.cacophonyem.me:443
+```
+
+## Database Management
+
+### MongoDB Connection
+Backend connects to MongoDB using connection string in environment variables or [config.js](mdc:backend/config.js).
+
+### Database Operations
+```bash
+# Access MongoDB shell (if installed locally)
+mongo
+
+# Check database status
+use meeting_db
+show collections
+db.stats()
+```
+
+### Admin User Management
+Use the deployment script [deploy-admin-fix.sh](mdc:deploy-admin-fix.sh):
+```bash
+chmod +x deploy-admin-fix.sh
+./deploy-admin-fix.sh
+```
+
+## Pre-deployment Checklist
+
+### Code Quality
+- [ ] All tests pass locally
+- [ ] No console errors in WeChat Developer Tools
+- [ ] API endpoints tested with proper error handling
+- [ ] Field naming consistency verified
+- [ ] Authentication flow working correctly
+
+### Configuration
+- [ ] Environment variables set correctly
+- [ ] Database connection string updated
+- [ ] API base URLs point to production domain
+- [ ] WeChat mini-program domain whitelist updated
+
+### Testing
+- [ ] Health check endpoint responds: `curl https://www.cacophonyem.me/meeting/api/health`
+- [ ] API authentication working
+- [ ] Room filtering and booking functionality tested
+- [ ] Admin panel accessible and functional
+
+## Rollback Procedure
+
+If deployment causes issues:
+
+1. **Quick Rollback**:
+   ```bash
+   cd /root/meeting
+   git log --oneline -5  # Find previous commit
+   git reset --hard <previous-commit-hash>
+   pm2 restart meeting-backend
+   ```
+
+2. **Service Restart**:
+   ```bash
+   pm2 restart meeting-backend
+   sudo systemctl restart nginx
+   ```
+
+3. **Check Service Status**:
+   ```bash
+   pm2 status
+   curl http://localhost:3000/api/health
+   curl https://www.cacophonyem.me/meeting/api/health
+   ```
+
+## Monitoring and Maintenance
+
+### Log Monitoring
+```bash
+# Backend application logs
+pm2 logs meeting-backend --lines 100
+
+# Nginx access logs
+tail -f /var/log/nginx/access.log
+
+# Nginx error logs
+tail -f /var/log/nginx/error.log
+
+# System logs
+journalctl -u nginx -f
+```
+
+### Performance Monitoring
+```bash
+# Check system resources
+htop
+df -h
+free -m
+
+# PM2 monitoring
+pm2 monit
+```
+
+### Backup Recommendations
+- Regular database backups
+- Code repository backup (GitHub)
+- Configuration file backup
+- SSL certificate backup

@@ -18,6 +18,7 @@ class RequestUtil {
 
         this.timeout = 10000; // 10秒超时
         this.retryCount = 3; // 重试次数
+        this.isHandlingAuthError = false; // 防止重复处理认证错误的标志
 
         // 检测设备类型
         this.isAndroid = this.detectAndroidDevice();
@@ -189,10 +190,17 @@ class RequestUtil {
     }
 
     /**
-     * 处理认证错误
+     * 处理认证错误 - 优化版本，避免重复弹窗
      */
     handleAuthError() {
         console.warn('🔐 检测到认证错误，可能需要重新登录');
+
+        // 防止重复处理认证错误
+        if (this.isHandlingAuthError) {
+            console.log('⚠️ 正在处理认证错误，跳过重复处理');
+            return;
+        }
+        this.isHandlingAuthError = true;
 
         // 清除可能损坏的用户信息
         try {
@@ -205,24 +213,64 @@ class RequestUtil {
             console.error('清除用户信息失败:', error);
         }
 
-        // 提示用户重新登录
-        wx.showModal({
-            title: '登录提示',
-            content: '登录状态已失效，请重新登录',
-            showCancel: false,
-            confirmText: '重新登录',
-            success: () => {
-                // 触发重新登录
-                try {
-                    const app = getApp();
-                    if (app && app.performLogin) {
-                        app.performLogin();
+        // 静默重新登录，避免弹窗
+        this.silentReLogin()
+            .then(() => {
+                console.log('✅ 静默重新登录成功');
+                this.isHandlingAuthError = false;
+            })
+            .catch((error) => {
+                console.error('❌ 静默重新登录失败:', error);
+                this.isHandlingAuthError = false;
+
+                // 只有在静默登录失败时才显示弹窗
+                wx.showModal({
+                    title: '登录提示',
+                    content: '缺少用户身份信息，请重新登录',
+                    showCancel: false,
+                    confirmText: '重新登录',
+                    success: () => {
+                        try {
+                            const app = getApp();
+                            if (app && app.performLogin) {
+                                app.performLogin();
+                            }
+                        } catch (error) {
+                            console.error('触发重新登录失败:', error);
+                        }
                     }
-                } catch (error) {
-                    console.error('触发重新登录失败:', error);
+                });
+            });
+    }
+
+    /**
+     * 静默重新登录 - 使用智能登录
+     */
+    async silentReLogin() {
+        try {
+            console.log('🔄 开始静默重新登录...');
+            const WechatAuth = require('./auth.js');
+
+            // 使用智能登录，避免重复登录
+            const userInfo = await WechatAuth.smartLogin();
+
+            if (userInfo && userInfo.openid) {
+                console.log('✅ 静默重新登录成功:', userInfo.openid.substring(0, 8) + '...');
+
+                // 确保全局状态也更新
+                const app = getApp();
+                if (app && app.globalData) {
+                    app.globalData.userInfo = userInfo;
                 }
+
+                return userInfo;
+            } else {
+                throw new Error('静默登录失败：无效的用户信息');
             }
-        });
+        } catch (error) {
+            console.error('❌ 静默重新登录失败:', error);
+            throw error;
+        }
     }
 
     /**

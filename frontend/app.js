@@ -85,7 +85,7 @@ App({
     },
 
     /**
-     * 执行登录
+     * 执行登录 - 优化版本，避免重复弹窗
      */
     async performLogin() {
         try {
@@ -103,17 +103,9 @@ App({
             // 使用新的微信认证工具
             const WechatAuth = require('./utils/auth.js');
 
-            // 先检查是否已有有效的登录状态
-            let userInfo = WechatAuth.checkLoginStatus();
-            if (userInfo && userInfo.openid) {
-                console.log('📱 使用缓存的用户信息:', userInfo.openid);
-                this.globalData.userInfo = userInfo;
-                return;
-            }
-
-            // 执行完整的微信登录流程
-            console.log('🔐 开始新的微信登录...');
-            userInfo = await WechatAuth.performWechatLogin();
+            // 使用智能登录，避免重复弹窗
+            console.log('🔐 开始智能登录流程...');
+            const userInfo = await WechatAuth.smartLogin();
 
             if (userInfo && userInfo.openid) {
                 this.globalData.userInfo = userInfo;

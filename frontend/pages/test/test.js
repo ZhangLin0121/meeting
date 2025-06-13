@@ -19,7 +19,9 @@ Page({
             { name: '网络状态检查', test: this.testNetworkStatus },
             { name: 'API健康检查', test: this.testAPIHealth },
             { name: '会议室列表', test: this.testRoomsList },
-            { name: '用户登录', test: this.testUserLogin }
+            { name: '用户登录', test: this.testUserLogin },
+            { name: '登录流程', test: this.testLoginFlow },
+            { name: '完整初始化', test: this.testCompleteInitialization }
         ];
 
         for (const testCase of tests) {
@@ -101,6 +103,124 @@ Page({
                 }
             });
         });
+    },
+
+    /**
+     * 测试登录流程 - 验证修复效果
+     */
+    async testLoginFlow() {
+        console.log('🧪 开始测试登录流程...');
+
+        wx.showLoading({
+            title: '测试登录中...',
+            mask: true
+        });
+
+        try {
+            const WechatAuth = require('../../utils/auth.js');
+
+            // 1. 清除现有登录状态
+            WechatAuth.logout();
+            console.log('✅ 已清除现有登录状态');
+
+            // 2. 测试智能登录
+            console.log('🔐 测试智能登录...');
+            const userInfo = await WechatAuth.smartLogin();
+
+            if (userInfo && userInfo.openid) {
+                console.log('✅ 智能登录成功:', userInfo.openid);
+
+                // 3. 测试API请求
+                console.log('🌐 测试API请求...');
+                const request = require('../../utils/request.js');
+                const result = await request.get('/api/health');
+
+                console.log('✅ API请求成功:', result);
+
+                wx.hideLoading();
+                wx.showModal({
+                    title: '测试结果',
+                    content: `登录流程测试成功！\n用户ID: ${userInfo.openid.substring(0, 8)}...\nAPI连接正常`,
+                    showCancel: false
+                });
+
+            } else {
+                throw new Error('智能登录返回无效用户信息');
+            }
+
+        } catch (error) {
+            console.error('❌ 登录流程测试失败:', error);
+            wx.hideLoading();
+            wx.showModal({
+                title: '测试失败',
+                content: `登录流程测试失败：${error.message}`,
+                showCancel: false
+            });
+        }
+    },
+
+    /**
+     * 测试完整初始化流程 - 模拟页面加载过程
+     */
+    async testCompleteInitialization() {
+        console.log('🧪 开始测试完整初始化流程...');
+
+        wx.showLoading({
+            title: '测试初始化中...',
+            mask: true
+        });
+
+        try {
+            // 1. 清除现有状态
+            const WechatAuth = require('../../utils/auth.js');
+            WechatAuth.logout();
+            console.log('✅ 已清除现有登录状态');
+
+            // 2. 模拟等待应用级登录
+            console.log('⏳ 模拟等待应用级登录...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 3. 执行应用级登录
+            console.log('🔐 执行应用级登录...');
+            const app = getApp();
+            if (app && app.performLogin) {
+                await app.performLogin();
+            }
+
+            // 4. 测试智能登录
+            console.log('🔐 测试智能登录...');
+            const userInfo = await WechatAuth.smartLogin();
+
+            if (userInfo && userInfo.openid) {
+                console.log('✅ 智能登录成功:', userInfo.openid);
+
+                // 5. 测试API请求
+                console.log('🌐 测试API请求...');
+                const request = require('../../utils/request.js');
+                const result = await request.get('/api/rooms');
+
+                console.log('✅ API请求成功:', result);
+
+                wx.hideLoading();
+                wx.showModal({
+                    title: '测试结果',
+                    content: `完整初始化流程测试成功！\n用户ID: ${userInfo.openid.substring(0, 8)}...\n会议室数量: ${result.data ? result.data.length : 0}`,
+                    showCancel: false
+                });
+
+            } else {
+                throw new Error('智能登录返回无效用户信息');
+            }
+
+        } catch (error) {
+            console.error('❌ 完整初始化流程测试失败:', error);
+            wx.hideLoading();
+            wx.showModal({
+                title: '测试失败',
+                content: `完整初始化流程测试失败：${error.message}`,
+                showCancel: false
+            });
+        }
     },
 
     // 重新运行测试

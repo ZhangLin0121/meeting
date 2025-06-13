@@ -51,47 +51,6 @@ async function loginToServer(code, userProfile = null) {
 }
 
 /**
- * 执行微信登录流程
- */
-async function performWechatLogin() {
-    try {
-        console.log('🔐 开始微信登录流程...');
-
-        // 1. 获取微信登录码
-        const loginResult = await new Promise((resolve, reject) => {
-            wx.login({
-                success: resolve,
-                fail: reject,
-                timeout: 15000 // 增加超时时间，安卓设备可能需要更长时间
-            });
-        });
-
-        console.log('✅ 获取微信登录码成功:', loginResult.code);
-
-        if (!loginResult.code) {
-            throw new Error('获取微信登录码失败');
-        }
-
-        // 2. 发送到服务器进行登录
-        const userInfo = await loginToServer(loginResult.code);
-
-        if (userInfo && userInfo.openid) {
-            // 3. 增强的数据保存逻辑 - 解决安卓设备问题
-            await saveUserInfoSafely(userInfo);
-
-            console.log('✅ 微信登录完成:', userInfo.openid);
-            return userInfo;
-        } else {
-            throw new Error('服务器登录失败：返回数据无效');
-        }
-
-    } catch (error) {
-        console.error('❌ 微信登录失败:', error);
-        throw error;
-    }
-}
-
-/**
  * 安全保存用户信息 - 解决安卓设备存储同步问题
  */
 async function saveUserInfoSafely(userInfo) {
@@ -150,6 +109,47 @@ async function saveUserInfoSafely(userInfo) {
  * 微信认证工具类
  */
 class WechatAuth {
+
+    /**
+     * 执行微信登录流程 - 主要登录方法
+     */
+    static async performWechatLogin() {
+        try {
+            console.log('🔐 开始微信登录流程...');
+
+            // 1. 获取微信登录码
+            const loginResult = await new Promise((resolve, reject) => {
+                wx.login({
+                    success: resolve,
+                    fail: reject,
+                    timeout: 15000 // 增加超时时间，安卓设备可能需要更长时间
+                });
+            });
+
+            console.log('✅ 获取微信登录码成功:', loginResult.code);
+
+            if (!loginResult.code) {
+                throw new Error('获取微信登录码失败');
+            }
+
+            // 2. 发送到服务器进行登录
+            const userInfo = await loginToServer(loginResult.code);
+
+            if (userInfo && userInfo.openid) {
+                // 3. 增强的数据保存逻辑 - 解决安卓设备问题
+                await saveUserInfoSafely(userInfo);
+
+                console.log('✅ 微信登录完成:', userInfo.openid);
+                return userInfo;
+            } else {
+                throw new Error('服务器登录失败：返回数据无效');
+            }
+
+        } catch (error) {
+            console.error('❌ 微信登录失败:', error);
+            throw error;
+        }
+    }
 
     /**
      * 获取用户资料（需要用户授权）
@@ -227,6 +227,28 @@ class WechatAuth {
         } catch (error) {
             console.error('❌ 检查登录状态失败:', error);
             return null;
+        }
+    }
+
+    /**
+     * 智能登录 - 避免重复弹窗的优化登录方法
+     */
+    static async smartLogin() {
+        try {
+            // 首先检查现有登录状态
+            const existingUserInfo = this.checkLoginStatus();
+            if (existingUserInfo && existingUserInfo.openid) {
+                console.log('✅ 使用现有登录状态:', existingUserInfo.openid);
+                return existingUserInfo;
+            }
+
+            // 如果没有现有状态，执行新的登录流程
+            console.log('🔐 执行新的登录流程...');
+            return await this.performWechatLogin();
+
+        } catch (error) {
+            console.error('❌ 智能登录失败:', error);
+            throw error;
         }
     }
 
