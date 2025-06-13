@@ -87,32 +87,67 @@ App({
     /**
      * 执行登录
      */
-    performLogin() {
-        // 先检查是否已有登录信息
-        const userInfo = wx.getStorageSync('userInfo');
-        if (userInfo && userInfo.openid) {
-            console.log('📱 使用缓存的用户信息:', userInfo);
-            this.globalData.userInfo = userInfo;
-            return;
-        }
+    async performLogin() {
+        try {
+            // 使用新的微信认证工具
+            const WechatAuth = require('./utils/auth.js');
 
-        wx.login({
-            success: (res) => {
-                console.log('✅ 微信登录成功，code:', res.code);
-                this.globalData.loginCode = res.code;
-
-                // 获取用户信息并登录
-                this.loginToServer(res.code);
-            },
-            fail: (error) => {
-                console.error('❌ 微信登录失败:', error);
-                wx.showToast({
-                    title: '登录失败，请重试',
-                    icon: 'none',
-                    duration: 2000
-                });
+            // 先检查是否已有有效的登录状态
+            let userInfo = WechatAuth.checkLoginStatus();
+            if (userInfo && userInfo.openid) {
+                console.log('📱 使用缓存的用户信息:', userInfo.openid);
+                this.globalData.userInfo = userInfo;
+                return;
             }
-        });
+
+            // 执行完整的微信登录流程
+            console.log('🔐 开始新的微信登录...');
+            userInfo = await WechatAuth.performWechatLogin();
+
+            if (userInfo && userInfo.openid) {
+                this.globalData.userInfo = userInfo;
+                console.log('✅ 微信登录完成，openid:', userInfo.openid);
+
+                // 显示登录成功提示
+                setTimeout(() => {
+                    wx.showToast({
+                        title: '登录成功',
+                        icon: 'success',
+                        duration: 1500
+                    });
+                }, 500);
+            } else {
+                throw new Error('登录结果无效');
+            }
+
+        } catch (error) {
+            console.error('❌ 登录流程失败:', error);
+
+            // 显示用户友好的错误信息
+            let errorMessage = '登录失败，请重试';
+            if (error.message) {
+                if (error.message.includes('网络')) {
+                    errorMessage = '网络连接失败，请检查网络';
+                } else if (error.message.includes('invalid code')) {
+                    errorMessage = '微信授权失败，请重新尝试';
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+
+            wx.showModal({
+                title: '登录提示',
+                content: errorMessage,
+                showCancel: true,
+                cancelText: '取消',
+                confirmText: '重试',
+                success: (res) => {
+                    if (res.confirm) {
+                        this.performLogin();
+                    }
+                }
+            });
+        }
     },
 
     /**

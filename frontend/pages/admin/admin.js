@@ -10,7 +10,7 @@ Page({
         currentTab: 0,
 
         // 用户信息
-        userOpenId: 'test_user_001', // 模拟管理员openid
+        userOpenId: '',
 
         // 会议室管理相关
         rooms: [],
@@ -63,29 +63,203 @@ Page({
             '网络接口/Wi-Fi',
             '空调',
             '电话'
-        ]
+        ],
+
+        activeTab: 'rooms',
+        showAddRoomModal: false,
+        showEditRoomModal: false,
+        newRoom: {
+            name: '',
+            capacity: '',
+            location: '',
+            description: '',
+            equipment: '',
+            imageUrl: ''
+        },
+        editingRoom: null,
+        statusBarHeight: 0
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad(options) {
-        console.log('管理员后台页面加载');
+        console.log('管理员页面加载');
 
-        // 获取API基础URL
-        const app = getApp();
-        this.setData({
-            apiBaseUrl: app.globalData.apiBaseUrl
-        });
+        // 安全获取App数据
+        this.safeGetAppData();
+
+        // 获取系统信息
+        this.getSystemInfo();
+    },
+
+    /**
+     * 安全获取App数据，避免getApp()返回undefined
+     */
+    safeGetAppData() {
+        try {
+            const app = getApp();
+
+            if (app && app.globalData) {
+                this.setData({
+                    apiBaseUrl: app.globalData.apiBaseUrl || 'https://www.cacophonyem.me/meeting'
+                });
+                console.log('✅ 成功获取App全局数据');
+
+                // 获取用户openid
+                this.getUserOpenId();
+
+                // 初始化页面
+                this.initializePage();
+            } else {
+                console.warn('⚠️ App实例未就绪，使用默认配置');
+                this.setData({
+                    apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+                });
+
+                // 延迟重试获取用户数据
+                setTimeout(() => {
+                    this.safeGetAppData();
+                }, 500);
+            }
+        } catch (error) {
+            console.error('❌ 获取App数据失败:', error);
+
+            // 使用默认配置
+            this.setData({
+                apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+            });
+
+            // 延迟重试
+            setTimeout(() => {
+                this.safeGetAppData();
+            }, 1000);
+        }
+    },
+
+    /**
+     * 初始化页面
+     */
+    initializePage() {
+        // 延迟执行权限检查，确保用户openid已获取
+        setTimeout(() => {
+            this.checkAdminPermission();
+        }, 500);
 
         this.loadRooms();
+    },
+
+    /**
+     * 获取用户openid
+     */
+    getUserOpenId() {
+        try {
+            // 先从全局数据获取
+            const app = getApp();
+            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
+                this.setData({
+                    userOpenId: app.globalData.userInfo.openid
+                });
+                console.log('✅ 从全局数据获取用户openid:', app.globalData.userInfo.openid);
+                return;
+            }
+
+            // 从本地存储获取
+            const userInfo = wx.getStorageSync('userInfo');
+            if (userInfo && userInfo.openid) {
+                this.setData({
+                    userOpenId: userInfo.openid
+                });
+                console.log('✅ 从本地存储获取用户openid:', userInfo.openid);
+                return;
+            }
+
+            // 如果都没有，尝试重新登录
+            console.log('⚠️ 未找到用户openid，尝试重新登录');
+            if (app && app.forceLogin) {
+                app.forceLogin().then(() => {
+                    this.getUserOpenId();
+                }).catch(error => {
+                    console.error('强制登录失败:', error);
+                });
+            }
+        } catch (error) {
+            console.error('❌ 获取用户openid失败:', error);
+            // 不影响页面正常加载，只是没有用户信息
+        }
+    },
+
+    /**
+     * 检查管理员权限
+     */
+    async checkAdminPermission() {
+        try {
+            console.log('🔐 检查管理员权限，当前用户openid:', this.data.userOpenId);
+
+            if (!this.data.userOpenId) {
+                throw new Error('用户身份信息缺失');
+            }
+
+            const result = await this.requestAPI('GET', '/api/user/role');
+
+            if (result.success) {
+                console.log('✅ 用户权限检查成功:', result.data);
+
+                if (result.data.role !== 'admin') {
+                    wx.showModal({
+                        title: '权限不足',
+                        content: '您没有管理员权限，无法访问此页面。',
+                        showCancel: false,
+                        success: () => {
+                            wx.navigateBack({
+                                delta: 1,
+                                fail: () => {
+                                    wx.switchTab({
+                                        url: '/pages/roomList/roomList'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            } else {
+                throw new Error(result.message || '权限检查失败');
+            }
+        } catch (error) {
+            console.error('❌ 管理员权限检查失败:', error);
+            wx.showToast({
+                title: error.message || '权限验证失败',
+                icon: 'none',
+                duration: 3000
+            });
+        }
     },
 
     /**
      * 生命周期函数--监听页面显示
      */
     onShow() {
-        // 刷新当前选项卡的数据
+        console.log('📱 管理员页面显示，当前用户openid:', this.data.userOpenId);
+
+        // 确保有用户openid
+        if (!this.data.userOpenId) {
+            console.log('⚠️ 缺少用户openid，重新获取');
+            this.getUserOpenId();
+
+            // 等待获取openid后再刷新数据
+            setTimeout(() => {
+                this.refreshCurrentTabData();
+            }, 500);
+        } else {
+            // 立即刷新数据
+            this.refreshCurrentTabData();
+        }
+    },
+
+    /**
+     * 刷新当前选项卡的数据
+     */
+    refreshCurrentTabData() {
         if (this.data.currentTab === 0) {
             this.refreshRooms();
         } else {
@@ -164,8 +338,6 @@ Page({
                         imageUrl = this.data.apiBaseUrl + room.images[0];
                     }
 
-
-
                     return {
                         ...room,
                         equipmentDisplay: equipmentDisplay,
@@ -176,16 +348,12 @@ Page({
 
                 const newRooms = this.data.roomsPage === 1 ? processedRooms : [...this.data.rooms, ...processedRooms];
 
-
-
                 this.setData({
                     rooms: newRooms,
                     roomsPage: this.data.roomsPage + 1,
                     roomsHasMore: result.pagination ? result.pagination.page < result.pagination.pages : false,
                     roomsLoading: false
                 });
-
-
             } else {
                 throw new Error(result.message || '获取会议室列表失败');
             }
@@ -518,8 +686,6 @@ Page({
             [`roomForm.${field}`]: value
         });
     },
-
-
 
     /**
      * 切换设备选择

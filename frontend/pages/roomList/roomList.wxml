@@ -2,28 +2,22 @@
 <view class="container fade-in">
   <!-- 自定义导航栏 -->
   <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
-    <view class="navbar-content">
+    <view class="navbar-content" style="height: {{customNavBarHeight}}px;">
       <text class="navbar-title">会议室列表</text>
-      <view class="navbar-right-icons">
+      <view class="navbar-right-icons" style="right: {{menuButtonInfo.width + 20}}px;">
         <image 
           class="navbar-icon" 
           src="/images/icons/search.svg" 
           bindtap="goToSearchPage"
           mode="aspectFit"
         ></image>
-        <image 
-          wx:if="{{isAdmin}}"
-          class="navbar-icon admin-icon-nav" 
-          src="/images/icons/admin.svg" 
-          bindtap="goToAdminPanel"
-          mode="aspectFit"
-        ></image>
+        <!-- 管理员图标移到底部浮动按钮，避免拥挤 -->
       </view>
     </view>
   </view>
 
   <!-- 搜索和筛选区域 - 吸顶效果 -->
-  <view class="search-filter-area sticky-header">
+  <view class="search-filter-area sticky-header" style="top: {{statusBarHeight + customNavBarHeight}}px;">
     <view class="search-input-wrapper">
       <image class="search-icon-in-input" src="/images/icons/search-grey.svg" mode="aspectFit"></image>
       <input
@@ -51,7 +45,7 @@
     <view wx:for="{{rooms}}" wx:key="id" class="room-card-wrapper slide-in-up" style="animation-delay: {{index * 0.05}}s;">
       <view
         class="room-card overlay-card enhanced-shadow"
-        data-room-id="{{item.id}}"
+        data-room-id="{{item.id || item.roomId || item._id}}"
         bindtap="goToRoomDetail"
       >
         <!-- 背景图片层 -->

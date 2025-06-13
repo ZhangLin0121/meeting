@@ -3,13 +3,23 @@
  * 处理API请求、错误处理、重试机制
  */
 
-const app = getApp();
-
 class RequestUtil {
     constructor() {
-        this.baseURL = app.globalData.apiBaseUrl;
+        // 安全获取baseURL，避免getApp()返回undefined
+        try {
+            const app = getApp();
+            this.baseURL = (app && app.globalData && app.globalData.apiBaseUrl) ?
+                app.globalData.apiBaseUrl :
+                'https://www.cacophonyem.me/meeting';
+        } catch (error) {
+            console.warn('⚠️ 获取App实例失败，使用默认API地址:', error);
+            this.baseURL = 'https://www.cacophonyem.me/meeting';
+        }
+
         this.timeout = 10000; // 10秒超时
         this.retryCount = 3; // 重试次数
+
+        console.log('🔧 RequestUtil 初始化完成，baseURL:', this.baseURL);
     }
 
     /**

@@ -60,9 +60,9 @@ page {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 44px;
     padding: 0 16px;
     box-sizing: border-box;
+    position: relative;
 }
 
 .navbar-title {
@@ -71,12 +71,18 @@ page {
     color: #1d1d1f;
     letter-spacing: -0.6rpx;
     text-shadow: 0 1rpx 2rpx rgba(255, 255, 255, 0.9);
+    flex: 1;
+    text-align: center;
 }
 
 .navbar-right-icons {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     gap: 16px;
+    z-index: 10;
 }
 
 .navbar-icon {
@@ -123,7 +129,6 @@ page {
 
 .sticky-header {
     position: sticky;
-    top: 88rpx;
     z-index: 99;
     box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06), 0 2rpx 16rpx rgba(0, 0, 0, 0.04), 0 0 0 0.5rpx rgba(255, 255, 255, 0.8) inset;
 }

@@ -7,11 +7,20 @@ Page({
      * 页面的初始数据
      */
     data: {
-        roomId: '',
-        roomDetails: null,
-        statusBarHeight: 0,
-        userOpenId: 'test_user_001', // 暂时硬编码，实际应从登录获取
+        roomId: null,
+        room: null,
+        loading: true,
+        userOpenId: '',
+        bookingData: {
+            startTime: '',
+            endTime: '',
+            purpose: '',
+            attendeeCount: 1
+        },
+        showBookingModal: false,
+        submittingBooking: false,
         apiBaseUrl: '',
+        statusBarHeight: 0,
 
         // 日期选择相关
         selectedDate: '',
@@ -28,22 +37,14 @@ Page({
             topic: '',
             contactName: '',
             contactPhone: '',
-            date: '',
-            startTime: '',
-            endTime: '',
-            attendeeCount: 1,
+            attendeesCount: 1,
             requirements: ''
         },
 
         // 页面状态
-        loading: true,
         imageLoading: true,
         imageError: false,
-
-        // 弹窗状态
-        showBookingModal: false,
         selectedTimeText: '',
-        submitting: false
     },
 
     /**
@@ -52,24 +53,127 @@ Page({
     onLoad(options) {
         console.log('会议室详情页面加载，参数:', options);
 
-        // 获取API基础URL
-        const app = getApp();
-        this.setData({
-            apiBaseUrl: app.globalData.apiBaseUrl
-        });
-
-        if (options.roomId) {
-            this.setData({ roomId: options.roomId });
-            this.fetchRoomDetails();
-        } else {
-            this.setData({
-                loading: false,
-                error: '缺少会议室ID参数'
+        // 安全获取房间ID
+        const roomId = options.roomId || options.id;
+        if (!roomId) {
+            console.error('❌ 会议室ID缺失');
+            wx.showToast({
+                title: '会议室ID缺失',
+                icon: 'none',
+                duration: 2000
             });
+            setTimeout(() => {
+                wx.navigateBack();
+            }, 2000);
+            return;
         }
 
+        this.setData({
+            roomId: roomId
+        });
+
+        // 安全获取App数据
+        this.safeGetAppData();
+
+        // 获取系统信息
         this.getSystemInfo();
-        this.initializeDates();
+    },
+
+    /**
+     * 安全获取App数据，避免getApp()返回undefined
+     */
+    safeGetAppData() {
+        try {
+            const app = getApp();
+
+            if (app && app.globalData) {
+                this.setData({
+                    apiBaseUrl: app.globalData.apiBaseUrl || 'https://www.cacophonyem.me/meeting'
+                });
+                console.log('✅ 成功获取App全局数据');
+
+                // 获取用户openid
+                this.getUserOpenId();
+
+                // 初始化页面数据
+                this.initializePage();
+            } else {
+                console.warn('⚠️ App实例未就绪，使用默认配置');
+                this.setData({
+                    apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+                });
+
+                // 延迟重试获取用户数据
+                setTimeout(() => {
+                    this.safeGetAppData();
+                }, 500);
+            }
+        } catch (error) {
+            console.error('❌ 获取App数据失败:', error);
+
+            // 使用默认配置
+            this.setData({
+                apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+            });
+
+            // 延迟重试
+            setTimeout(() => {
+                this.safeGetAppData();
+            }, 1000);
+        }
+    },
+
+    /**
+     * 初始化页面数据
+     */
+    initializePage() {
+        if (this.data.roomId) {
+            console.log('✅ 开始获取会议室详情:', this.data.roomId);
+            this.fetchRoomDetails();
+            this.initializeDates();
+        } else {
+            console.error('❌ 房间ID缺失，无法初始化页面');
+        }
+    },
+
+    /**
+     * 获取用户openid
+     */
+    getUserOpenId() {
+        try {
+            // 先从全局数据获取
+            const app = getApp();
+            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
+                this.setData({
+                    userOpenId: app.globalData.userInfo.openid
+                });
+                console.log('✅ 从全局数据获取用户openid:', app.globalData.userInfo.openid);
+                return;
+            }
+
+            // 从本地存储获取
+            const userInfo = wx.getStorageSync('userInfo');
+            if (userInfo && userInfo.openid) {
+                this.setData({
+                    userOpenId: userInfo.openid
+                });
+                console.log('✅ 从本地存储获取用户openid:', userInfo.openid);
+                return;
+            }
+
+            // 如果都没有，尝试重新登录
+            console.log('⚠️ 未找到用户openid，尝试重新登录');
+            if (app && app.forceLogin) {
+                app.forceLogin().then(() => {
+                    this.getUserOpenId();
+                }).catch(error => {
+                    console.error('强制登录失败:', error);
+                });
+            }
+        } catch (error) {
+            console.error('❌ 获取用户openid失败:', error);
+            // 不影响页面正常加载，只是没有用户信息
+        }
     },
 
     /**
@@ -437,7 +541,7 @@ Page({
                 date: '',
                 startTime: '',
                 endTime: '',
-                attendeeCount: 1,
+                attendeesCount: 1,
                 requirements: ''
             }
         });
@@ -592,8 +696,15 @@ Page({
         };
 
         // 只有当参会人数有值时才添加该字段
-        if (this.data.bookingForm.attendeeCount && this.data.bookingForm.attendeeCount.trim()) {
-            bookingData.attendeesCount = parseInt(this.data.bookingForm.attendeeCount);
+        if (this.data.bookingForm.attendeesCount) {
+            // 处理数字或字符串类型的参会人数
+            const attendeeCount = typeof this.data.bookingForm.attendeesCount === 'string' ?
+                this.data.bookingForm.attendeesCount.trim() :
+                String(this.data.bookingForm.attendeesCount);
+
+            if (attendeeCount && attendeeCount !== '0') {
+                bookingData.attendeesCount = parseInt(attendeeCount);
+            }
         }
 
         try {

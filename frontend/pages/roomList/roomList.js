@@ -13,8 +13,11 @@ Page({
         searchKeyword: '',
         isAdmin: false,
         statusBarHeight: 0,
-        userOpenId: 'test_user_001', // 模拟用户openid，实际应通过微信登录获取
-        apiBaseUrl: ''
+        userOpenId: '',
+        apiBaseUrl: '',
+        // 胶囊按钮信息
+        menuButtonInfo: null,
+        customNavBarHeight: 0
     },
 
     /**
@@ -23,14 +26,98 @@ Page({
     onLoad() {
         console.log('会议室列表页面加载');
 
-        // 获取API基础URL
-        const app = getApp();
-        this.setData({
-            apiBaseUrl: app.globalData.apiBaseUrl
-        });
+        // 安全获取App实例和API基础URL
+        this.safeGetAppData();
 
         this.getSystemInfo();
-        this.loginUser();
+    },
+
+    /**
+     * 安全获取App数据，避免getApp()返回undefined
+     */
+    safeGetAppData() {
+        try {
+            const app = getApp();
+
+            if (app && app.globalData) {
+                this.setData({
+                    apiBaseUrl: app.globalData.apiBaseUrl || 'https://www.cacophonyem.me/meeting'
+                });
+                console.log('✅ 成功获取App全局数据');
+
+                // 获取用户openid
+                this.getUserOpenId();
+            } else {
+                console.warn('⚠️ App实例未就绪，使用默认配置');
+                this.setData({
+                    apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+                });
+
+                // 延迟重试获取用户数据
+                setTimeout(() => {
+                    this.safeGetAppData();
+                }, 500);
+            }
+        } catch (error) {
+            console.error('❌ 获取App数据失败:', error);
+
+            // 使用默认配置
+            this.setData({
+                apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+            });
+
+            // 显示错误提示但不阻塞页面
+            wx.showToast({
+                title: '初始化中，请稍候',
+                icon: 'loading',
+                duration: 1500
+            });
+
+            // 延迟重试
+            setTimeout(() => {
+                this.safeGetAppData();
+            }, 1000);
+        }
+    },
+
+    /**
+     * 获取用户openid
+     */
+    getUserOpenId() {
+        try {
+            // 先从全局数据获取
+            const app = getApp();
+            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
+                this.setData({
+                    userOpenId: app.globalData.userInfo.openid
+                });
+                console.log('✅ 从全局数据获取用户openid:', app.globalData.userInfo.openid);
+                return;
+            }
+
+            // 从本地存储获取
+            const userInfo = wx.getStorageSync('userInfo');
+            if (userInfo && userInfo.openid) {
+                this.setData({
+                    userOpenId: userInfo.openid
+                });
+                console.log('✅ 从本地存储获取用户openid:', userInfo.openid);
+                return;
+            }
+
+            // 如果都没有，尝试重新登录
+            console.log('⚠️ 未找到用户openid，尝试重新登录');
+            if (app && app.forceLogin) {
+                app.forceLogin().then(() => {
+                    this.getUserOpenId();
+                }).catch(error => {
+                    console.error('强制登录失败:', error);
+                });
+            }
+        } catch (error) {
+            console.error('❌ 获取用户openid失败:', error);
+            // 不影响页面正常加载，只是没有用户信息
+        }
     },
 
     /**
@@ -44,17 +131,30 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow() {
-        this.loginUser().then(() => {
-            this.checkUserRole();
-            this.fetchRooms();
-        }).catch(error => {
-            console.error('用户登录失败:', error);
-            wx.showToast({
-                title: '登录失败，请重试',
-                icon: 'none',
-                duration: 2000
-            });
-        });
+        // 先确保有用户openid
+        if (!this.data.userOpenId) {
+            this.getUserOpenId();
+        }
+
+        // 等待一下确保openid已获取
+        setTimeout(() => {
+            if (this.data.userOpenId) {
+                this.loginUser().then(() => {
+                    this.checkUserRole();
+                    this.fetchRooms();
+                }).catch(error => {
+                    console.error('用户登录失败:', error);
+                    wx.showToast({
+                        title: '登录失败，请重试',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                });
+            } else {
+                // 如果还是没有openid，直接获取房间列表
+                this.fetchRooms();
+            }
+        }, 500);
     },
 
     /**
@@ -96,18 +196,39 @@ Page({
     },
 
     /**
-     * 获取系统信息，计算状态栏高度
+     * 获取系统信息，计算状态栏高度和导航栏安全区域
      */
     getSystemInfo() {
         try {
             const systemInfo = wx.getSystemInfoSync();
+            const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+
+            console.log('📱 系统信息:', systemInfo);
+            console.log('🔘 胶囊按钮信息:', menuButtonInfo);
+
+            const statusBarHeight = systemInfo.statusBarHeight || 20;
+
+            // 计算自定义导航栏的安全高度
+            // 胶囊按钮顶部到状态栏底部的距离 * 2 + 胶囊按钮高度
+            const customNavBarHeight = menuButtonInfo.top && menuButtonInfo.height ?
+                (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height : 44;
+
             this.setData({
-                statusBarHeight: systemInfo.statusBarHeight || 20
+                statusBarHeight: statusBarHeight,
+                menuButtonInfo: menuButtonInfo,
+                customNavBarHeight: customNavBarHeight
+            });
+
+            console.log('✅ 导航栏信息设置完成:', {
+                statusBarHeight,
+                customNavBarHeight,
+                menuButtonInfo
             });
         } catch (error) {
             console.error('获取系统信息失败:', error);
             this.setData({
-                statusBarHeight: 20 // 默认值
+                statusBarHeight: 20, // 默认值
+                customNavBarHeight: 44 // 默认值
             });
         }
     },
@@ -117,18 +238,25 @@ Page({
      */
     async loginUser() {
         try {
-            // 调用后端登录接口，确保用户存在于数据库中
-            const result = await this.requestAPI('POST', '/api/user/login', {
-                openid: this.data.userOpenId,
-                nickname: '测试用户', // 这里可以是微信获取的昵称
-                avatarUrl: '' // 这里可以是微信获取的头像
-            });
+            const WechatAuth = require('../../utils/auth.js');
 
-            if (result.success) {
-                console.log('✅ 用户登录成功:', result.data);
-                return result.data;
+            // 检查登录状态
+            let userInfo = WechatAuth.checkLoginStatus();
+
+            if (!userInfo || !userInfo.openid) {
+                console.log('🔐 未找到用户信息，尝试重新登录...');
+                userInfo = await WechatAuth.performWechatLogin();
+            }
+
+            if (userInfo && userInfo.openid) {
+                // 更新页面的用户ID
+                this.setData({
+                    userOpenId: userInfo.openid
+                });
+                console.log('✅ 用户登录成功，openid:', userInfo.openid);
+                return userInfo;
             } else {
-                throw new Error(result.message || '登录失败');
+                throw new Error('无法获取用户信息');
             }
         } catch (error) {
             console.error('用户登录失败:', error);
@@ -344,32 +472,42 @@ Page({
      * 跳转到会议室详情页
      */
     goToRoomDetail(e) {
+        console.log('🖱️ 点击会议室卡片');
+        console.log('📥 事件对象:', e);
+        console.log('📥 dataset:', e.currentTarget.dataset);
+        console.log('📥 当前会议室数据:', this.data.rooms);
+
         const roomId = e.currentTarget.dataset.roomId;
-        console.log('点击会议室卡片，roomId:', roomId);
+        console.log('🏢 获取到的roomId:', roomId);
+        console.log('🏢 roomId类型:', typeof roomId);
 
         if (!roomId) {
-            console.error('roomId 为空，无法跳转');
-            wx.showToast({
-                title: '会议室信息错误',
-                icon: 'none',
-                duration: 2000
+            console.error('❌ roomId 为空，无法跳转');
+            console.error('❌ dataset内容:', e.currentTarget.dataset);
+            console.error('❌ 当前rooms数据:', this.data.rooms);
+
+            wx.showModal({
+                title: '调试信息',
+                content: `roomId为空\ndataset: ${JSON.stringify(e.currentTarget.dataset)}\n\n检查点：\n1. 请查看控制台完整日志\n2. 数据是否正确加载`,
+                showCancel: false
             });
             return;
         }
 
-        console.log('准备跳转到会议室详情页，URL:', `/pages/roomDetail/roomDetail?roomId=${roomId}`);
+        const targetUrl = `/pages/roomDetail/roomDetail?roomId=${roomId}`;
+        console.log('🔗 准备跳转URL:', targetUrl);
 
         wx.navigateTo({
-            url: `/pages/roomDetail/roomDetail?roomId=${roomId}`,
+            url: targetUrl,
             success: () => {
-                console.log('跳转成功');
+                console.log('✅ 跳转成功到会议室详情页');
             },
             fail: (error) => {
-                console.error('跳转失败:', error);
-                wx.showToast({
-                    title: '页面跳转失败',
-                    icon: 'none',
-                    duration: 2000
+                console.error('❌ 跳转失败:', error);
+                wx.showModal({
+                    title: '跳转失败',
+                    content: `错误: ${JSON.stringify(error)}\nURL: ${targetUrl}`,
+                    showCancel: false
                 });
             }
         });
@@ -508,7 +646,7 @@ Page({
         this.setData({ loading: true });
 
         try {
-            const result = await this.requestAPI('GET', `/api/rooms?minCapacity=${minCapacity}&maxCapacity=${maxCapacity}`);
+            const result = await this.requestAPI('GET', `/api/rooms?capacityMin=${minCapacity}&capacityMax=${maxCapacity}`);
 
             if (result.success && result.data) {
                 const processedRooms = await this.processRoomsData(result.data);
@@ -540,14 +678,56 @@ Page({
     },
 
     /**
-     * 显示设备筛选（简化版）
+     * 显示设备筛选
      */
     showEquipmentFilter() {
-        wx.showToast({
-            title: '设备筛选功能开发中',
-            icon: 'none',
-            duration: 2000
+        const equipmentOptions = ['投屏设备', '麦克风', '音响系统', '白板', '视频会议设备', '网络接口/Wi-Fi'];
+
+        wx.showActionSheet({
+            itemList: equipmentOptions,
+            success: (res) => {
+                const selectedEquipment = equipmentOptions[res.tapIndex];
+                this.filterByEquipment(selectedEquipment);
+            }
         });
+    },
+
+    /**
+     * 按设备筛选
+     */
+    async filterByEquipment(equipment) {
+        this.setData({ loading: true });
+
+        try {
+            const result = await this.requestAPI('GET', `/api/rooms?equipment=${encodeURIComponent(equipment)}`);
+
+            if (result.success && result.data) {
+                const processedRooms = await this.processRoomsData(result.data);
+                this.setData({
+                    rooms: processedRooms,
+                    loading: false
+                });
+
+                wx.showToast({
+                    title: `已筛选包含"${equipment}"的会议室`,
+                    icon: 'none',
+                    duration: 2000
+                });
+            } else {
+                throw new Error(result.message || '筛选失败');
+            }
+        } catch (error) {
+            console.error('按设备筛选失败:', error);
+            this.setData({
+                loading: false
+            });
+
+            wx.showToast({
+                title: '筛选失败，请重试',
+                icon: 'none',
+                duration: 2000
+            });
+        }
     },
 
     /**
