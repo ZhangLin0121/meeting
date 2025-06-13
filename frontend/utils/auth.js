@@ -62,7 +62,7 @@ async function performWechatLogin() {
             wx.login({
                 success: resolve,
                 fail: reject,
-                timeout: 10000
+                timeout: 15000 // 增加超时时间，安卓设备可能需要更长时间
             });
         });
 
@@ -76,14 +76,8 @@ async function performWechatLogin() {
         const userInfo = await loginToServer(loginResult.code);
 
         if (userInfo && userInfo.openid) {
-            // 3. 保存到全局状态和本地存储
-            const app = getSafeApp();
-            if (app) {
-                app.globalData.userInfo = userInfo;
-            }
-
-            wx.setStorageSync('userInfo', userInfo);
-            wx.setStorageSync('loginTime', Date.now());
+            // 3. 增强的数据保存逻辑 - 解决安卓设备问题
+            await saveUserInfoSafely(userInfo);
 
             console.log('✅ 微信登录完成:', userInfo.openid);
             return userInfo;
@@ -94,6 +88,61 @@ async function performWechatLogin() {
     } catch (error) {
         console.error('❌ 微信登录失败:', error);
         throw error;
+    }
+}
+
+/**
+ * 安全保存用户信息 - 解决安卓设备存储同步问题
+ */
+async function saveUserInfoSafely(userInfo) {
+    try {
+        console.log('💾 开始保存用户信息...');
+
+        // 1. 保存到全局状态
+        const app = getSafeApp();
+        if (app) {
+            app.globalData.userInfo = userInfo;
+            console.log('✅ 已保存到全局状态');
+        }
+
+        // 2. 保存到本地存储（使用异步方式确保可靠性）
+        await new Promise((resolve, reject) => {
+            wx.setStorage({
+                key: 'userInfo',
+                data: userInfo,
+                success: () => {
+                    console.log('✅ 已保存到本地存储');
+                    resolve();
+                },
+                fail: (error) => {
+                    console.error('❌ 本地存储失败:', error);
+                    // 尝试同步方式作为备选
+                    try {
+                        wx.setStorageSync('userInfo', userInfo);
+                        console.log('✅ 同步存储成功');
+                        resolve();
+                    } catch (syncError) {
+                        console.error('❌ 同步存储也失败:', syncError);
+                        reject(syncError);
+                    }
+                }
+            });
+        });
+
+        // 3. 保存登录时间戳
+        wx.setStorageSync('loginTime', Date.now());
+
+        // 4. 验证保存是否成功
+        const savedInfo = wx.getStorageSync('userInfo');
+        if (!savedInfo || !savedInfo.openid) {
+            throw new Error('用户信息保存验证失败');
+        }
+
+        console.log('✅ 用户信息保存完成并验证成功');
+
+    } catch (error) {
+        console.error('❌ 保存用户信息失败:', error);
+        throw new Error('用户信息保存失败，请重试');
     }
 }
 

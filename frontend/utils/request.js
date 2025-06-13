@@ -19,7 +19,39 @@ class RequestUtil {
         this.timeout = 10000; // 10秒超时
         this.retryCount = 3; // 重试次数
 
+        // 检测设备类型
+        this.isAndroid = this.detectAndroidDevice();
+        if (this.isAndroid) {
+            console.log('📱 检测到安卓设备，启用特殊处理逻辑');
+            this.timeout = 15000; // 安卓设备增加超时时间
+        }
+
         console.log('🔧 RequestUtil 初始化完成，baseURL:', this.baseURL);
+    }
+
+    /**
+     * 检测是否为安卓设备
+     */
+    detectAndroidDevice() {
+        try {
+            const systemInfo = wx.getSystemInfoSync();
+            const platform = systemInfo.platform;
+            const userAgent = systemInfo.brand || '';
+
+            console.log('📱 设备信息:', {
+                platform,
+                brand: systemInfo.brand,
+                model: systemInfo.model,
+                system: systemInfo.system
+            });
+
+            return platform === 'android' ||
+                userAgent.toLowerCase().includes('android') ||
+                systemInfo.system.toLowerCase().includes('android');
+        } catch (error) {
+            console.warn('⚠️ 无法检测设备类型:', error);
+            return false;
+        }
     }
 
     /**
@@ -50,10 +82,18 @@ class RequestUtil {
             // 合并请求头
             const requestHeader = {...defaultHeader, ...header };
 
-            // 添加用户标识（如果存在）
-            const userInfo = wx.getStorageSync('userInfo');
+            // 增强用户标识获取逻辑 - 修复安卓设备问题
+            const userInfo = this.getUserInfo();
             if (userInfo && userInfo.openid) {
+                // 使用多种请求头格式确保兼容性
                 requestHeader['X-User-Openid'] = userInfo.openid;
+                requestHeader['x-user-openid'] = userInfo.openid; // 小写版本
+                requestHeader['openid'] = userInfo.openid; // 简化版本
+
+                // 添加调试信息
+                console.log('🔑 添加用户标识到请求头:', userInfo.openid);
+            } else {
+                console.warn('⚠️ 未找到用户标识信息');
             }
 
             console.log(`🌐 发起请求: ${method} ${fullUrl}`, {
@@ -75,6 +115,12 @@ class RequestUtil {
                         resolve(res.data);
                     } else {
                         console.error(`❌ HTTP错误: ${res.statusCode}`, res);
+
+                        // 特殊处理401错误 - 可能是登录状态丢失
+                        if (res.statusCode === 401) {
+                            this.handleAuthError();
+                        }
+
                         reject(new Error(`HTTP ${res.statusCode}: ${res.data?.message || '请求失败'}`));
                     }
                 },
@@ -94,6 +140,88 @@ class RequestUtil {
                     }
                 }
             });
+        });
+    }
+
+    /**
+     * 增强的用户信息获取方法
+     * 解决安卓设备上的存储同步问题
+     */
+    getUserInfo() {
+        try {
+            // 首先尝试从全局状态获取
+            const app = getApp();
+            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
+                console.log('📱 从全局状态获取用户信息');
+                return app.globalData.userInfo;
+            }
+
+            // 然后尝试从本地存储获取
+            const userInfo = wx.getStorageSync('userInfo');
+            if (userInfo && userInfo.openid) {
+                console.log('💾 从本地存储获取用户信息');
+                // 同步到全局状态
+                if (app && app.globalData) {
+                    app.globalData.userInfo = userInfo;
+                }
+                return userInfo;
+            }
+
+            // 安卓设备特殊处理：可能存在存储延迟
+            if (this.isAndroid) {
+                console.log('📱 安卓设备：尝试延迟获取用户信息');
+                // 短暂延迟后再次尝试
+                setTimeout(() => {
+                    const retryUserInfo = wx.getStorageSync('userInfo');
+                    if (retryUserInfo && retryUserInfo.openid && app && app.globalData) {
+                        app.globalData.userInfo = retryUserInfo;
+                        console.log('✅ 安卓设备延迟获取成功');
+                    }
+                }, 100);
+            }
+
+            console.warn('⚠️ 未找到有效的用户信息');
+            return null;
+        } catch (error) {
+            console.error('❌ 获取用户信息失败:', error);
+            return null;
+        }
+    }
+
+    /**
+     * 处理认证错误
+     */
+    handleAuthError() {
+        console.warn('🔐 检测到认证错误，可能需要重新登录');
+
+        // 清除可能损坏的用户信息
+        try {
+            wx.removeStorageSync('userInfo');
+            const app = getApp();
+            if (app && app.globalData) {
+                app.globalData.userInfo = null;
+            }
+        } catch (error) {
+            console.error('清除用户信息失败:', error);
+        }
+
+        // 提示用户重新登录
+        wx.showModal({
+            title: '登录提示',
+            content: '登录状态已失效，请重新登录',
+            showCancel: false,
+            confirmText: '重新登录',
+            success: () => {
+                // 触发重新登录
+                try {
+                    const app = getApp();
+                    if (app && app.performLogin) {
+                        app.performLogin();
+                    }
+                } catch (error) {
+                    console.error('触发重新登录失败:', error);
+                }
+            }
         });
     }
 

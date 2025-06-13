@@ -7,27 +7,45 @@ const ResponseHelper = require('../utils/responseHelper');
  */
 async function authenticate(req, res, next) {
     try {
-        // 从请求头获取openid
-        const openid = req.headers['x-user-openid'] || req.headers.openid;
+        // 从请求头获取openid - 支持多种格式以兼容不同设备
+        const openid = req.headers['x-user-openid'] ||
+            req.headers['x-openid'] ||
+            req.headers['openid'] ||
+            req.headers['X-User-Openid'] ||
+            req.headers['X-Openid'] ||
+            req.headers['Openid'];
+
+        console.log('🔍 认证中间件 - 请求头:', {
+            'x-user-openid': req.headers['x-user-openid'],
+            'openid': req.headers['openid'],
+            'X-User-Openid': req.headers['X-User-Openid'],
+            'user-agent': req.headers['user-agent']
+        });
 
         if (!openid) {
+            console.warn('❌ 认证失败: 缺少用户身份信息');
             return ResponseHelper.unauthorized(res, '缺少用户身份信息');
         }
+
+        console.log('🔑 找到用户标识:', openid);
 
         // 查找用户
         let user = await User.findOne({ openid });
 
         if (!user) {
+            console.log('👤 用户不存在，创建新用户:', openid);
             // 如果用户不存在，创建新用户
             user = new User({
                 openid,
-                nickname: req.headers['x-nickname'] || req.headers.nickname || '',
+                nickname: req.headers['x-nickname'] || req.headers.nickname || '微信用户',
                 avatarUrl: req.headers['x-avatar-url'] || req.headers.avatarurl || '',
                 role: 'employee' // 默认为普通员工
             });
 
             await user.save();
-            console.log(`✅ 新用户注册: ${openid}`);
+            console.log(`✅ 新用户注册成功: ${openid}`);
+        } else {
+            console.log(`✅ 用户认证成功: ${openid}`);
         }
 
         // 将用户信息添加到请求对象
@@ -36,7 +54,7 @@ async function authenticate(req, res, next) {
 
         next();
     } catch (error) {
-        console.error('身份验证失败:', error);
+        console.error('❌ 身份验证失败:', error);
         return ResponseHelper.serverError(res, '身份验证失败', error.message);
     }
 }

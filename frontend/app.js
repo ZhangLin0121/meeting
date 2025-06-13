@@ -89,6 +89,17 @@ App({
      */
     async performLogin() {
         try {
+            // 检测设备类型并记录
+            const systemInfo = wx.getSystemInfoSync();
+            console.log('📱 设备信息:', {
+                platform: systemInfo.platform,
+                system: systemInfo.system,
+                brand: systemInfo.brand,
+                model: systemInfo.model,
+                version: systemInfo.version,
+                SDKVersion: systemInfo.SDKVersion
+            });
+
             // 使用新的微信认证工具
             const WechatAuth = require('./utils/auth.js');
 
@@ -107,6 +118,33 @@ App({
             if (userInfo && userInfo.openid) {
                 this.globalData.userInfo = userInfo;
                 console.log('✅ 微信登录完成，openid:', userInfo.openid);
+
+                // 安卓设备额外验证
+                if (systemInfo.platform === 'android') {
+                    console.log('📱 安卓设备：验证登录状态...');
+                    setTimeout(() => {
+                        const savedInfo = wx.getStorageSync('userInfo');
+                        if (!savedInfo || !savedInfo.openid) {
+                            console.error('❌ 安卓设备：用户信息保存验证失败');
+                            wx.showModal({
+                                title: '登录提示',
+                                content: '检测到登录状态保存异常，建议重启小程序',
+                                showCancel: true,
+                                cancelText: '忽略',
+                                confirmText: '重启',
+                                success: (res) => {
+                                    if (res.confirm) {
+                                        wx.reLaunch({
+                                            url: '/pages/roomList/roomList'
+                                        });
+                                    }
+                                }
+                            });
+                        } else {
+                            console.log('✅ 安卓设备：登录状态验证成功');
+                        }
+                    }, 1000);
+                }
 
                 // 显示登录成功提示
                 setTimeout(() => {
@@ -130,6 +168,8 @@ App({
                     errorMessage = '网络连接失败，请检查网络';
                 } else if (error.message.includes('invalid code')) {
                     errorMessage = '微信授权失败，请重新尝试';
+                } else if (error.message.includes('保存失败')) {
+                    errorMessage = '登录信息保存失败，请重试或重启小程序';
                 } else {
                     errorMessage = error.message;
                 }
