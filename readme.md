@@ -136,12 +136,57 @@ curl https://www.cacophonyem.me/meeting/api/user/wechat-login \
 
 **配置完微信后台域名后，您的小程序体验版就可以正常登录了！**
 
+### 🧠 功能5：用户联系人信息自动记忆功能 (已完成)
+**需求背景**: 用户每次预约都需要重新填写联系人姓名和电话，体验不够友好
+**功能特性**: 
+- **智能记忆**: 系统自动记住用户首次填写的联系人信息，存储在数据库中
+- **自动填入**: 用户下次预约时，联系人信息会自动填入表单，无需重复输入
+- **智能更新**: 如果用户修改了联系人信息，系统会自动检测变化并更新数据库记录
+- **透明体验**: 整个过程对用户透明，不影响正常的预约流程
+
+**实现细节**:
+- **前端**: 页面初始化时自动获取用户历史联系人信息并填入表单
+- **后端**: 预约提交时智能检测联系人信息变化并自动更新用户记录
+- **数据库**: 利用现有User模型的contactName和contactPhone字段
+- **API**: 使用现有的 `/api/user/profile` 和 `/api/user/contact` 接口
+
+**技术实现**:
+```javascript
+// 前端：自动获取并填入联系人信息
+async fetchUserContactInfo() {
+    const result = await this.requestAPI('GET', '/api/user/profile');
+    if (result.success && result.data.contactName) {
+        this.setData({
+            'bookingForm.contactName': result.data.contactName,
+            'bookingForm.contactPhone': result.data.contactPhone
+        });
+    }
+}
+
+// 后端：智能更新联系人信息
+if (user.contactName !== contactName || user.contactPhone !== contactPhone) {
+    user.contactName = contactName;
+    user.contactPhone = contactPhone;
+    await user.save();
+}
+```
+
+**用户体验优化**:
+- ✅ 首次用户正常填写联系人信息
+- ✅ 老用户自动填入历史信息，节省时间
+- ✅ 信息变更时自动更新，保持同步
+- ✅ 完全向后兼容，不影响现有功能
+
+**实现时间**: 2025-06-12
+**状态**: ✅ 已完成并部署
+
 ## 核心功能
 
 ### 用户功能
 - 🔐 **用户认证**: 安全的微信小程序登录系统
 - 📋 **会议室浏览**: 查看所有可用会议室列表和详细信息
 - 📅 **在线预约**: 选择时间段和会议室进行预约
+- 🧠 **智能记忆**: 自动记忆用户的联系人信息，下次预约时自动填入
 - 📱 **预约管理**: 查看、修改、取消个人预约记录
 - 🔍 **实时查询**: 实时查看会议室占用状态
 
