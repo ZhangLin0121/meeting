@@ -309,6 +309,38 @@ page {
     margin-bottom: 16px;
 }
 
+
+/* 时段分组样式 */
+
+.time-period-section {
+    margin-bottom: 20px;
+}
+
+.time-period-section:last-of-type {
+    margin-bottom: 16px;
+}
+
+.period-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.period-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+}
+
+.period-subtitle {
+    font-size: 12px;
+    color: #666666;
+    font-weight: 400;
+}
+
 .time-slots-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

@@ -95,15 +95,44 @@
       <!-- 时间段选择网格 -->
       <view class="time-slots-container">
         <text class="time-slots-title">选择时间段</text>
-        <view class="time-slots-grid">
-          <view 
-            wx:for="{{timeSlots}}" 
-            wx:key="index"
-            class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
-            data-index="{{index}}"
-            bindtap="onTimeSlotTap"
-          >
-            <text class="time-slot-text">{{item.time}}</text>
+        
+        <!-- 上午时段 -->
+        <view class="time-period-section">
+          <view class="period-header">
+            <text class="period-title">上午时段</text>
+            <text class="period-subtitle">08:30 - 12:30</text>
+          </view>
+          <view class="time-slots-grid">
+            <view 
+              wx:for="{{timeSlots}}" 
+              wx:key="index"
+              wx:if="{{item.period === 'morning'}}"
+              class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
+              data-index="{{index}}"
+              bindtap="onTimeSlotTap"
+            >
+              <text class="time-slot-text">{{item.time}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 下午时段 -->
+        <view class="time-period-section">
+          <view class="period-header">
+            <text class="period-title">下午时段</text>
+            <text class="period-subtitle">14:30 - 18:00</text>
+          </view>
+          <view class="time-slots-grid">
+            <view 
+              wx:for="{{timeSlots}}" 
+              wx:key="index"
+              wx:if="{{item.period === 'afternoon'}}"
+              class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
+              data-index="{{index}}"
+              bindtap="onTimeSlotTap"
+            >
+              <text class="time-slot-text">{{item.time}}</text>
+            </view>
           </view>
         </view>
         

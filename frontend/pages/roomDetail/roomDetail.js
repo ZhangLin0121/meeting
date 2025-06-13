@@ -209,7 +209,7 @@ Page({
     initializeDates() {
         const today = new Date();
         const maxDate = new Date(today);
-        maxDate.setDate(today.getDate() + 3); // 最多可预约未来3天
+        maxDate.setDate(today.getDate() + 30); // 最多可预约未来30天
 
         this.setData({
             selectedDate: this.formatDate(today),
@@ -226,6 +226,15 @@ Page({
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    },
+
+    /**
+     * 检查日期是否为周末
+     */
+    isWeekend(dateString) {
+        const date = new Date(dateString);
+        const dayOfWeek = date.getDay();
+        return dayOfWeek === 0 || dayOfWeek === 6; // 0是周日，6是周六
     },
 
     /**
@@ -329,26 +338,27 @@ Page({
     },
 
     /**
-     * 生成时间段数组 (08:30-12:00 和 14:30-17:30，每30分钟一个时间段)
+     * 生成时间段数组 (08:30-12:30 和 14:30-18:00，每30分钟一个时间段)
      */
     generateTimeSlotsArray() {
         const timeSlots = [];
         let index = 0;
 
-        // 上午时段 08:30-12:00
+        // 上午时段 08:30-12:30 (包含12:00和12:30)
         const morningStart = { hour: 8, minute: 30 };
-        const morningEnd = { hour: 12, minute: 0 };
+        const morningEnd = { hour: 12, minute: 30 };
 
         let currentHour = morningStart.hour;
         let currentMinute = morningStart.minute;
 
-        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute < morningEnd.minute)) {
+        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute <= morningEnd.minute)) {
             const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
             timeSlots.push({
                 time: timeStr,
                 status: 'available',
                 isSelected: false,
-                index: index++
+                index: index++,
+                period: 'morning' // 添加时段标识
             });
 
             // 增加30分钟
@@ -359,20 +369,21 @@ Page({
             }
         }
 
-        // 下午时段 14:30-17:30
+        // 下午时段 14:30-18:00 (包含17:30)
         const afternoonStart = { hour: 14, minute: 30 };
-        const afternoonEnd = { hour: 17, minute: 30 };
+        const afternoonEnd = { hour: 18, minute: 0 };
 
         currentHour = afternoonStart.hour;
         currentMinute = afternoonStart.minute;
 
-        while (currentHour < afternoonEnd.hour || (currentHour === afternoonEnd.hour && currentMinute < afternoonEnd.minute)) {
+        while (currentHour < afternoonEnd.hour || (currentHour === afternoonEnd.hour && currentMinute <= afternoonEnd.minute)) {
             const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
             timeSlots.push({
                 time: timeStr,
                 status: 'available',
                 isSelected: false,
-                index: index++
+                index: index++,
+                period: 'afternoon' // 添加时段标识
             });
 
             // 增加30分钟
@@ -391,6 +402,17 @@ Page({
      */
     bindDateChange(e) {
         const selectedDate = e.detail.value;
+
+        // 检查是否选择了周末
+        if (this.isWeekend(selectedDate)) {
+            wx.showToast({
+                title: '周末不可预约，请选择工作日',
+                icon: 'none',
+                duration: 2000
+            });
+            return;
+        }
+
         this.setData({
             selectedDate: selectedDate
         });
@@ -489,11 +511,11 @@ Page({
     validateTimeRange(startIndex, endIndex) {
         const timeSlots = this.data.timeSlots;
 
-        // 检查是否跨越午休时间
-        const morningEndIndex = timeSlots.findIndex(slot => slot.time === '12:00');
+        // 检查是否跨越午休时间 (12:30之后到14:30之前是午休时间)
+        const morningEndIndex = timeSlots.findIndex(slot => slot.time === '12:30');
         const afternoonStartIndex = timeSlots.findIndex(slot => slot.time === '14:30');
 
-        if (startIndex < morningEndIndex && endIndex >= afternoonStartIndex) {
+        if (startIndex <= morningEndIndex && endIndex >= afternoonStartIndex) {
             return {
                 isValid: false,
                 message: '不能跨越午休时间预约'
