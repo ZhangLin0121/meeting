@@ -141,11 +141,29 @@ class BookingController {
 
             await booking.save();
 
-            // 更新用户联系信息（如果为空）
+            // 更新用户联系信息（如果有变化或为空）
+            let shouldUpdateUser = false;
+
             if (!user.contactName || !user.contactPhone) {
+                // 用户首次填写联系人信息
+                console.log('📝 首次设置用户联系人信息');
+                shouldUpdateUser = true;
+            } else if (user.contactName !== contactName || user.contactPhone !== contactPhone) {
+                // 用户修改了联系人信息
+                console.log('📝 更新用户联系人信息:', {
+                    oldName: user.contactName,
+                    newName: contactName,
+                    oldPhone: user.contactPhone ? user.contactPhone.substring(0, 3) + '****' + user.contactPhone.substring(7) : '',
+                    newPhone: contactPhone.substring(0, 3) + '****' + contactPhone.substring(7)
+                });
+                shouldUpdateUser = true;
+            }
+
+            if (shouldUpdateUser) {
                 user.contactName = contactName;
                 user.contactPhone = contactPhone;
                 await user.save();
+                console.log('✅ 用户联系人信息更新成功');
             }
 
             return ResponseHelper.success(res, {

@@ -127,10 +127,19 @@ Page({
     /**
      * 初始化页面数据
      */
-    initializePage() {
+    async initializePage() {
         if (this.data.roomId) {
             console.log('✅ 开始获取会议室详情:', this.data.roomId);
-            this.fetchRoomDetails();
+
+            // 并行获取会议室详情和用户联系人信息
+            await Promise.all([
+                this.fetchRoomDetails(),
+                this.fetchUserContactInfo().catch(error => {
+                    console.warn('⚠️ 获取用户联系人信息失败:', error);
+                    // 不影响页面正常加载
+                })
+            ]);
+
             this.initializeDates();
         } else {
             console.error('❌ 房间ID缺失，无法初始化页面');
@@ -174,6 +183,45 @@ Page({
         } catch (error) {
             console.error('❌ 获取用户openid失败:', error);
             // 不影响页面正常加载，只是没有用户信息
+        }
+    },
+
+    /**
+     * 获取用户联系人信息
+     */
+    async fetchUserContactInfo() {
+        try {
+            if (!this.data.userOpenId) {
+                console.log('⚠️ 用户未登录，跳过获取联系人信息');
+                return;
+            }
+
+            console.log('👤 开始获取用户联系人信息...');
+
+            const result = await this.requestAPI('GET', '/api/user/profile');
+
+            if (result.success && result.data) {
+                const { contactName, contactPhone } = result.data;
+
+                if (contactName && contactPhone) {
+                    console.log('✅ 获取用户联系人信息成功:', {
+                        contactName,
+                        contactPhone: contactPhone.substring(0, 3) + '****' + contactPhone.substring(7)
+                    });
+
+                    // 存储用户的联系人信息，但不立即填入表单
+                    // 表单填入会在显示预订弹窗时进行
+                    this.setData({
+                        'bookingForm.contactName': contactName,
+                        'bookingForm.contactPhone': contactPhone
+                    });
+                } else {
+                    console.log('ℹ️ 用户尚未设置联系人信息');
+                }
+            }
+        } catch (error) {
+            console.error('❌ 获取用户联系人信息失败:', error);
+            // 不抛出错误，避免影响页面正常加载
         }
     },
 
@@ -767,6 +815,9 @@ Page({
                     icon: 'success'
                 });
 
+                // 检查并更新用户联系人信息
+                await this.updateUserContactInfo(contactName.trim(), contactPhone.trim());
+
                 // 关闭弹窗
                 this.hideBookingModal();
 
@@ -852,5 +903,47 @@ Page({
 
             wx.request(requestConfig);
         });
+    },
+
+    /**
+     * 更新用户联系人信息
+     */
+    async updateUserContactInfo(contactName, contactPhone) {
+        try {
+            // 检查是否需要更新（联系人信息有变化）
+            const currentContactName = this.data.bookingForm.contactName;
+            const currentContactPhone = this.data.bookingForm.contactPhone;
+
+            if (currentContactName === contactName && currentContactPhone === contactPhone) {
+                console.log('ℹ️ 联系人信息无变化，跳过更新');
+                return;
+            }
+
+            console.log('📝 更新用户联系人信息:', {
+                contactName,
+                contactPhone: contactPhone.substring(0, 3) + '****' + contactPhone.substring(7)
+            });
+
+            const result = await this.requestAPI('PUT', '/api/user/contact', {
+                contactName: contactName,
+                contactPhone: contactPhone
+            });
+
+            if (result.success) {
+                console.log('✅ 用户联系人信息更新成功');
+
+                // 更新本地缓存的联系人信息
+                this.setData({
+                    'bookingForm.contactName': contactName,
+                    'bookingForm.contactPhone': contactPhone
+                });
+            } else {
+                throw new Error(result.message || '更新用户联系人信息失败');
+            }
+        } catch (error) {
+            console.error('❌ 更新用户联系人信息失败:', error);
+            // 不显示错误提示，避免干扰用户体验
+            // 联系人信息更新失败不影响预订流程
+        }
     }
 });
