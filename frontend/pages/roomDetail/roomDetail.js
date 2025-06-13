@@ -338,20 +338,20 @@ Page({
     },
 
     /**
-     * 生成时间段数组 (08:30-12:30 和 14:30-18:00，每30分钟一个时间段)
+     * 生成时间段数组 (08:30-12:00 和 14:30-17:30，每30分钟一个时间段)
      */
     generateTimeSlotsArray() {
         const timeSlots = [];
         let index = 0;
 
-        // 上午时段 08:30-12:30 (包含12:00和12:30)
+        // 上午时段 08:30-12:00
         const morningStart = { hour: 8, minute: 30 };
-        const morningEnd = { hour: 12, minute: 30 };
+        const morningEnd = { hour: 12, minute: 0 };
 
         let currentHour = morningStart.hour;
         let currentMinute = morningStart.minute;
 
-        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute <= morningEnd.minute)) {
+        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute < morningEnd.minute)) {
             const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
             timeSlots.push({
                 time: timeStr,
@@ -369,9 +369,9 @@ Page({
             }
         }
 
-        // 下午时段 14:30-18:00 (包含17:30)
+        // 下午时段 14:30-17:30
         const afternoonStart = { hour: 14, minute: 30 };
-        const afternoonEnd = { hour: 18, minute: 0 };
+        const afternoonEnd = { hour: 17, minute: 30 };
 
         currentHour = afternoonStart.hour;
         currentMinute = afternoonStart.minute;
@@ -511,11 +511,11 @@ Page({
     validateTimeRange(startIndex, endIndex) {
         const timeSlots = this.data.timeSlots;
 
-        // 检查是否跨越午休时间 (12:30之后到14:30之前是午休时间)
-        const morningEndIndex = timeSlots.findIndex(slot => slot.time === '12:30');
+        // 检查是否跨越午休时间 (12:00之后到14:30之前是午休时间)
+        const morningEndIndex = timeSlots.findIndex(slot => slot.time === '12:00');
         const afternoonStartIndex = timeSlots.findIndex(slot => slot.time === '14:30');
 
-        if (startIndex <= morningEndIndex && endIndex >= afternoonStartIndex) {
+        if (startIndex < morningEndIndex && endIndex >= afternoonStartIndex) {
             return {
                 isValid: false,
                 message: '不能跨越午休时间预约'

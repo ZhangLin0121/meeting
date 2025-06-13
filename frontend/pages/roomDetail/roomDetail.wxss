@@ -229,7 +229,11 @@ page {
 .description-text {
     font-size: 14px;
     color: #666666;
-    line-height: 1.5;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    /* 保留换行符和空格 */
+    word-wrap: break-word;
+    /* 长单词自动换行 */
 }
 
 

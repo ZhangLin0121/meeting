@@ -100,7 +100,7 @@
         <view class="time-period-section">
           <view class="period-header">
             <text class="period-title">上午时段</text>
-            <text class="period-subtitle">08:30 - 12:30</text>
+            <text class="period-subtitle">08:30 - 12:00</text>
           </view>
           <view class="time-slots-grid">
             <view 
@@ -120,7 +120,7 @@
         <view class="time-period-section">
           <view class="period-header">
             <text class="period-title">下午时段</text>
-            <text class="period-subtitle">14:30 - 18:00</text>
+            <text class="period-subtitle">14:30 - 17:30</text>
           </view>
           <view class="time-slots-grid">
             <view 
