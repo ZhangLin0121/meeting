@@ -130,6 +130,15 @@ Page({
     onShow() {
         console.log('📱 页面显示，开始初始化...');
 
+        // 打印当前页面状态，帮助调试
+        console.log('🔍 当前页面状态:', {
+            userOpenId: this.data.userOpenId,
+            apiBaseUrl: this.data.apiBaseUrl,
+            loading: this.data.loading,
+            roomsCount: this.data.rooms.length,
+            isAdmin: this.data.isAdmin
+        });
+
         // 使用智能登录流程，确保用户已登录后再获取数据
         this.initializePageWithLogin();
     },
@@ -342,6 +351,14 @@ Page({
      * 获取会议室列表 - 增强版本，确保用户已登录
      */
     async fetchRooms() {
+        console.log('🏢 fetchRooms方法被调用');
+        console.log('🔍 当前状态检查:', {
+            userOpenId: this.data.userOpenId,
+            apiBaseUrl: this.data.apiBaseUrl,
+            hasUserOpenId: !!this.data.userOpenId,
+            userOpenIdLength: this.data.userOpenId ? this.data.userOpenId.length : 0
+        });
+
         // 检查页面是否有用户ID
         if (!this.data.userOpenId) {
             console.warn('⚠️ 页面用户ID未设置，跳过获取会议室列表');
@@ -353,10 +370,26 @@ Page({
         }
 
         this.setData({ loading: true });
+        console.log('⏳ 开始加载会议室列表，loading状态已设置为true');
 
         try {
-            console.log('🏢 开始获取会议室列表...', { userOpenId: this.data.userOpenId.substring(0, 8) + '...' });
-            const result = await request.get('/api/rooms');
+            console.log('🏢 开始获取会议室列表...', {
+                userOpenId: this.data.userOpenId.substring(0, 8) + '...',
+                fullUrl: `${this.data.apiBaseUrl}/api/rooms`
+            });
+
+            // 明确传递用户标识到请求头，确保API能正确识别用户
+            const requestOptions = {
+                header: {
+                    'X-User-Openid': this.data.userOpenId,
+                    'x-user-openid': this.data.userOpenId, // 小写版本
+                    'openid': this.data.userOpenId // 简化版本
+                }
+            };
+
+            console.log('🔑 请求配置:', requestOptions);
+
+            const result = await request.get('/api/rooms', {}, requestOptions);
 
             console.log('✅ 获取会议室列表成功:', result);
 
@@ -514,12 +547,16 @@ Page({
                 method: method,
                 header: {
                     'Content-Type': 'application/json',
-                    'X-User-Openid': this.data.userOpenId
+                    'X-User-Openid': this.data.userOpenId,
+                    'x-user-openid': this.data.userOpenId, // 小写版本  
+                    'openid': this.data.userOpenId // 简化版本
                 },
                 success: (res) => {
+                    console.log(`✅ requestAPI成功: ${method} ${url}`, res);
                     resolve(res.data);
                 },
                 fail: (error) => {
+                    console.error(`❌ requestAPI失败: ${method} ${url}`, error);
                     reject(error);
                 }
             };
@@ -527,6 +564,11 @@ Page({
             if (method === 'POST' || method === 'PUT') {
                 requestConfig.data = data;
             }
+
+            console.log(`🌐 requestAPI请求: ${method} ${url}`, {
+                header: requestConfig.header,
+                data: method === 'POST' || method === 'PUT' ? data : undefined
+            });
 
             wx.request(requestConfig);
         });
