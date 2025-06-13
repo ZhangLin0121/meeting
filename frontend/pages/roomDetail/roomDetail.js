@@ -228,10 +228,33 @@ Page({
     /**
      * 生命周期函数--监听页面显示
      */
-    onShow() {
+    async onShow() {
         if (this.data.roomId) {
             this.fetchRoomDetails();
-            this.fetchRoomAvailability(this.data.selectedDate);
+
+            // 确保selectedDate已初始化，如果没有则初始化日期
+            if (!this.data.selectedDate) {
+                console.log('⚠️ selectedDate未初始化，先初始化日期');
+                this.initializeDates();
+
+                // 等待setData完成
+                await new Promise(resolve => {
+                    wx.nextTick(() => {
+                        resolve();
+                    });
+                });
+            }
+
+            // 确保selectedDate有值后再获取可用性
+            if (this.data.selectedDate) {
+                this.fetchRoomAvailability(this.data.selectedDate);
+            } else {
+                // 如果还是没有，使用今天的日期作为默认值
+                const today = new Date();
+                const todayStr = this.formatDate(today);
+                console.log('🔧 使用今天日期作为默认值:', todayStr);
+                this.fetchRoomAvailability(todayStr);
+            }
         }
     },
 
@@ -349,7 +372,17 @@ Page({
      * 获取会议室指定日期的可用性
      */
     async fetchRoomAvailability(date) {
+        // 检查日期参数是否有效
+        if (!date || typeof date !== 'string' || date.trim() === '') {
+            console.error('❌ fetchRoomAvailability 接收到无效的日期参数:', date);
+            // 使用今天的日期作为默认值
+            const today = new Date();
+            date = this.formatDate(today);
+            console.log('🔧 使用今天日期作为默认值:', date);
+        }
+
         try {
+            console.log('🔍 获取会议室可用性，日期:', date);
             const result = await this.requestAPI('GET', `/api/rooms/${this.data.roomId}/availability?date=${date}`);
 
             if (result.success && result.data) {
