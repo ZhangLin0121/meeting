@@ -466,7 +466,7 @@ Page({
                     }
 
                     // 处理图片显示逻辑
-                    let displayImage = '/images/default_room.svg';
+                    let displayImage = '/images/default_room.png';
                     if (room.images && room.images.length > 0) {
                         // 构建完整的图片URL
                         const imageUrl = room.images[0];
@@ -485,7 +485,7 @@ Page({
                     return {
                         ...room,
                         status: 'available',
-                        displayImage: '/images/default_room.svg',
+                        displayImage: '/images/default_room.png',
                         imageLoading: false,
                         imageError: false
                     };

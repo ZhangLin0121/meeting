@@ -13,9 +13,9 @@ function createSVGIcon(svgContent, filename, targetDir) {
 
     // 这里我们将创建一个简单的HTML文件来展示图标，但实际项目中应该保存为PNG
     // 为了简化，我们直接创建SVG文件
-    const svgPath = path.join(targetDir, filename.replace('.png', '.svg'));
+    const svgPath = path.join(targetDir, filename.replace('.png', '.png'));
     fs.writeFileSync(svgPath, svgContent);
-    console.log(`✅ 创建SVG图标: ${filename.replace('.png', '.svg')}`);
+    console.log(`✅ 创建SVG图标: ${filename.replace('.png', '.png')}`);
 }
 
 // 创建简单的占位图片（使用SVG格式）
@@ -90,7 +90,7 @@ function createPlaceholderImages() {
 
     // 创建会议室图片（使用SVG绘制）
     const roomImages = [{
-            name: 'admin_meeting_room_1.svg',
+            name: 'admin_meeting_room_1.png',
             content: `
             <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="500" height="300" fill="#f5f5f5"/>
@@ -101,7 +101,7 @@ function createPlaceholderImages() {
             </svg>`
         },
         {
-            name: 'creative_room_1.svg',
+            name: 'creative_room_1.png',
             content: `
             <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="500" height="300" fill="#fff8e1"/>
@@ -111,7 +111,7 @@ function createPlaceholderImages() {
             </svg>`
         },
         {
-            name: 'large_conference_hall_1.svg',
+            name: 'large_conference_hall_1.png',
             content: `
             <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="500" height="300" fill="#e8f5e8"/>
@@ -121,7 +121,7 @@ function createPlaceholderImages() {
             </svg>`
         },
         {
-            name: 'small_meeting_room_1.svg',
+            name: 'small_meeting_room_1.png',
             content: `
             <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="500" height="300" fill="#fce4ec"/>
@@ -131,7 +131,7 @@ function createPlaceholderImages() {
             </svg>`
         },
         {
-            name: 'training_room_1.svg',
+            name: 'training_room_1.png',
             content: `
             <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="500" height="300" fill="#f3e5f5"/>
@@ -141,7 +141,7 @@ function createPlaceholderImages() {
             </svg>`
         },
         {
-            name: 'video_conference_room_1.svg',
+            name: 'video_conference_room_1.png',
             content: `
             <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="500" height="300" fill="#e0f2f1"/>
@@ -162,12 +162,12 @@ function createPlaceholderImages() {
     console.log('\n✅ 占位图片创建完成!');
     console.log('\n📋 创建的文件清单:');
     console.log('图标文件:');
-    console.log('  - search.svg (搜索图标)');
-    console.log('  - search-grey.svg (灰色搜索图标)');
-    console.log('  - filter.svg (筛选图标)');
-    console.log('  - empty.svg (空状态图标)');
-    console.log('  - admin.svg (管理员图标)');
-    console.log('  - default_room.svg (默认会议室图标)');
+    console.log('  - search.png (搜索图标)');
+    console.log('  - search-grey.png (灰色搜索图标)');
+    console.log('  - filter.png (筛选图标)');
+    console.log('  - empty.png (空状态图标)');
+    console.log('  - admin.png (管理员图标)');
+    console.log('  - default_room.png (默认会议室图标)');
     console.log('\n会议室图片:');
     roomImages.forEach(img => {
         console.log(`  - ${img.name}`);

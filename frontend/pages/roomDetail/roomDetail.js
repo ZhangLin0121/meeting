@@ -361,7 +361,7 @@ Page({
                 if (roomDetails.images && roomDetails.images.length > 0) {
                     roomDetails.displayImage = `${this.data.apiBaseUrl}${roomDetails.images[0]}`;
                 } else {
-                    roomDetails.displayImage = '/images/default_room.svg';
+                    roomDetails.displayImage = '/images/default_room.png';
                 }
 
                 this.setData({

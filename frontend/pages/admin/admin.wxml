@@ -5,7 +5,7 @@
     <view class="navbar-content">
       <view class="header-left">
         <view class="back-button" bindtap="goBackToRoomList">
-          <image class="back-icon" src="/images/icons/back.svg" mode="aspectFit"></image>
+          <image class="back-icon" src="/images/icons/back.png" mode="aspectFit"></image>
           <text class="back-text">列表</text>
         </view>
       </view>
@@ -63,10 +63,10 @@
           <!-- 悬浮操作按钮 -->
           <view class="room-actions-overlay">
             <view class="action-button-new edit" bindtap="editRoom" data-room-id="{{item.id}}">
-              <image class="action-icon-new" src="/images/icons/edit.svg" mode="aspectFit"></image>
+              <image class="action-icon-new" src="/images/icons/edit.png" mode="aspectFit"></image>
             </view>
             <view class="action-button-new delete" bindtap="deleteRoom" data-room-id="{{item.id}}" data-room-name="{{item.name}}">
-              <image class="action-icon-new" src="/images/icons/delete.svg" mode="aspectFit"></image>
+              <image class="action-icon-new" src="/images/icons/delete.png" mode="aspectFit"></image>
             </view>
           </view>
         </view>
@@ -111,13 +111,13 @@
 
     <!-- 会议室列表加载状态 -->
     <view wx:if="{{roomsLoading}}" class="loading-container">
-      <image class="loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
+      <image class="loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
       <text class="loading-text">加载中...</text>
     </view>
 
     <!-- 无会议室数据 -->
     <view wx:elif="{{!roomsLoading && rooms.length === 0}}" class="empty-container">
-      <image class="empty-icon" src="/images/icons/empty.svg" mode="aspectFit"></image>
+      <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
       <text class="empty-text">暂无会议室</text>
       <view class="add-first-room-button" bindtap="showAddRoomModal">
         <text class="add-first-text">添加第一个会议室</text>
@@ -138,7 +138,7 @@
         <view class="filter-item">
           <text class="filter-label">日期:</text>
           <text class="filter-value">{{filterDate || '全部'}}</text>
-          <image class="filter-arrow" src="/images/icons/arrow-down.svg" mode="aspectFit"></image>
+          <image class="filter-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
         </view>
       </picker>
       
@@ -152,7 +152,7 @@
         <view class="filter-item">
           <text class="filter-label">状态:</text>
           <text class="filter-value">{{statusOptions[filterStatusIndex].text}}</text>
-          <image class="filter-arrow" src="/images/icons/arrow-down.svg" mode="aspectFit"></image>
+          <image class="filter-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
         </view>
       </picker>
     </view>
@@ -204,13 +204,13 @@
 
     <!-- 预约记录加载状态 -->
     <view wx:if="{{bookingsLoading}}" class="loading-container">
-      <image class="loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
+      <image class="loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
       <text class="loading-text">加载中...</text>
     </view>
 
     <!-- 无预约记录 -->
     <view wx:elif="{{!bookingsLoading && bookings.length === 0}}" class="empty-container">
-      <image class="empty-icon" src="/images/icons/empty.svg" mode="aspectFit"></image>
+      <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
       <text class="empty-text">暂无预约记录</text>
     </view>
   </view>
@@ -221,7 +221,7 @@
       <view class="modal-header">
         <text class="modal-title">{{isEditMode ? '编辑会议室' : '添加会议室'}}</text>
         <view class="modal-close" bindtap="hideRoomModal">
-          <image class="close-icon" src="/images/icons/close.svg" mode="aspectFit"></image>
+          <image class="close-icon" src="/images/icons/close.png" mode="aspectFit"></image>
         </view>
       </view>
       
@@ -291,7 +291,7 @@
               ></image>
               <view class="image-overlay">
                 <view class="overlay-content">
-                  <image class="overlay-icon" src="/images/icons/camera.svg" mode="aspectFit"></image>
+                  <image class="overlay-icon" src="/images/icons/camera.png" mode="aspectFit"></image>
                   <text class="overlay-text">点击更换图片</text>
                 </view>
               </view>
@@ -309,7 +309,7 @@
               ></image>
               <view class="image-overlay">
                 <view class="overlay-content">
-                  <image class="overlay-icon" src="/images/icons/camera.svg" mode="aspectFit"></image>
+                  <image class="overlay-icon" src="/images/icons/camera.png" mode="aspectFit"></image>
                   <text class="overlay-text">点击更换图片</text>
                 </view>
               </view>
@@ -317,7 +317,7 @@
             
             <!-- 选择图片按钮 -->
             <view wx:else class="choose-image-button" bindtap="chooseImage">
-              <image class="upload-icon" src="/images/icons/add.svg" mode="aspectFit"></image>
+              <image class="upload-icon" src="/images/icons/add.png" mode="aspectFit"></image>
               <text class="upload-text">选择图片</text>
               <text class="upload-hint">支持 JPG、PNG、GIF、SVG 格式，最大5MB</text>
             </view>
@@ -350,6 +350,6 @@
 
   <!-- 浮动添加按钮 -->
   <view wx:if="{{currentTab === 0}}" class="floating-add-button" bindtap="showAddRoomModal">
-    <image class="floating-add-icon" src="/images/icons/add.svg" mode="aspectFit"></image>
+    <image class="floating-add-icon" src="/images/icons/add.png" mode="aspectFit"></image>
   </view>
 </view> 

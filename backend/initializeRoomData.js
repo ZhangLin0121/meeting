@@ -16,7 +16,7 @@ const roomsData = [{
         equipment: ['投屏设备', '麦克风', '音响系统', '白板', '空调', '视频会议设备'],
         description: '行政办公区主要会议室，适合管理层会议、项目讨论等。配备完善的音视频设备，支持远程会议。',
         images: [
-            '/uploads/rooms/admin_meeting_room_1.svg'
+            '/uploads/rooms/admin_meeting_room_1.png'
         ]
     },
     {
@@ -27,7 +27,7 @@ const roomsData = [{
         equipment: ['白板', '电子白板', '投屏设备', '空调', '网络接口/Wi-Fi'],
         description: '专为创意团队设计的讨论空间，配备电子白板和多种协作工具，激发团队创新思维。',
         images: [
-            '/uploads/rooms/creative_room_1.svg'
+            '/uploads/rooms/creative_room_1.png'
         ]
     },
     {
@@ -38,7 +38,7 @@ const roomsData = [{
         equipment: ['投屏设备', '麦克风', '音响系统', '视频会议设备', '空调', '电话'],
         description: '公司最大的会议空间，适合全员大会、重要客户会议、培训讲座等大型活动。',
         images: [
-            '/uploads/rooms/large_conference_hall_1.svg'
+            '/uploads/rooms/large_conference_hall_1.png'
         ]
     },
     {
@@ -49,7 +49,7 @@ const roomsData = [{
         equipment: ['投屏设备', '空调', '网络接口/Wi-Fi'],
         description: '私密舒适的小型会议空间，适合一对一面谈、小组讨论、客户洽谈等。',
         images: [
-            '/uploads/rooms/small_meeting_room_1.svg'
+            '/uploads/rooms/small_meeting_room_1.png'
         ]
     },
     {
@@ -60,7 +60,7 @@ const roomsData = [{
         equipment: ['投屏设备', '麦克风', '音响系统', '白板', '空调', '网络接口/Wi-Fi'],
         description: '专业的培训环境，配备教学所需的各种设备，适合内部培训、讲座、工作坊等。',
         images: [
-            '/uploads/rooms/training_room_1.svg'
+            '/uploads/rooms/training_room_1.png'
         ]
     },
     {
@@ -71,7 +71,7 @@ const roomsData = [{
         equipment: ['视频会议设备', '投屏设备', '麦克风', '音响系统', '空调', '网络接口/Wi-Fi'],
         description: '专业的远程会议环境，配备高清摄像头和专业音响设备，确保远程沟通效果。',
         images: [
-            '/uploads/rooms/video_conference_room_1.svg'
+            '/uploads/rooms/video_conference_room_1.png'
         ]
     }
 ];

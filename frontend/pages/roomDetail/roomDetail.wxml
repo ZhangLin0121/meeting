@@ -4,7 +4,7 @@
   <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
     <view class="navbar-content">
       <view class="navbar-left" bindtap="goBack">
-        <image class="back-icon" src="/images/icons/back.svg" mode="aspectFit"></image>
+        <image class="back-icon" src="/images/icons/back.png" mode="aspectFit"></image>
       </view>
       <text class="navbar-title">会议室详情</text>
       <view class="navbar-right"></view>
@@ -30,13 +30,13 @@
         <view wx:else class="room-image-placeholder">
           <image 
             class="room-default-image" 
-            src="/images/default_room.svg" 
+            src="/images/default_room.png" 
             mode="aspectFit"
           ></image>
         </view>
         <!-- 加载状态 -->
         <view wx:if="{{imageLoading}}" class="image-loading-overlay">
-          <image class="image-loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
+          <image class="image-loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
         </view>
       </view>
 
@@ -87,7 +87,7 @@
         >
           <view class="picker-display">
             <text class="picker-text">{{selectedDateWithWeekday}}</text>
-            <image class="picker-arrow" src="/images/icons/arrow-down.svg" mode="aspectFit"></image>
+            <image class="picker-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
           </view>
         </picker>
       </view>
@@ -169,13 +169,13 @@
 
   <!-- 页面加载状态 -->
   <view wx:if="{{loading}}" class="loading-overlay">
-    <image class="loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
+    <image class="loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
     <text class="loading-text">加载中，请稍候...</text>
   </view>
 
   <!-- 无数据状态 -->
   <view wx:elif="{{!loading && !roomDetails.id}}" class="no-data-placeholder">
-    <image class="empty-icon" src="/images/icons/empty.svg" mode="aspectFit"></image>
+    <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
     <text class="empty-text">未找到会议室信息</text>
     <text class="empty-subtext">请检查会议室ID是否正确</text>
     <view class="back-button" bindtap="goBack">
@@ -190,7 +190,7 @@
       <view class="modal-header">
         <text class="modal-title">填写预约信息</text>
         <view class="modal-close" bindtap="hideBookingModal">
-          <image class="close-icon" src="/images/icons/close.svg" mode="aspectFit"></image>
+          <image class="close-icon" src="/images/icons/close.png" mode="aspectFit"></image>
         </view>
       </view>
       

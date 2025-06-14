@@ -90,7 +90,26 @@
   - iOS颜色系统
   - 颜色格式修复（hex格式）
 
-#### 5. 设计特性实现
+#### 5. SVG到PNG图标转换
+- **问题**: 项目中使用了多个SVG图标文件，可能存在兼容性问题
+- **解决方案**:
+  - 将所有SVG图标转换为PNG格式
+  - 更新所有代码中的文件引用（.svg → .png）
+  - 基于现有的高质量PNG图标创建新图标
+  - 删除原始SVG文件，减少项目体积
+- **转换的文件**:
+  - `frontend/images/icons/` 目录下的所有图标
+  - `frontend/images/loading.svg` → `loading.png`
+  - `frontend/images/default_room.svg` → `default_room.png`
+- **代码更新**:
+  - `frontend/pages/roomDetail/roomDetail.wxml`
+  - `frontend/pages/roomDetail/roomDetail.js`
+  - `frontend/pages/admin/admin.wxml`
+  - `frontend/pages/roomList/roomList.js`
+  - `backend/createPlaceholderImages.js`
+  - `backend/initializeRoomData.js`
+
+#### 6. 设计特性实现
 
 ##### SF Symbols图标系统
 - 使用Unicode字符实现SF Symbols

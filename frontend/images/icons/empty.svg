@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="40" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="5,5"/>
-  <circle cx="40" cy="40" r="2" fill="#ccc"/>
-  <circle cx="60" cy="40" r="2" fill="#ccc"/>
-  <path d="M35 60 Q50 70 65 60" stroke="#ccc" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <text x="50" y="85" text-anchor="middle" font-family="Arial" font-size="8" fill="#999">暂无数据</text>
-</svg>
