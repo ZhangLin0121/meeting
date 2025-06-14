@@ -105,9 +105,25 @@ class RoomController {
             const { id } = req.params;
             const { date } = req.query; // 可选的日期参数，默认为今天
 
+            console.log('🔍 获取会议室详情请求:', {
+                id: id,
+                idType: typeof id,
+                idLength: id ? id.length : 0,
+                date: date,
+                headers: req.headers['x-user-openid'] || req.headers['X-User-Openid']
+            });
+
             // 从数据库获取会议室数据
             const room = await ConferenceRoom.findById(id);
+
+            console.log('🏢 数据库查询结果:', {
+                found: !!room,
+                roomId: room ? room._id : null,
+                roomName: room ? room.name : null
+            });
+
             if (!room) {
+                console.log('❌ 会议室不存在，ID:', id);
                 return ResponseHelper.notFound(res, '会议室不存在');
             }
 
@@ -116,16 +132,16 @@ class RoomController {
             const startOfDay = TimeHelper.getStartOfDay(queryDate);
             const endOfDay = TimeHelper.getEndOfDay(queryDate);
 
-            // 检查是否为工作日
-            if (!TimeHelper.isWorkday(queryDate)) {
-                return ResponseHelper.success(res, {
-                    ...room.toJSON(),
-                    queryDate: TimeHelper.formatDate(queryDate),
-                    isWorkday: false,
-                    timeSlots: [],
-                    message: '非工作日，会议室不开放'
-                }, '获取会议室详情成功');
-            }
+            // 检查是否为工作日 - 现已开放周末预约，所以注释掉工作日限制
+            // if (!TimeHelper.isWorkday(queryDate)) {
+            //     return ResponseHelper.success(res, {
+            //         ...room.toJSON(),
+            //         queryDate: TimeHelper.formatDate(queryDate),
+            //         isWorkday: false,
+            //         timeSlots: [],
+            //         message: '非工作日，会议室不开放'
+            //     }, '获取会议室详情成功');
+            // }
 
             // 获取该会议室在指定日期的所有预约
             const bookings = await Booking.find({
@@ -165,7 +181,7 @@ class RoomController {
                 description: room.description,
                 images: images, // 带时间戳的图片URL
                 queryDate: TimeHelper.formatDate(queryDate),
-                isWorkday: true,
+                isWorkday: TimeHelper.isWorkday(queryDate), // 保留工作日标识，但不限制预约
                 timeSlots,
                 bookings: bookings.map(booking => ({
                     id: booking._id,

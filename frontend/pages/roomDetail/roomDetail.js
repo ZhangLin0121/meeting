@@ -336,11 +336,28 @@ Page({
         try {
             this.setData({ imageLoading: true });
 
+            console.log('🔍 开始获取会议室详情:', {
+                roomId: this.data.roomId,
+                apiBaseUrl: this.data.apiBaseUrl,
+                fullUrl: `${this.data.apiBaseUrl}/api/rooms/${this.data.roomId}`
+            });
+
             const result = await this.requestAPI('GET', `/api/rooms/${this.data.roomId}`);
+
+            console.log('📡 会议室详情API响应:', result);
 
             if (result.success && result.data) {
                 // 处理图片路径
                 const roomDetails = result.data;
+
+                console.log('🏢 收到的会议室详情数据:', roomDetails);
+                console.log('🆔 会议室ID字段检查:', {
+                    id: roomDetails.id,
+                    roomId: roomDetails.roomId,
+                    _id: roomDetails._id,
+                    name: roomDetails.name
+                });
+
                 if (roomDetails.images && roomDetails.images.length > 0) {
                     roomDetails.displayImage = `${this.data.apiBaseUrl}${roomDetails.images[0]}`;
                 } else {
@@ -351,11 +368,24 @@ Page({
                     roomDetails: roomDetails,
                     loading: false
                 });
+
+                console.log('✅ 会议室详情设置完成:', {
+                    hasId: !!roomDetails.id,
+                    name: roomDetails.name,
+                    displayImage: roomDetails.displayImage
+                });
             } else {
+                console.error('❌ API返回格式错误:', result);
                 throw new Error(result.message || '获取会议室详情失败');
             }
         } catch (error) {
-            console.error('获取会议室详情失败:', error);
+            console.error('❌ 获取会议室详情失败:', error);
+            console.error('❌ 错误详情:', {
+                message: error.message,
+                roomId: this.data.roomId,
+                apiBaseUrl: this.data.apiBaseUrl
+            });
+
             this.setData({
                 loading: false,
                 roomDetails: null
