@@ -145,11 +145,4 @@
     </scroll-view>
   </view>
 
-  <!-- 管理员浮动按钮 -->
-  <view wx:if="{{isAdmin}}" class="floating-admin-button" bindtap="goToAdminPanel">
-    <text class="admin-icon">􀢎</text>
-    <view class="admin-badge" wx:if="{{hasAdminNotifications}}">
-      <text class="badge-count">!</text>
-    </view>
-  </view>
 </view> 

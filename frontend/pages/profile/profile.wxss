@@ -55,25 +55,33 @@
 
 .user-profile-card {
     background: #ffffff;
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 20px;
+    padding: 32px 24px;
     margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border: 0.5px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.user-profile-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 }
 
 .profile-header {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
 }
 
 .user-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 40px;
+    width: 90px;
+    height: 90px;
+    border-radius: 45px;
     overflow: hidden;
     position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .avatar-image {
@@ -92,20 +100,54 @@
 
 .avatar-initial {
     color: #ffffff;
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 600;
+}
+
+.edit-avatar-overlay {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 28px;
+    height: 28px;
+    background: #007AFF;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-avatar-overlay .sf-symbol {
+    color: #ffffff;
+    font-size: 14px;
 }
 
 .user-info {
     flex: 1;
 }
 
+.user-name-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
 .user-name {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 600;
     color: #1c1c1e;
-    margin-bottom: 8px;
-    display: block;
+}
+
+.edit-indicator {
+    opacity: 0.6;
+}
+
+.edit-indicator .sf-symbol {
+    font-size: 16px;
+    color: #8E8E93;
 }
 
 .role-chip {
@@ -116,6 +158,7 @@
     border-radius: 12px;
     font-size: 14px;
     font-weight: 500;
+    margin-bottom: 8px;
 }
 
 .admin-role {
@@ -130,6 +173,16 @@
 
 .role-text {
     font-size: 14px;
+}
+
+.contact-info {
+    margin-top: 4px;
+}
+
+.contact-text {
+    font-size: 15px;
+    color: #8E8E93;
+    line-height: 1.4;
 }
 
 

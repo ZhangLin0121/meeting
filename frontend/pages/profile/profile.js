@@ -5,11 +5,13 @@ Page({
     data: {
         userInfo: {}, // 用户信息
         upcomingCount: 0, // 即将开始的预约数量
+        totalBookings: 0, // 总预约数量
         loading: false, // 加载状态
-        showContactEdit: false, // 是否显示联系信息编辑弹窗
-        contactForm: { // 联系信息表单
-            name: '',
-            phone: ''
+        showProfileEdit: false, // 是否显示个人信息编辑弹窗
+        profileForm: { // 个人信息表单
+            nickname: '',
+            contactName: '',
+            contactPhone: ''
         },
         statusBarHeight: 0 // 状态栏高度
     },
@@ -87,8 +89,11 @@ Page({
         try {
             const result = await request.get('/api/user/bookings');
             if (result.success && result.data) {
+                const upcomingCount = result.data.upcomingBookings.length;
+                const pastCount = result.data.pastBookings.length;
                 this.setData({
-                    upcomingCount: result.data.upcomingBookings.length
+                    upcomingCount: upcomingCount,
+                    totalBookings: upcomingCount + pastCount
                 });
             }
         } catch (error) {
@@ -117,24 +122,35 @@ Page({
     },
 
     /**
-     * 显示联系信息编辑弹窗
+     * 编辑个人信息
      */
-    showContactModal() {
+    editProfile() {
         this.setData({
-            showContactEdit: true,
-            contactForm: {
-                name: this.data.userInfo.contactName || '',
-                phone: this.data.userInfo.contactPhone || ''
+            showProfileEdit: true,
+            profileForm: {
+                nickname: this.data.userInfo.nickname || '',
+                contactName: this.data.userInfo.contactName || '',
+                contactPhone: this.data.userInfo.contactPhone || ''
             }
         });
     },
 
     /**
-     * 隐藏联系信息编辑弹窗
+     * 隐藏个人信息编辑弹窗
      */
-    hideContactModal() {
+    hideProfileModal() {
         this.setData({
-            showContactEdit: false
+            showProfileEdit: false
+        });
+    },
+
+    /**
+     * 显示设置页面
+     */
+    showSettings() {
+        wx.showToast({
+            title: '设置功能开发中',
+            icon: 'none'
         });
     },
 
@@ -146,11 +162,20 @@ Page({
     },
 
     /**
+     * 昵称输入
+     */
+    onNicknameInput(e) {
+        this.setData({
+            'profileForm.nickname': e.detail.value
+        });
+    },
+
+    /**
      * 联系人姓名输入
      */
     onContactNameInput(e) {
         this.setData({
-            'contactForm.name': e.detail.value
+            'profileForm.contactName': e.detail.value
         });
     },
 
@@ -159,25 +184,25 @@ Page({
      */
     onContactPhoneInput(e) {
         this.setData({
-            'contactForm.phone': e.detail.value
+            'profileForm.contactPhone': e.detail.value
         });
     },
 
     /**
-     * 保存联系信息
+     * 保存个人信息
      */
-    async saveContactInfo() {
-        const { name, phone } = this.data.contactForm;
+    async saveProfileInfo() {
+        const { nickname, contactName, contactPhone } = this.data.profileForm;
 
-        if (!name || !phone) {
+        if (!nickname.trim()) {
             wx.showToast({
-                title: '请填写完整信息',
+                title: '请输入昵称',
                 icon: 'none'
             });
             return;
         }
 
-        if (!/^1[3-9]\d{9}$/.test(phone)) {
+        if (contactPhone && !/^1[3-9]\d{9}$/.test(contactPhone)) {
             wx.showToast({
                 title: '请输入正确的手机号',
                 icon: 'none'
@@ -189,21 +214,22 @@ Page({
             this.setData({ loading: true });
 
             const result = await request.put('/api/user/contact', {
-                contactName: name,
-                contactPhone: phone
+                contactName: contactName.trim(),
+                contactPhone: contactPhone.trim()
             });
 
             if (result.success) {
                 // 更新用户信息
                 const updatedUserInfo = {
                     ...this.data.userInfo,
-                    contactName: name,
-                    contactPhone: phone
+                    nickname: nickname.trim(),
+                    contactName: contactName.trim(),
+                    contactPhone: contactPhone.trim()
                 };
 
                 this.setData({
                     userInfo: updatedUserInfo,
-                    showContactEdit: false
+                    showProfileEdit: false
                 });
 
                 // 更新全局用户信息

@@ -483,56 +483,6 @@
 }
 
 
-/* ==================== 管理员浮动按钮 ==================== */
-
-.floating-admin-button {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    width: 56px;
-    height: 56px;
-    border-radius: 28px;
-    background: #007AFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    z-index: 100;
-}
-
-.floating-admin-button:active {
-    transform: scale(0.9);
-    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4);
-}
-
-.admin-icon {
-    font-size: 24px;
-    color: white;
-    font-weight: 600;
-}
-
-.admin-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
-    background: #ff3b30;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-}
-
-.badge-count {
-    font-size: 12px;
-    font-weight: 700;
-    color: white;
-}
-
-
 /* ==================== 响应式设计 ==================== */
 
 @media (max-width: 768px) {
@@ -560,16 +510,6 @@
     }
     .room-image-container {
         height: 140px;
-    }
-    .floating-admin-button {
-        bottom: 24px;
-        right: 24px;
-        width: 48px;
-        height: 48px;
-        border-radius: 24px;
-    }
-    .admin-icon {
-        font-size: 20px;
     }
 }
 

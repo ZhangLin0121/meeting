@@ -1,29 +1,33 @@
 <!-- frontend/pages/profile/profile.wxml -->
 <view class="ios-app-container">
-  <!-- iOS 风格导航栏 -->
-  <view class="ios-nav-bar" style="padding-top: {{statusBarHeight}}px;">
-    <view class="nav-bar-content">
-      <text class="nav-bar-title">我的</text>
-    </view>
-  </view>
-
-  <!-- 主要内容区域 -->
-  <view class="main-content" style="padding-top: {{statusBarHeight + 44}}px;">
+  <!-- 主要内容区域 - 无导航栏设计 -->
+  <view class="main-content" style="padding-top: {{statusBarHeight + 20}}px;">
     
-    <!-- 用户信息卡片 - iOS风格 -->
-    <view class="user-profile-card">
+    <!-- 用户信息卡片 - 可编辑设计 -->
+    <view class="user-profile-card" bindtap="editProfile">
       <view class="profile-header">
         <view class="user-avatar">
           <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" class="avatar-image"></image>
           <view wx:else class="default-avatar">
             <text class="avatar-initial">{{userInfo.nickname ? userInfo.nickname.charAt(0) : '用'}}</text>
           </view>
+          <view class="edit-avatar-overlay">
+            <text class="sf-symbol">􀌟</text>
+          </view>
         </view>
         <view class="user-info">
-          <text class="user-name">{{userInfo.nickname || '微信用户'}}</text>
+          <view class="user-name-section">
+            <text class="user-name">{{userInfo.nickname || '微信用户'}}</text>
+            <view class="edit-indicator">
+              <text class="sf-symbol">􀈊</text>
+            </view>
+          </view>
           <view class="role-chip {{userInfo.role === 'admin' ? 'admin-role' : 'user-role'}}">
             <text class="sf-symbol">{{userInfo.role === 'admin' ? '􀎹' : '􀉩'}}</text>
             <text class="role-text">{{userInfo.role === 'admin' ? '管理员' : '员工'}}</text>
+          </view>
+          <view class="contact-info">
+            <text class="contact-text">{{userInfo.contactName ? userInfo.contactName + ' · ' + userInfo.contactPhone : '点击设置联系信息'}}</text>
           </view>
         </view>
       </view>
@@ -49,31 +53,9 @@
       </view>
     </view>
 
-    <!-- 功能列表 - iOS风格 -->
+    <!-- 功能列表 - 简化设计 -->
     <view class="function-section">
-      <view class="section-title">
-        <text class="sf-symbol">􀍟</text>
-        <text class="title-text">功能</text>
-      </view>
-      
       <view class="ios-list-group">
-        <!-- 我的预约 -->
-        <view class="ios-list-item" bindtap="goToMyBookings">
-          <view class="item-icon primary">
-            <text class="sf-symbol">􀉀</text>
-          </view>
-          <view class="item-content">
-            <text class="item-title">我的预约</text>
-            <text class="item-subtitle">查看和管理我的会议室预约</text>
-          </view>
-          <view class="item-badge" wx:if="{{upcomingCount > 0}}">
-            <text class="badge-text">{{upcomingCount}}</text>
-          </view>
-          <view class="item-arrow">
-            <text class="sf-symbol">􀆊</text>
-          </view>
-        </view>
-
         <!-- 管理员功能 -->
         <view wx:if="{{userInfo.role === 'admin'}}" class="ios-list-item" bindtap="goToAdmin">
           <view class="item-icon admin">
@@ -88,14 +70,14 @@
           </view>
         </view>
 
-        <!-- 联系信息 -->
-        <view class="ios-list-item" bindtap="showContactModal">
-          <view class="item-icon contact">
-            <text class="sf-symbol">􀍱</text>
+        <!-- 设置 -->
+        <view class="ios-list-item" bindtap="showSettings">
+          <view class="item-icon settings">
+            <text class="sf-symbol">􀍟</text>
           </view>
           <view class="item-content">
-            <text class="item-title">联系信息</text>
-            <text class="item-subtitle">{{userInfo.contactName ? userInfo.contactName + ' ' + userInfo.contactPhone : '点击设置联系信息'}}</text>
+            <text class="item-title">设置</text>
+            <text class="item-subtitle">应用设置和偏好</text>
           </view>
           <view class="item-arrow">
             <text class="sf-symbol">􀆊</text>
@@ -105,33 +87,44 @@
     </view>
   </view>
 
-  <!-- iOS风格弹窗 - 联系信息编辑 -->
-  <view wx:if="{{showContactEdit}}" class="ios-modal-overlay" bindtap="hideContactModal">
+  <!-- iOS风格弹窗 - 个人信息编辑 -->
+  <view wx:if="{{showProfileEdit}}" class="ios-modal-overlay" bindtap="hideProfileModal">
     <view class="ios-modal-container" catchtap="stopPropagation">
       <view class="modal-header">
-        <button class="modal-cancel-btn" bindtap="hideContactModal">取消</button>
-        <text class="modal-title">联系信息</text>
-        <button class="modal-save-btn" bindtap="saveContactInfo">保存</button>
+        <button class="modal-cancel-btn" bindtap="hideProfileModal">取消</button>
+        <text class="modal-title">编辑个人信息</text>
+        <button class="modal-save-btn" bindtap="saveProfileInfo">保存</button>
       </view>
       
       <view class="modal-content">
         <view class="ios-form-group">
           <view class="form-row">
-            <text class="form-label">姓名</text>
+            <text class="form-label">昵称</text>
             <input 
               class="form-input" 
-              value="{{contactForm.name}}" 
-              bindinput="onContactNameInput" 
-              placeholder="请输入姓名"
+              value="{{profileForm.nickname}}" 
+              bindinput="onNicknameInput" 
+              placeholder="请输入昵称"
               placeholder-class="input-placeholder"
             />
           </view>
           <view class="form-divider"></view>
           <view class="form-row">
-            <text class="form-label">电话</text>
+            <text class="form-label">姓名</text>
             <input 
               class="form-input" 
-              value="{{contactForm.phone}}" 
+              value="{{profileForm.contactName}}" 
+              bindinput="onContactNameInput" 
+              placeholder="请输入真实姓名"
+              placeholder-class="input-placeholder"
+            />
+          </view>
+          <view class="form-divider"></view>
+          <view class="form-row">
+            <text class="form-label">手机号</text>
+            <input 
+              class="form-input" 
+              value="{{profileForm.contactPhone}}" 
               bindinput="onContactPhoneInput" 
               placeholder="请输入手机号" 
               type="number"
