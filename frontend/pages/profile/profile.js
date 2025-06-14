@@ -40,22 +40,35 @@ Page({
      */
     async getUserInfo() {
         try {
-            // 先从全局获取用户信息
-            if (app && app.globalData && app.globalData.userInfo) {
-                this.setData({
-                    userInfo: app.globalData.userInfo
-                });
-                console.log('✅ 从全局数据获取用户信息:', app.globalData.userInfo);
-                return;
-            }
+            // 直接从服务器获取最新的用户信息
+            console.log('🔄 从服务器获取最新用户信息...');
+            const result = await request.get('/api/user/profile');
 
-            // 从本地存储获取
-            const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo) {
+            if (result.success && result.data) {
+                const userInfo = result.data;
                 this.setData({
                     userInfo: userInfo
                 });
-                console.log('✅ 从本地存储获取用户信息:', userInfo);
+
+                // 更新全局用户信息
+                if (app && app.globalData) {
+                    app.globalData.userInfo = userInfo;
+                }
+
+                // 更新本地存储
+                wx.setStorageSync('userInfo', userInfo);
+
+                console.log('✅ 从服务器获取用户信息成功:', userInfo);
+                return;
+            }
+
+            // 如果服务器获取失败，尝试从本地获取
+            const localUserInfo = wx.getStorageSync('userInfo');
+            if (localUserInfo) {
+                this.setData({
+                    userInfo: localUserInfo
+                });
+                console.log('✅ 从本地存储获取用户信息:', localUserInfo);
                 return;
             }
 
@@ -71,10 +84,20 @@ Page({
             }
         } catch (error) {
             console.error('❌ 获取用户信息失败:', error);
-            wx.showToast({
-                title: '获取用户信息失败',
-                icon: 'none'
-            });
+
+            // 尝试从本地存储获取
+            const localUserInfo = wx.getStorageSync('userInfo');
+            if (localUserInfo) {
+                this.setData({
+                    userInfo: localUserInfo
+                });
+                console.log('✅ 从本地存储获取用户信息:', localUserInfo);
+            } else {
+                wx.showToast({
+                    title: '获取用户信息失败',
+                    icon: 'none'
+                });
+            }
         }
     },
 
@@ -214,17 +237,18 @@ Page({
             this.setData({ loading: true });
 
             const result = await request.put('/api/user/contact', {
+                nickname: nickname.trim(),
                 contactName: contactName.trim(),
                 contactPhone: contactPhone.trim()
             });
 
             if (result.success) {
-                // 更新用户信息
+                // 使用服务器返回的最新用户信息
                 const updatedUserInfo = {
                     ...this.data.userInfo,
-                    nickname: nickname.trim(),
-                    contactName: contactName.trim(),
-                    contactPhone: contactPhone.trim()
+                    nickname: result.data.nickname,
+                    contactName: result.data.contactName,
+                    contactPhone: result.data.contactPhone
                 };
 
                 this.setData({

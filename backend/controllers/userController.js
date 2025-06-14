@@ -121,25 +121,35 @@ class UserController {
      */
     static async updateContact(req, res) {
         try {
-            const { contactName, contactPhone } = req.body;
+            const { nickname, contactName, contactPhone } = req.body;
             const user = req.user;
 
-            // 更新用户联系信息
-            user.contactName = contactName;
-            user.contactPhone = contactPhone;
+            console.log(`📝 用户 ${user.openid} 更新用户信息:`, { nickname, contactName, contactPhone });
+
+            // 更新用户信息
+            if (nickname !== undefined) {
+                user.nickname = nickname;
+            }
+            if (contactName !== undefined) {
+                user.contactName = contactName;
+            }
+            if (contactPhone !== undefined) {
+                user.contactPhone = contactPhone;
+            }
 
             await user.save();
 
             return ResponseHelper.success(res, {
                 id: user._id,
+                nickname: user.nickname,
                 contactName: user.contactName,
                 contactPhone: user.contactPhone,
                 updatedAt: user.updatedAt
-            }, '更新联系信息成功');
+            }, '更新用户信息成功');
 
         } catch (error) {
-            console.error('更新用户联系信息失败:', error);
-            return ResponseHelper.serverError(res, '更新联系信息失败', error.message);
+            console.error('更新用户信息失败:', error);
+            return ResponseHelper.serverError(res, '更新用户信息失败', error.message);
         }
     }
 
