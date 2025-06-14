@@ -426,9 +426,16 @@ Page({
                 if (availabilityData.timeSlots) {
                     availabilityData.timeSlots.forEach(slot => {
                         if (slot.status === 'booked') {
+                            // 找到对应的时间槽并标记为已预约
                             const index = timeSlots.findIndex(ts => ts.time === slot.startTime);
                             if (index !== -1) {
                                 timeSlots[index].status = 'booked';
+                            }
+                        } else if (slot.status === 'closed') {
+                            // 处理临时关闭的时间段
+                            const index = timeSlots.findIndex(ts => ts.time === slot.startTime);
+                            if (index !== -1) {
+                                timeSlots[index].status = 'closed';
                             }
                         }
                     });
@@ -732,11 +739,34 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 修正结束时间计算：结束时间就是用户选择的最后一个时间槽的时间
-        // 用户选择的时间槽就是他们期望的结束时间，不需要额外加30分钟
+        // 修正结束时间计算：用户选择的最后一个时间槽+30分钟才是真正的结束时间
+        // 例如：用户选择11:30-12:00，selectedEndIndex是11:30这个槽，结束时间应该是12:00
         const lastSelectedSlot = timeSlots[selectedEndIndex];
-        const actualEndTime = lastSelectedSlot.time;
+        const endTimeParts = lastSelectedSlot.time.split(':');
+        let endHour = parseInt(endTimeParts[0]);
+        let endMinute = parseInt(endTimeParts[1]) + 30;
+
+        if (endMinute >= 60) {
+            endHour += 1;
+            endMinute = 0;
+        }
+
+        const actualEndTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
         const selectedTimeText = `${startTime} - ${actualEndTime}`;
+
+        // 如果用户已有联系人信息但表单中没有，则自动填入
+        const currentContactName = this.data.bookingForm.contactName;
+        const currentContactPhone = this.data.bookingForm.contactPhone;
+
+        // 检查是否需要自动填入联系人信息
+        if (!currentContactName && !currentContactPhone) {
+            // 重新获取用户联系人信息并填入表单
+            this.fetchUserContactInfo().then(() => {
+                console.log('💡 自动填入用户联系人信息');
+            }).catch(error => {
+                console.warn('⚠️ 获取联系人信息失败:', error);
+            });
+        }
 
         this.setData({
             showBookingModal: true,
@@ -814,10 +844,27 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 修正结束时间计算：结束时间就是用户选择的最后一个时间槽的时间
-        // 用户选择的时间槽就是他们期望的结束时间，不需要额外加30分钟
+        // 修正结束时间计算：用户选择的最后一个时间槽+30分钟才是真正的结束时间
+        // 例如：用户选择11:30-12:00，selectedEndIndex是11:30这个槽，结束时间应该是12:00
         const lastSelectedSlot = timeSlots[selectedEndIndex];
-        const actualEndTime = lastSelectedSlot.time;
+        const endTimeParts = lastSelectedSlot.time.split(':');
+        let endHour = parseInt(endTimeParts[0]);
+        let endMinute = parseInt(endTimeParts[1]) + 30;
+
+        if (endMinute >= 60) {
+            endHour += 1;
+            endMinute = 0;
+        }
+
+        const actualEndTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+
+        console.log('🕒 时间计算:', {
+            selectedStartIndex,
+            selectedEndIndex,
+            startTime,
+            lastSelectedSlotTime: lastSelectedSlot.time,
+            calculatedEndTime: actualEndTime
+        });
 
         // 构建预约数据 - 注意日期格式转换
         const bookingData = {

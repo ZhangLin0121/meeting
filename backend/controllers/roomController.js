@@ -441,6 +441,11 @@ class RoomController {
      * @returns {Array} 时间段数组
      */
     static generateTimeSlots(bookings, closures) {
+        console.log('🔍 生成时间段信息，预约记录:', bookings.map(b => ({
+            startTime: b.startTime,
+            endTime: b.endTime,
+            topic: b.topic
+        })));
         const config = require('../config');
         const slots = [];
 
@@ -467,7 +472,12 @@ class RoomController {
                 const isBooked = bookings.some(booking => {
                     const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
                     const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
-                    return minutes >= bookingStart && minutes < bookingEnd;
+                    // 一个时间槽被预约，如果它的开始时间在预约时间范围内
+                    const slotStart = minutes;
+                    const slotEnd = minutes + 30;
+                    // 检查时间槽是否与预约时间有重叠
+                    const hasOverlap = slotStart < bookingEnd && slotEnd > bookingStart;
+                    return hasOverlap;
                 });
 
                 // 检查是否临时关闭
