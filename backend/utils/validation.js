@@ -19,13 +19,12 @@ const validationSchemas = {
 
         // 更新用户联系信息
         updateContact: Joi.object({
-            contactName: Joi.string().required().messages({
-                'string.empty': '联系人姓名不能为空',
-                'any.required': '联系人姓名是必填项'
+            nickname: Joi.string().allow('').optional(),
+            contactName: Joi.string().allow('').optional().messages({
+                'string.empty': '联系人姓名不能为空'
             }),
-            contactPhone: Joi.string().pattern(/^1[3-9]\d{9}$/).required().messages({
-                'string.pattern.base': '请输入正确的手机号码',
-                'any.required': '联系电话是必填项'
+            contactPhone: Joi.string().pattern(/^1[3-9]\d{9}$/).allow('').optional().messages({
+                'string.pattern.base': '请输入正确的手机号码'
             })
         })
     },
