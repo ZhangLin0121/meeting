@@ -208,6 +208,46 @@ const actualEndTime = lastSelectedSlot.time;
 **修复时间**: 2025-06-12
 **状态**: ✅ 已修复并部署
 
+### 🔧 问题7：周末预约限制和会议室详情显示问题 (已修复)
+**问题背景**: 
+- 用户预约周末时间出现400错误："只能预约工作日的会议室"
+- 查看会议室详情时显示"未找到会议室信息"
+
+**问题分析**:
+- **周末预约问题**: 前端已经移除了工作日限制，但后端API中仍有多处工作日校验逻辑
+- **会议室详情问题**: 后端在非工作日时返回特殊响应格式，可能导致前端显示异常
+
+**解决方案**:
+- **后端API修复**: 
+  - `bookingController.js`: 注释掉`createBooking`和`createManualBooking`中的工作日校验
+  - `roomController.js`: 注释掉`getRoomDetail`和`getRoomAvailability`中的工作日限制
+  - `getRoomAvailabilityStatus`: 移除工作日状态检查
+- **保留工作日标识**: 在响应中保留`isWorkday`字段用于前端显示，但不限制功能
+- **添加调试信息**: 增加详细的前后端日志，便于问题排查
+
+**技术实现**:
+```javascript
+// 修改前：限制性校验
+if (!TimeHelper.isWorkday(bookingDate)) {
+    return ResponseHelper.error(res, '只能预约工作日的会议室');
+}
+
+// 修改后：注释掉限制
+// 验证是否为工作日 - 现已开放周末预约
+// if (!TimeHelper.isWorkday(bookingDate)) {
+//     return ResponseHelper.error(res, '只能预约工作日的会议室');
+// }
+```
+
+**用户体验改进**:
+- ✅ 用户现在可以在周末预约会议室
+- ✅ 会议室详情页面在周末也能正常显示
+- ✅ 前后端逻辑保持一致
+- ✅ 添加了详细的调试日志，便于问题排查
+
+**修复时间**: 2025-06-13
+**状态**: ✅ 已修复并部署
+
 ## 核心功能
 
 ### 用户功能
