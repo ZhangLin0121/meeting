@@ -6,10 +6,10 @@
       <text class="nav-bar-title">会议室</text>
       <view class="nav-bar-actions">
         <view class="nav-action-button" bindtap="goToSearchPage">
-          <text class="sf-icon">􀊫</text>
+          <image class="nav-icon" src="/images/icons/search.png" mode="aspectFit"></image>
         </view>
         <view class="nav-action-button" bindtap="goToMyBookings">
-          <text class="sf-icon">􀉪</text>
+          <image class="nav-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
         </view>
       </view>
     </view>
@@ -18,7 +18,7 @@
   <!-- 搜索栏 -->
   <view class="search-section" style="top: {{statusBarHeight + 44}}px;">
     <view class="search-bar">
-      <text class="search-icon">􀊫</text>
+      <image class="search-icon" src="/images/icons/search.png" mode="aspectFit"></image>
       <input
         class="search-input"
         placeholder="搜索会议室"
@@ -29,13 +29,13 @@
         value="{{searchKeyword}}"
       />
       <view wx:if="{{searchKeyword}}" class="clear-button" bindtap="clearSearch">
-        <text class="sf-icon">􀁡</text>
+        <image class="clear-icon" src="/images/icons/close.png" mode="aspectFit"></image>
       </view>
     </view>
     
     <!-- 筛选按钮 -->
     <view class="filter-button" bindtap="showFilterOptions">
-      <text class="sf-icon">􀌈</text>
+      <image class="filter-icon" src="/images/icons/filter.png" mode="aspectFit"></image>
     </view>
   </view>
 
@@ -54,7 +54,7 @@
     <view wx:elif="{{!loading && rooms.length === 0}}" class="empty-view">
       <view class="empty-content">
         <view class="empty-icon">
-          <text class="sf-symbol-large">􀂋</text>
+          <image class="empty-image" src="/images/icons/empty.png" mode="aspectFit"></image>
         </view>
         <text class="empty-title">{{searchKeyword ? '未找到相关会议室' : '暂无会议室'}}</text>
         <text class="empty-subtitle">{{searchKeyword ? '请尝试其他关键词' : '下拉刷新或联系管理员'}}</text>
@@ -94,7 +94,7 @@
                 data-room-id="{{item.id}}"
               />
               <view wx:else class="room-image-placeholder">
-                <text class="placeholder-icon">􀎟</text>
+                <image class="placeholder-icon" src="/images/icons/image-placeholder.png" mode="aspectFit"></image>
               </view>
               
               <!-- 状态指示器 -->
@@ -108,13 +108,13 @@
               <view class="room-header">
                 <text class="room-name">{{item.name}}</text>
                 <view class="capacity-badge">
-                  <text class="sf-mini-icon">􀝊</text>
+                  <image class="capacity-icon" src="/images/icons/people.png" mode="aspectFit"></image>
                   <text class="capacity-text">{{item.capacity}}</text>
                 </view>
               </view>
               
               <view class="room-location">
-                <text class="location-icon">􀋑</text>
+                <image class="location-icon" src="/images/icons/location.png" mode="aspectFit"></image>
                 <text class="location-text">{{item.location}}</text>
               </view>
               
@@ -126,7 +126,7 @@
                   <text class="status-text">{{item.status === 'available' ? '可预约' : '已占用'}}</text>
                 </view>
                 <view class="book-button">
-                  <text class="sf-action-icon">􀯶</text>
+                  <text class="sf-action-icon">预约</text>
                 </view>
               </view>
             </view>

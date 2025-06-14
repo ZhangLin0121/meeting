@@ -62,10 +62,10 @@
     transform: scale(0.9);
 }
 
-.sf-symbol {
-    font-size: 18px;
-    color: #007AFF;
-    font-weight: 600;
+.back-icon,
+.refresh-icon {
+    width: 18px;
+    height: 18px;
 }
 
 .nav-title {
@@ -383,10 +383,8 @@
 }
 
 .detail-icon {
-    font-size: 16px;
-    color: #8e8e93;
-    width: 20px;
-    text-align: center;
+    width: 16px;
+    height: 16px;
 }
 
 .detail-text {
@@ -509,4 +507,14 @@
 
 .bottom-spacing {
     height: 40px;
+}
+
+
+/* ==================== 新增图标样式 ==================== */
+
+.error-symbol,
+.empty-symbol {
+    width: 64px;
+    height: 64px;
+    opacity: 0.6;
 }

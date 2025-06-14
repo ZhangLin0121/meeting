@@ -12,18 +12,18 @@
             <text class="avatar-initial">{{userInfo.nickname ? userInfo.nickname.charAt(0) : '用'}}</text>
           </view>
           <view class="edit-avatar-overlay">
-            <text class="sf-symbol">􀌟</text>
+            <image class="camera-icon" src="/images/icons/camera.png" mode="aspectFit"></image>
           </view>
         </view>
         <view class="user-info">
           <view class="user-name-section">
             <text class="user-name">{{userInfo.nickname || '微信用户'}}</text>
             <view class="edit-indicator">
-              <text class="sf-symbol">􀈊</text>
+              <image class="edit-icon" src="/images/icons/edit.png" mode="aspectFit"></image>
             </view>
           </view>
           <view class="role-chip {{userInfo.role === 'admin' ? 'admin-role' : 'user-role'}}">
-            <text class="sf-symbol">{{userInfo.role === 'admin' ? '􀎹' : '􀉩'}}</text>
+            <image class="role-icon" src="/images/icons/{{userInfo.role === 'admin' ? 'admin' : 'user'}}.png" mode="aspectFit"></image>
             <text class="role-text">{{userInfo.role === 'admin' ? '管理员' : '员工'}}</text>
           </view>
           <view class="contact-info">
@@ -36,19 +36,19 @@
     <!-- 统计卡片 -->
     <view class="stats-section">
       <view class="section-title">
-        <text class="sf-symbol">􀐱</text>
+        <image class="stats-icon" src="/images/icons/stats.png" mode="aspectFit"></image>
         <text class="title-text">统计信息</text>
       </view>
       <view class="stats-grid">
         <view class="stat-card">
           <text class="stat-number">{{upcomingCount || 0}}</text>
           <text class="stat-label">即将到来</text>
-          <text class="stat-icon">􀉀</text>
+          <image class="stat-icon" src="/images/icons/booking.png" mode="aspectFit"></image>
         </view>
         <view class="stat-card">
           <text class="stat-number">{{totalBookings || 0}}</text>
           <text class="stat-label">总预约数</text>
-          <text class="stat-icon">􀉪</text>
+          <image class="stat-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
         </view>
       </view>
     </view>
@@ -59,28 +59,28 @@
         <!-- 管理员功能 -->
         <view wx:if="{{userInfo.role === 'admin'}}" class="ios-list-item" bindtap="goToAdmin">
           <view class="item-icon admin">
-            <text class="sf-symbol">􀎹</text>
+            <image class="item-icon-img" src="/images/icons/admin.png" mode="aspectFit"></image>
           </view>
           <view class="item-content">
             <text class="item-title">会议室管理</text>
             <text class="item-subtitle">管理会议室和预约信息</text>
           </view>
           <view class="item-arrow">
-            <text class="sf-symbol">􀆊</text>
+            <image class="arrow-icon" src="/images/icons/arrow.png" mode="aspectFit"></image>
           </view>
         </view>
 
         <!-- 设置 -->
         <view class="ios-list-item" bindtap="showSettings">
           <view class="item-icon settings">
-            <text class="sf-symbol">􀍟</text>
+            <image class="item-icon-img" src="/images/icons/settings.png" mode="aspectFit"></image>
           </view>
           <view class="item-content">
             <text class="item-title">设置</text>
             <text class="item-subtitle">应用设置和偏好</text>
           </view>
           <view class="item-arrow">
-            <text class="sf-symbol">􀆊</text>
+            <image class="arrow-icon" src="/images/icons/arrow.png" mode="aspectFit"></image>
           </view>
         </view>
       </view>

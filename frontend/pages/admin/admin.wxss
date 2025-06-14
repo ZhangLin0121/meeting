@@ -482,10 +482,6 @@ page {
 
 /* 预约记录列表 */
 
-.booking-list {
-    /* 简单的预约列表，不设置固定高度 */
-}
-
 .booking-card {
     background-color: #ffffff;
     border-radius: 16rpx;

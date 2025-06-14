@@ -5,13 +5,13 @@
     <view class="navbar-content">
       <view class="nav-left" bindtap="goBack">
         <view class="back-button">
-          <text class="sf-symbol">􀁙</text>
+          <image class="back-icon" src="/images/icons/back.png" mode="aspectFit"></image>
         </view>
       </view>
       <text class="nav-title">我的预约</text>
       <view class="nav-right" bindtap="refreshData">
         <view class="refresh-button {{refreshing ? 'rotating' : ''}}">
-          <text class="sf-symbol">􀅈</text>
+          <image class="refresh-icon" src="/images/icons/refresh.png" mode="aspectFit"></image>
         </view>
       </view>
     </view>
@@ -31,7 +31,7 @@
     <!-- 错误状态 - iOS风格 -->
     <view wx:elif="{{error}}" class="error-state">
       <view class="error-content">
-        <view class="error-symbol">􀢄</view>
+        <image class="error-symbol" src="/images/icons/error.png" mode="aspectFit"></image>
         <text class="error-title">无法加载预约</text>
         <text class="error-message">{{error}}</text>
         <button class="ios-button primary" bindtap="retryLoad">重新尝试</button>
@@ -41,7 +41,7 @@
     <!-- 空状态 - iOS风格 -->
     <view wx:elif="{{isEmpty}}" class="empty-state">
       <view class="empty-content">
-        <view class="empty-symbol">􀉀</view>
+        <image class="empty-symbol" src="/images/icons/booking.png" mode="aspectFit"></image>
         <text class="empty-title">暂无预约</text>
         <text class="empty-subtitle">开始预约第一个会议室吧</text>
         <button class="ios-button primary" bindtap="goToRoomList">浏览会议室</button>
@@ -90,15 +90,15 @@
             <!-- 详细信息 -->
             <view class="details-section">
               <view wx:if="{{item.topic}}" class="detail-row">
-                <text class="detail-icon">􀍳</text>
+                <image class="detail-icon" src="/images/icons/topic.png" mode="aspectFit"></image>
                 <text class="detail-text">{{item.topic}}</text>
               </view>
               <view wx:if="{{item.attendeesCount}}" class="detail-row">
-                <text class="detail-icon">􀝊</text>
+                <image class="detail-icon" src="/images/icons/people.png" mode="aspectFit"></image>
                 <text class="detail-text">{{item.attendeesCount}} 人参会</text>
               </view>
               <view class="detail-row">
-                <text class="detail-icon">􀌾</text>
+                <image class="detail-icon" src="/images/icons/contact.png" mode="aspectFit"></image>
                 <text class="detail-text">{{item.contactName}} {{item.contactPhone}}</text>
               </view>
             </view>
@@ -147,11 +147,11 @@
             <!-- 详细信息 -->
             <view class="details-section">
               <view wx:if="{{item.topic}}" class="detail-row">
-                <text class="detail-icon">􀍳</text>
+                <image class="detail-icon" src="/images/icons/topic.png" mode="aspectFit"></image>
                 <text class="detail-text">{{item.topic}}</text>
               </view>
               <view wx:if="{{item.attendeesCount}}" class="detail-row">
-                <text class="detail-icon">􀝊</text>
+                <image class="detail-icon" src="/images/icons/people.png" mode="aspectFit"></image>
                 <text class="detail-text">{{item.attendeesCount}} 人参会</text>
               </view>
             </view>
