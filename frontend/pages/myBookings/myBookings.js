@@ -1,4 +1,5 @@
 const app = getApp(); // 获取全局应用实例
+const request = require('../../utils/request.js'); // 导入网络请求工具
 
 Page({
     data: {
@@ -13,8 +14,7 @@ Page({
         statusBarHeight: 0, // 状态栏高度
         hasMore: false, // 是否有更多数据
         currentPage: 1, // 当前页码
-        pageSize: 10, // 每页数量
-        apiBaseUrl: 'https://www.cacophonyem.me/meeting/api' // API基础URL
+        pageSize: 10 // 每页数量
     },
 
     onLoad() {
@@ -106,7 +106,7 @@ Page({
         console.log('🔍 开始获取我的预约记录...');
 
         try {
-            const result = await this.requestAPI('GET', '/api/user/bookings', {
+            const result = await request.get('/api/user/bookings', {
                 page: isLoadMore ? this.data.currentPage + 1 : 1,
                 pageSize: this.data.pageSize
             });
@@ -197,43 +197,7 @@ Page({
         }
     },
 
-    /**
-     * 通用API请求方法
-     */
-    async requestAPI(method, url, data = {}) {
-        return new Promise((resolve, reject) => {
-            const requestConfig = {
-                url: `${this.data.apiBaseUrl}${url}`,
-                method: method,
-                header: {
-                    'Content-Type': 'application/json',
-                    'X-User-Openid': this.data.userOpenId
-                },
-                success: (res) => {
-                    console.log(`${method} ${url} 响应:`, res);
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        resolve(res.data);
-                    } else {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.data?.message || 'Request failed'}`));
-                    }
-                },
-                fail: (err) => {
-                    console.error(`${method} ${url} 请求失败:`, err);
-                    reject(new Error(err.errMsg || '网络请求失败'));
-                }
-            };
 
-            if (method !== 'GET' && Object.keys(data).length > 0) {
-                requestConfig.data = data;
-            } else if (method === 'GET' && Object.keys(data).length > 0) {
-                // GET请求将参数添加到URL
-                const params = new URLSearchParams(data).toString();
-                requestConfig.url += `?${params}`;
-            }
-
-            wx.request(requestConfig);
-        });
-    },
 
     /**
      * 返回上一页

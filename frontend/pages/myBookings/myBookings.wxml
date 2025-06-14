@@ -1,238 +1,180 @@
 <!-- frontend/pages/myBookings/myBookings.wxml -->
-<view class="container">
-  <!-- 自定义导航栏 -->
-  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+<view class="apple-container">
+  <!-- iOS 风格导航栏 -->
+  <view class="ios-navbar" style="padding-top: {{statusBarHeight}}px;">
     <view class="navbar-content">
-      <view class="navbar-left" bindtap="goBack">
-        <text class="back-text">‹</text>
+      <view class="nav-left" bindtap="goBack">
+        <view class="back-button">
+          <text class="sf-symbol">􀁙</text>
+        </view>
       </view>
-      <text class="navbar-title">我的预约</text>
-      <view class="navbar-right">
-        <view class="refresh-btn" bindtap="refreshData">
-          <text class="refresh-text">⟳</text>
+      <text class="nav-title">我的预约</text>
+      <view class="nav-right" bindtap="refreshData">
+        <view class="refresh-button {{refreshing ? 'rotating' : ''}}">
+          <text class="sf-symbol">􀅈</text>
         </view>
       </view>
     </view>
   </view>
 
-  <view class="content" style="padding-top: {{statusBarHeight + 44}}px;">
-    <!-- 加载状态 -->
-    <view wx:if="{{loading}}" class="loading-container">
-      <view class="loading-animation">
-        <view class="loading-spinner"></view>
-        <text class="loading-text">加载中...</text>
+  <!-- 主要内容区域 -->
+  <view class="main-content" style="padding-top: {{statusBarHeight + 44}}px;">
+    
+    <!-- 加载状态 - iOS风格 -->
+    <view wx:if="{{loading}}" class="loading-state">
+      <view class="ios-loading">
+        <view class="spinner"></view>
+        <text class="loading-label">正在加载...</text>
       </view>
     </view>
 
-    <!-- 错误状态 -->
-    <view wx:elif="{{error}}" class="error-container">
-      <view class="error-icon">
-        <text class="error-emoji">⚠️</text>
+    <!-- 错误状态 - iOS风格 -->
+    <view wx:elif="{{error}}" class="error-state">
+      <view class="error-content">
+        <view class="error-symbol">􀢄</view>
+        <text class="error-title">无法加载预约</text>
+        <text class="error-message">{{error}}</text>
+        <button class="ios-button primary" bindtap="retryLoad">重新尝试</button>
       </view>
-      <text class="error-title">加载失败</text>
-      <text class="error-desc">{{error}}</text>
-      <button class="retry-btn" bindtap="retryLoad">重新加载</button>
     </view>
 
-    <!-- 空状态 -->
-    <view wx:elif="{{isEmpty}}" class="empty-container">
-      <view class="empty-icon">
-        <text class="empty-emoji">📅</text>
+    <!-- 空状态 - iOS风格 -->
+    <view wx:elif="{{isEmpty}}" class="empty-state">
+      <view class="empty-content">
+        <view class="empty-symbol">􀉀</view>
+        <text class="empty-title">暂无预约</text>
+        <text class="empty-subtitle">开始预约第一个会议室吧</text>
+        <button class="ios-button primary" bindtap="goToRoomList">浏览会议室</button>
       </view>
-      <text class="empty-title">您还没有任何预约哦</text>
-      <text class="empty-desc">快去预订心仪的会议室吧！</text>
-      <button class="primary-button" bindtap="goToRoomList">立即预订</button>
     </view>
 
-    <!-- 预约列表 -->
-    <scroll-view wx:else scroll-y class="booking-list" refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+    <!-- 预约列表 - iOS风格 -->
+    <scroll-view wx:else scroll-y class="booking-scroll" 
+                 refresher-enabled="{{true}}" 
+                 refresher-triggered="{{refreshing}}" 
+                 bindrefresherrefresh="onRefresh">
+      
       <!-- 即将开始的预约 -->
-      <block wx:if="{{upcomingBookings.length > 0}}">
+      <view wx:if="{{upcomingBookings.length > 0}}" class="section">
         <view class="section-header">
-          <view class="section-title-row">
-            <text class="section-title">即将开始</text>
-            <view class="section-badge">{{upcomingBookings.length}}</view>
-          </view>
-          <text class="section-desc">这些预约即将开始或正在进行中</text>
+          <text class="section-title">即将开始</text>
+          <view class="section-badge">{{upcomingBookings.length}}</view>
         </view>
         
-        <view class="booking-cards">
-          <view wx:for="{{upcomingBookings}}" wx:key="id" class="booking-card upcoming-card" bindtap="onBookingCardTap" data-booking="{{item}}">
-            <!-- 会议室图片 -->
-            <view class="card-image-container">
-              <image wx:if="{{item.roomImage}}" src="{{item.roomImage}}" mode="aspectFill" class="card-image"></image>
-              <view wx:else class="card-image-placeholder">
-                <text class="placeholder-emoji">🏢</text>
+        <view class="card-list">
+          <view wx:for="{{upcomingBookings}}" wx:key="id" 
+                class="booking-card active" 
+                bindtap="onBookingCardTap" 
+                data-booking="{{item}}">
+            
+            <!-- 卡片头部 -->
+            <view class="card-header">
+              <view class="room-info">
+                <text class="room-name">{{item.conferenceRoomName}}</text>
+                <text class="room-location" wx:if="{{item.roomLocation}}">{{item.roomLocation}}</text>
               </view>
-              <!-- 状态标签 -->
-              <view class="status-badge status-{{item.displayStatus === '已预约' ? 'upcoming' : (item.displayStatus === '进行中' ? 'in-progress' : 'cancelled')}}">
-                {{item.displayStatus}}
+              <view class="status-chip active">
+                <text class="status-dot"></text>
+                <text class="status-text">{{item.displayStatus}}</text>
               </view>
             </view>
 
-            <!-- 预约详情 -->
-            <view class="card-content">
-              <!-- 会议室名称 -->
-              <view class="card-title-row">
-                <text class="room-name">{{item.conferenceRoomName}}</text>
-                <view class="room-location" wx:if="{{item.roomLocation}}">
-                  <text class="location-emoji">📍</text>
-                  <text>{{item.roomLocation}}</text>
-                </view>
+            <!-- 时间信息 -->
+            <view class="time-section">
+              <view class="time-row">
+                <text class="time-date">{{item.bookingDateWithWeekday}}</text>
+                <text class="time-range">{{item.startTime}} - {{item.endTime}}</text>
               </view>
+            </view>
 
-              <!-- 预约时间 -->
-              <view class="card-detail-row highlight-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">📅</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-date">{{item.bookingDateWithWeekday}}</text>
-                  <text class="detail-time">{{item.startTime}} - {{item.endTime}}</text>
-                </view>
+            <!-- 详细信息 -->
+            <view class="details-section">
+              <view wx:if="{{item.topic}}" class="detail-row">
+                <text class="detail-icon">􀍳</text>
+                <text class="detail-text">{{item.topic}}</text>
               </view>
+              <view wx:if="{{item.attendeesCount}}" class="detail-row">
+                <text class="detail-icon">􀝊</text>
+                <text class="detail-text">{{item.attendeesCount}} 人参会</text>
+              </view>
+              <view class="detail-row">
+                <text class="detail-icon">􀌾</text>
+                <text class="detail-text">{{item.contactName}} {{item.contactPhone}}</text>
+              </view>
+            </view>
 
-              <!-- 会议主题 -->
-              <view class="card-detail-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">💼</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-label">会议主题</text>
-                  <text class="detail-value">{{item.topic || '无主题'}}</text>
-                </view>
-              </view>
-
-              <!-- 参会人数 -->
-              <view wx:if="{{item.attendeesCount}}" class="card-detail-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">👥</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-label">参会人数</text>
-                  <text class="detail-value">{{item.attendeesCount}}人</text>
-                </view>
-              </view>
-
-              <!-- 联系信息 -->
-              <view class="card-detail-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">📞</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-label">联系人</text>
-                  <text class="detail-value">{{item.contactName}} {{item.contactPhone}}</text>
-                </view>
-              </view>
-
-              <!-- 创建时间 -->
-              <view class="card-footer">
-                <text class="created-time">预约时间：{{item.createdAt}}</text>
-              </view>
+            <!-- 卡片底部 -->
+            <view class="card-footer">
+              <text class="creation-time">预约于 {{item.createdAt}}</text>
             </view>
           </view>
         </view>
-      </block>
+      </view>
 
       <!-- 历史预约 -->
-      <block wx:if="{{pastBookings.length > 0}}">
+      <view wx:if="{{pastBookings.length > 0}}" class="section">
         <view class="section-header">
-          <view class="section-title-row">
-            <text class="section-title">历史记录</text>
-            <view class="section-badge">{{pastBookings.length}}</view>
-          </view>
-          <text class="section-desc">这些预约已经完成或取消</text>
+          <text class="section-title">历史记录</text>
+          <view class="section-badge secondary">{{pastBookings.length}}</view>
         </view>
         
-        <view class="booking-cards">
-          <view wx:for="{{pastBookings}}" wx:key="id" class="booking-card past-card" bindtap="onBookingCardTap" data-booking="{{item}}">
-            <!-- 会议室图片 -->
-            <view class="card-image-container">
-              <image wx:if="{{item.roomImage}}" src="{{item.roomImage}}" mode="aspectFill" class="card-image"></image>
-              <view wx:else class="card-image-placeholder">
-                <text class="placeholder-emoji">🏢</text>
+        <view class="card-list">
+          <view wx:for="{{pastBookings}}" wx:key="id" 
+                class="booking-card past" 
+                bindtap="onBookingCardTap" 
+                data-booking="{{item}}">
+            
+            <!-- 卡片头部 -->
+            <view class="card-header">
+              <view class="room-info">
+                <text class="room-name">{{item.conferenceRoomName}}</text>
+                <text class="room-location" wx:if="{{item.roomLocation}}">{{item.roomLocation}}</text>
               </view>
-              <!-- 状态标签 -->
-              <view class="status-badge status-{{item.displayStatus === '已完成' ? 'completed' : 'cancelled'}}">
-                {{item.displayStatus}}
+              <view class="status-chip {{item.displayStatus === '已完成' ? 'completed' : 'cancelled'}}">
+                <text class="status-dot"></text>
+                <text class="status-text">{{item.displayStatus}}</text>
               </view>
             </view>
 
-            <!-- 预约详情 -->
-            <view class="card-content">
-              <!-- 会议室名称 -->
-              <view class="card-title-row">
-                <text class="room-name">{{item.conferenceRoomName}}</text>
-                <view class="room-location" wx:if="{{item.roomLocation}}">
-                  <text class="location-emoji">📍</text>
-                  <text>{{item.roomLocation}}</text>
-                </view>
+            <!-- 时间信息 -->
+            <view class="time-section">
+              <view class="time-row">
+                <text class="time-date">{{item.bookingDateWithWeekday}}</text>
+                <text class="time-range">{{item.startTime}} - {{item.endTime}}</text>
               </view>
+            </view>
 
-              <!-- 预约时间 -->
-              <view class="card-detail-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">📅</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-date">{{item.bookingDateWithWeekday}}</text>
-                  <text class="detail-time">{{item.startTime}} - {{item.endTime}}</text>
-                </view>
+            <!-- 详细信息 -->
+            <view class="details-section">
+              <view wx:if="{{item.topic}}" class="detail-row">
+                <text class="detail-icon">􀍳</text>
+                <text class="detail-text">{{item.topic}}</text>
               </view>
+              <view wx:if="{{item.attendeesCount}}" class="detail-row">
+                <text class="detail-icon">􀝊</text>
+                <text class="detail-text">{{item.attendeesCount}} 人参会</text>
+              </view>
+            </view>
 
-              <!-- 会议主题 -->
-              <view class="card-detail-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">💼</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-label">会议主题</text>
-                  <text class="detail-value">{{item.topic || '无主题'}}</text>
-                </view>
-              </view>
-
-              <!-- 参会人数 -->
-              <view wx:if="{{item.attendeesCount}}" class="card-detail-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">👥</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-label">参会人数</text>
-                  <text class="detail-value">{{item.attendeesCount}}人</text>
-                </view>
-              </view>
-
-              <!-- 联系信息 -->
-              <view class="card-detail-row">
-                <view class="detail-icon">
-                  <text class="detail-emoji">📞</text>
-                </view>
-                <view class="detail-content">
-                  <text class="detail-label">联系人</text>
-                  <text class="detail-value">{{item.contactName}} {{item.contactPhone}}</text>
-                </view>
-              </view>
-
-              <!-- 创建时间 -->
-              <view class="card-footer">
-                <text class="created-time">预约时间：{{item.createdAt}}</text>
-              </view>
+            <!-- 卡片底部 -->
+            <view class="card-footer">
+              <text class="creation-time">预约于 {{item.createdAt}}</text>
             </view>
           </view>
         </view>
-      </block>
+      </view>
 
-      <!-- 加载更多提示 -->
-      <view wx:if="{{hasMore}}" class="load-more-container">
+      <!-- 加载更多 -->
+      <view wx:if="{{hasMore}}" class="load-more" bindtap="loadMore">
         <view wx:if="{{loadingMore}}" class="loading-more">
-          <view class="loading-spinner-small"></view>
-          <text>加载中...</text>
+          <view class="mini-spinner"></view>
+          <text>正在加载更多...</text>
         </view>
-        <button wx:else class="load-more-btn" bindtap="loadMore">加载更多</button>
+        <text wx:else class="load-more-text">加载更多</text>
       </view>
 
       <!-- 底部间距 -->
-      <view class="bottom-space"></view>
+      <view class="bottom-spacing"></view>
     </scroll-view>
   </view>
 </view> 

@@ -1,21 +1,30 @@
 /* frontend/pages/myBookings/myBookings.wxss */
 
-.container {
+
+/* 🎨 Apple iOS Design System - 我的预约页面 */
+
+
+/* ==================== 根容器 ==================== */
+
+.apple-container {
     min-height: 100vh;
-    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(180deg, #f2f2f7 0%, #ffffff 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
 }
 
 
-/* ==================== 自定义导航栏 ==================== */
+/* ==================== iOS 导航栏 ==================== */
 
-.custom-navbar {
+.ios-navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(248, 248, 248, 0.8);
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
 }
 
 .navbar-content {
@@ -23,94 +32,108 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32rpx;
+    padding: 0 20rpx;
 }
 
-.navbar-left,
-.navbar-right {
-    width: 80rpx;
-    display: flex;
-    align-items: center;
-}
-
-.navbar-right {
-    justify-content: flex-end;
-}
-
-.back-text {
-    font-size: 48rpx;
-    color: #ffffff;
-    font-weight: bold;
-    line-height: 1;
-}
-
-.refresh-text {
-    font-size: 32rpx;
-    color: #ffffff;
-    font-weight: bold;
-    line-height: 1;
-}
-
-.refresh-btn {
-    width: 56rpx;
-    height: 56rpx;
-    border-radius: 28rpx;
-    background: rgba(255, 255, 255, 0.2);
+.nav-left,
+.nav-right {
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
 }
 
-.refresh-btn:active {
-    background: rgba(255, 255, 255, 0.3);
+.back-button,
+.refresh-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.back-button:active,
+.refresh-button:active {
+    background: rgba(0, 0, 0, 0.15);
     transform: scale(0.9);
 }
 
-.navbar-title {
-    font-size: 36rpx;
+.sf-symbol {
+    font-size: 18px;
+    color: #007AFF;
     font-weight: 600;
-    color: #ffffff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.nav-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1c1c1e;
+    letter-spacing: -0.4px;
+}
+
+.rotating {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 
-/* ==================== 页面内容 ==================== */
+/* ==================== 主要内容区域 ==================== */
 
-.content {
+.main-content {
     min-height: 100vh;
-    padding: 24rpx 32rpx 120rpx;
+    padding: 16px;
 }
 
 
-/* ==================== 加载状态 ==================== */
+/* ==================== 状态页面 ==================== */
 
-.loading-container {
+.loading-state,
+.error-state,
+.empty-state {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 400rpx;
+    min-height: 400px;
 }
 
-.loading-animation {
+.ios-loading,
+.error-content,
+.empty-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24rpx;
+    text-align: center;
 }
 
-.loading-spinner {
-    width: 80rpx;
-    height: 80rpx;
-    border: 6rpx solid #e9ecef;
-    border-top: 6rpx solid #667eea;
+
+/* iOS 加载动画 */
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007AFF;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    margin-bottom: 12px;
 }
 
-.loading-text {
-    font-size: 28rpx;
-    color: #6c757d;
+.loading-label {
+    font-size: 15px;
+    color: #8e8e93;
+    font-weight: 400;
 }
 
 @keyframes spin {
@@ -123,445 +146,367 @@
 }
 
 
-/* ==================== 错误状态 ==================== */
+/* 错误状态 */
 
-.error-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 80rpx 40rpx;
-    text-align: center;
+.error-symbol,
+.empty-symbol {
+    font-size: 48px;
+    color: #ff3b30;
+    margin-bottom: 16px;
 }
 
-.error-icon {
-    width: 120rpx;
-    height: 120rpx;
-    margin-bottom: 32rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.empty-symbol {
+    color: #8e8e93;
 }
 
-.error-emoji {
-    font-size: 120rpx;
-    line-height: 1;
-}
-
-.error-title {
-    font-size: 32rpx;
-    font-weight: 600;
-    color: #dc3545;
-    margin-bottom: 16rpx;
-}
-
-.error-desc {
-    font-size: 28rpx;
-    color: #6c757d;
-    margin-bottom: 40rpx;
-    line-height: 1.5;
-}
-
-.retry-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 48rpx;
-    padding: 24rpx 48rpx;
-    font-size: 28rpx;
-    font-weight: 500;
-    box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
-}
-
-
-/* ==================== 空状态 ==================== */
-
-.empty-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 120rpx 40rpx;
-    text-align: center;
-}
-
-.empty-icon {
-    width: 200rpx;
-    height: 200rpx;
-    margin-bottom: 40rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.empty-emoji {
-    font-size: 200rpx;
-    line-height: 1;
-    opacity: 0.6;
-}
-
+.error-title,
 .empty-title {
-    font-size: 36rpx;
+    font-size: 20px;
     font-weight: 600;
-    color: #495057;
-    margin-bottom: 16rpx;
+    color: #1c1c1e;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
 }
 
-.empty-desc {
-    font-size: 28rpx;
-    color: #6c757d;
-    margin-bottom: 48rpx;
-    line-height: 1.5;
+.error-message,
+.empty-subtitle {
+    font-size: 15px;
+    color: #8e8e93;
+    margin-bottom: 24px;
+    line-height: 1.4;
 }
 
-.primary-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
+
+/* iOS 按钮 */
+
+.ios-button {
+    background: #007AFF;
     border: none;
-    border-radius: 48rpx;
-    padding: 28rpx 56rpx;
-    font-size: 32rpx;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 16px;
     font-weight: 600;
-    box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
+    color: white;
+    letter-spacing: -0.4px;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ios-button:active {
+    background: #0056d3;
+    transform: scale(0.95);
+}
+
+.ios-button.primary {
+    background: linear-gradient(135deg, #007AFF 0%, #5856d6 100%);
 }
 
 
 /* ==================== 预约列表 ==================== */
 
-.booking-list {
-    height: calc(100vh - 180rpx);
+.booking-scroll {
+    height: calc(100vh - 120px);
 }
 
-
-/* ==================== 分组标题 ==================== */
+.section {
+    margin-bottom: 32px;
+}
 
 .section-header {
-    margin: 40rpx 0 24rpx;
-}
-
-.section-title-row {
     display: flex;
     align-items: center;
-    gap: 16rpx;
-    margin-bottom: 8rpx;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 4px;
 }
 
 .section-title {
-    font-size: 36rpx;
+    font-size: 22px;
     font-weight: 700;
-    color: #212529;
+    color: #1c1c1e;
+    letter-spacing: -0.6px;
 }
 
 .section-badge {
-    background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
-    color: #ffffff;
-    font-size: 24rpx;
+    background: #007AFF;
+    color: white;
+    font-size: 12px;
     font-weight: 600;
-    padding: 8rpx 16rpx;
-    border-radius: 20rpx;
-    min-width: 40rpx;
+    padding: 4px 8px;
+    border-radius: 10px;
+    min-width: 20px;
     text-align: center;
-    box-shadow: 0 4rpx 12rpx rgba(232, 67, 147, 0.3);
 }
 
-.section-desc {
-    font-size: 26rpx;
-    color: #6c757d;
-    line-height: 1.4;
+.section-badge.secondary {
+    background: #8e8e93;
 }
 
 
-/* ==================== 预约卡片 ==================== */
+/* ==================== 卡片设计 ==================== */
 
-.booking-cards {
+.card-list {
     display: flex;
     flex-direction: column;
-    gap: 24rpx;
+    gap: 12px;
 }
 
 .booking-card {
-    background: #ffffff;
-    border-radius: 24rpx;
-    overflow: hidden;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
-    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 0.5px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .booking-card:active {
     transform: scale(0.98);
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.upcoming-card {
-    border-left: 8rpx solid #28a745;
-}
-
-.past-card {
-    border-left: 8rpx solid #6c757d;
-    opacity: 0.85;
-}
-
-
-/* ==================== 卡片图片 ==================== */
-
-.card-image-container {
-    position: relative;
-    height: 240rpx;
-    overflow: hidden;
-}
-
-.card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.card-image-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.placeholder-emoji {
-    font-size: 80rpx;
-    line-height: 1;
-    opacity: 0.4;
-}
-
-
-/* ==================== 状态标签 ==================== */
-
-.status-badge {
-    position: absolute;
-    top: 16rpx;
-    right: 16rpx;
-    padding: 8rpx 16rpx;
-    border-radius: 20rpx;
-    font-size: 24rpx;
-    font-weight: 600;
-    color: #ffffff;
-    backdrop-filter: blur(8px);
-}
-
-.status-upcoming {
-    background: rgba(40, 167, 69, 0.9);
-    box-shadow: 0 4rpx 12rpx rgba(40, 167, 69, 0.4);
-}
-
-.status-in-progress {
-    background: rgba(255, 193, 7, 0.9);
-    color: #212529;
-    box-shadow: 0 4rpx 12rpx rgba(255, 193, 7, 0.4);
-}
-
-.status-completed {
-    background: rgba(108, 117, 125, 0.9);
-    box-shadow: 0 4rpx 12rpx rgba(108, 117, 125, 0.4);
-}
-
-.status-cancelled {
-    background: rgba(220, 53, 69, 0.9);
-    box-shadow: 0 4rpx 12rpx rgba(220, 53, 69, 0.4);
-}
-
-
-/* ==================== 卡片内容 ==================== */
-
-.card-content {
-    padding: 32rpx;
-}
-
-
-/* ==================== 标题行 ==================== */
-
-.card-title-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 24rpx;
-}
-
-.room-name {
-    font-size: 36rpx;
-    font-weight: 700;
-    color: #212529;
-    line-height: 1.3;
-    flex: 1;
-    margin-right: 16rpx;
-}
-
-.room-location {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-    background: rgba(102, 126, 234, 0.1);
-    padding: 8rpx 12rpx;
-    border-radius: 16rpx;
-    flex-shrink: 0;
-}
-
-.location-emoji {
-    font-size: 24rpx;
-    line-height: 1;
+.booking-card.past {
     opacity: 0.7;
 }
 
-.room-location text {
-    font-size: 24rpx;
-    color: #667eea;
+
+/* 卡片头部 */
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.room-info {
+    flex: 1;
+}
+
+.room-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1c1c1e;
+    letter-spacing: -0.5px;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.room-location {
+    font-size: 14px;
+    color: #8e8e93;
+    font-weight: 400;
+}
+
+
+/* 状态标签 */
+
+.status-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
     font-weight: 500;
 }
 
-
-/* ==================== 详情行 ==================== */
-
-.card-detail-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 20rpx;
-    margin-bottom: 20rpx;
-    padding: 12rpx 0;
+.status-chip.active {
+    background: rgba(52, 199, 89, 0.15);
+    color: #34c759;
 }
 
-.highlight-row {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border-radius: 16rpx;
-    padding: 20rpx;
-    margin: 0 -8rpx 20rpx;
+.status-chip.completed {
+    background: rgba(142, 142, 147, 0.15);
+    color: #8e8e93;
+}
+
+.status-chip.cancelled {
+    background: rgba(255, 59, 48, 0.15);
+    color: #ff3b30;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: currentColor;
+}
+
+.status-text {
+    letter-spacing: -0.2px;
+}
+
+
+/* 时间区域 */
+
+.time-section {
+    background: rgba(0, 122, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.time-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.time-date {
+    font-size: 15px;
+    font-weight: 600;
+    color: #007AFF;
+    letter-spacing: -0.3px;
+}
+
+.time-range {
+    font-size: 15px;
+    font-weight: 500;
+    color: #007AFF;
+    letter-spacing: -0.2px;
+}
+
+
+/* 详细信息 */
+
+.details-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .detail-icon {
-    width: 48rpx;
-    height: 48rpx;
-    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-    border-radius: 24rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 4rpx 12rpx rgba(116, 185, 255, 0.3);
+    font-size: 16px;
+    color: #8e8e93;
+    width: 20px;
+    text-align: center;
 }
 
-.detail-icon image {
-    width: 24rpx;
-    height: 24rpx;
-    filter: brightness(0) invert(1);
-}
-
-.detail-emoji {
-    font-size: 24rpx;
-    line-height: 1;
-}
-
-.detail-content {
+.detail-text {
+    font-size: 15px;
+    color: #1c1c1e;
+    font-weight: 400;
+    letter-spacing: -0.2px;
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4rpx;
-}
-
-.detail-date {
-    font-size: 32rpx;
-    font-weight: 600;
-    color: #212529;
-    line-height: 1.3;
-}
-
-.detail-time {
-    font-size: 28rpx;
-    color: #667eea;
-    font-weight: 500;
-}
-
-.detail-label {
-    font-size: 24rpx;
-    color: #6c757d;
-    font-weight: 500;
-}
-
-.detail-value {
-    font-size: 28rpx;
-    color: #212529;
-    font-weight: 500;
-    line-height: 1.4;
 }
 
 
-/* ==================== 卡片底部 ==================== */
+/* 卡片底部 */
 
 .card-footer {
-    border-top: 1px solid #f1f3f4;
-    padding-top: 20rpx;
-    margin-top: 24rpx;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+    padding-top: 12px;
 }
 
-.created-time {
-    font-size: 24rpx;
-    color: #6c757d;
-    font-style: italic;
+.creation-time {
+    font-size: 13px;
+    color: #8e8e93;
+    font-weight: 400;
+    letter-spacing: -0.1px;
 }
 
 
 /* ==================== 加载更多 ==================== */
 
-.load-more-container {
+.load-more {
     display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 40rpx 0;
+    padding: 20px;
+    margin: 16px 0;
 }
 
 .loading-more {
     display: flex;
     align-items: center;
-    gap: 16rpx;
-    color: #6c757d;
-    font-size: 28rpx;
+    gap: 8px;
+    font-size: 14px;
+    color: #8e8e93;
 }
 
-.loading-spinner-small {
-    width: 40rpx;
-    height: 40rpx;
-    border: 4rpx solid #e9ecef;
-    border-top: 4rpx solid #667eea;
+.mini-spinner {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #f3f3f3;
+    border-top: 1.5px solid #007AFF;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
-.load-more-btn {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    color: #667eea;
-    border: 2rpx solid #667eea;
-    border-radius: 48rpx;
-    padding: 20rpx 40rpx;
-    font-size: 28rpx;
+.load-more-text {
+    font-size: 16px;
+    color: #007AFF;
     font-weight: 500;
-}
-
-.load-more-btn:active {
-    background: rgba(102, 126, 234, 0.2);
-}
-
-
-/* ==================== 底部间距 ==================== */
-
-.bottom-space {
-    height: 120rpx;
+    letter-spacing: -0.3px;
 }
 
 
 /* ==================== 响应式设计 ==================== */
 
 @media (max-width: 375px) {
-    .card-content {
-        padding: 24rpx;
+    .main-content {
+        padding: 12px;
+    }
+    .section-title {
+        font-size: 20px;
     }
     .room-name {
-        font-size: 32rpx;
+        font-size: 16px;
     }
-    .detail-date {
-        font-size: 28rpx;
+    .booking-card {
+        padding: 14px;
     }
+}
+
+
+/* ==================== 高分辨率适配 ==================== */
+
+@media (-webkit-min-device-pixel-ratio: 2) {
+    .ios-navbar {
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.15);
+    }
+    .booking-card {
+        border: 0.5px solid rgba(0, 0, 0, 0.06);
+    }
+}
+
+
+/* ==================== 暗黑模式支持 ==================== */
+
+@media (prefers-color-scheme: dark) {
+    .apple-container {
+        background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+    }
+    .ios-navbar {
+        background: rgba(28, 28, 30, 0.8);
+        border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
+    }
+    .nav-title {
+        color: #ffffff;
+    }
+    .booking-card {
+        background: #2c2c2e;
+        border: 0.5px solid rgba(255, 255, 255, 0.04);
+    }
+    .room-name,
+    .detail-text {
+        color: #ffffff;
+    }
+    .section-title {
+        color: #ffffff;
+    }
+}
+
+
+/* ==================== 底部间距 ==================== */
+
+.bottom-spacing {
+    height: 40px;
 }

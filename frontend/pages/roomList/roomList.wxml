@@ -1,145 +1,155 @@
-<!--会议室列表页面 - Apple Design风格-->
-<view class="container fade-in">
-  <!-- 自定义导航栏 -->
-  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
-    <view class="navbar-content" style="height: {{customNavBarHeight}}px;">
-      <text class="navbar-title">会议室列表</text>
-      <view class="navbar-right-icons" style="right: {{menuButtonInfo.width + 20}}px;">
-        <image 
-          class="navbar-icon" 
-          src="/images/icons/search.svg" 
-          bindtap="goToSearchPage"
-          mode="aspectFit"
-        ></image>
-        <image 
-          class="navbar-icon" 
-          src="/images/icons/user.svg" 
-          bindtap="goToMyBookings"
-          mode="aspectFit"
-        ></image>
-        <!-- 管理员图标移到底部浮动按钮，避免拥挤 -->
+<!-- 🎨 Apple iOS Design - 会议室列表页面 -->
+<view class="ios-app-container">
+  <!-- iOS 风格导航栏 -->
+  <view class="ios-nav-bar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-bar-content">
+      <text class="nav-bar-title">会议室</text>
+      <view class="nav-bar-actions">
+        <view class="nav-action-button" bindtap="goToSearchPage">
+          <text class="sf-icon">􀊫</text>
+        </view>
+        <view class="nav-action-button" bindtap="goToMyBookings">
+          <text class="sf-icon">􀉪</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- 搜索和筛选区域 - 吸顶效果 -->
-  <view class="search-filter-area sticky-header" style="top: {{statusBarHeight + customNavBarHeight}}px;">
-    <view class="search-input-wrapper">
-      <image class="search-icon-in-input" src="/images/icons/search-grey.svg" mode="aspectFit"></image>
+  <!-- 搜索栏 -->
+  <view class="search-section" style="top: {{statusBarHeight + 44}}px;">
+    <view class="search-bar">
+      <text class="search-icon">􀊫</text>
       <input
         class="search-input"
-        placeholder="搜索会议室名称或描述"
+        placeholder="搜索会议室"
         placeholder-class="search-placeholder"
         confirm-type="search"
         bindinput="onSearchInput"
         bindconfirm="onSearchConfirm"
         value="{{searchKeyword}}"
       />
+      <view wx:if="{{searchKeyword}}" class="clear-button" bindtap="clearSearch">
+        <text class="sf-icon">􀁡</text>
+      </view>
     </view>
+    
+    <!-- 筛选按钮 -->
     <view class="filter-button" bindtap="showFilterOptions">
-      <image class="filter-icon" src="/images/icons/filter.svg" mode="aspectFit"></image>
+      <text class="sf-icon">􀌈</text>
     </view>
   </view>
 
-  <!-- 会议室列表区域 -->
-  <scroll-view
-    class="room-list-scroll-view"
-    scroll-y
-    bindscrolltolower="onReachBottom"
-    wx:if="{{!loading && rooms.length > 0}}"
-  >
-    <view wx:for="{{rooms}}" wx:key="id" class="room-card-wrapper slide-in-up" style="animation-delay: {{index * 0.05}}s;">
-      <view
-        class="room-card overlay-card enhanced-shadow"
-        data-room-id="{{item.id || item.roomId || item._id}}"
-        bindtap="goToRoomDetail"
-      >
-        <!-- 背景图片层 -->
-        <view class="room-background-container">
-          <image 
-            wx:if="{{!item.imageError}}"
-            class="room-background-image" 
-            src="{{item.displayImage}}" 
-            mode="aspectFill" 
-            lazy-load
-            binderror="onImageError"
-            bindload="onImageLoad"
-            data-room-id="{{item.id}}"
-          ></image>
-          <view wx:else class="room-background-placeholder">
-            <image 
-              class="room-default-background" 
-              src="/images/default_room.svg" 
-              mode="aspectFill"
-            ></image>
-          </view>
-          <!-- 加载状态 -->
-          <view wx:if="{{item.imageLoading}}" class="background-loading-overlay">
-            <image class="background-loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
-          </view>
-        </view>
-
-        <!-- 渐变遮罩层 -->
-        <view class="room-gradient-overlay"></view>
-
-        <!-- 状态角标 -->
-        <view class="room-status-badge {{item.status === 'available' ? 'badge-available' : 'badge-unavailable'}}">
-          <text class="badge-text">
-            {{item.status === 'available' ? '可预约' : '已约满'}}
-          </text>
-        </view>
-
-        <!-- 底部信息叠层卡片 -->
-        <view class="room-info-overlay">
-          <view class="room-info-content">
-            <text class="room-name-overlay">{{item.name}}</text>
-            
-            <view class="room-meta-overlay">
-              <view class="meta-item">
-                <text class="meta-icon">👥</text>
-                <text class="meta-text">{{item.capacity}}人</text>
-              </view>
-              <view class="meta-item">
-                <text class="meta-icon">📍</text>
-                <text class="meta-text">{{item.location}}</text>
-              </view>
-            </view>
-            
-            <text class="room-description-overlay" style="-webkit-line-clamp: 2;">
-              {{item.description || '暂无描述'}}
-            </text>
-          </view>
-        </view>
+  <!-- 主要内容区域 -->
+  <view class="main-content" style="padding-top: {{statusBarHeight + 44 + 80}}px;">
+    
+    <!-- 加载状态 -->
+    <view wx:if="{{loading}}" class="loading-view">
+      <view class="ios-activity-indicator">
+        <view class="spinner"></view>
+        <text class="loading-label">正在加载...</text>
       </view>
     </view>
 
-    <!-- 加载更多提示 -->
-    <view wx:if="{{loadingMore}}" class="loading-more">
-      <image class="loading-more-spinner" src="/images/loading.svg" mode="aspectFit"></image>
-      <text class="loading-more-text">加载中...</text>
+    <!-- 空状态 -->
+    <view wx:elif="{{!loading && rooms.length === 0}}" class="empty-view">
+      <view class="empty-content">
+        <view class="empty-icon">
+          <text class="sf-symbol-large">􀂋</text>
+        </view>
+        <text class="empty-title">{{searchKeyword ? '未找到相关会议室' : '暂无会议室'}}</text>
+        <text class="empty-subtitle">{{searchKeyword ? '请尝试其他关键词' : '下拉刷新或联系管理员'}}</text>
+        <button wx:if="{{searchKeyword}}" class="ios-button secondary" bindtap="clearSearch">
+          清除搜索
+        </button>
+      </view>
     </view>
-  </scroll-view>
 
-  <!-- 页面加载状态 -->
-  <view wx:if="{{loading}}" class="loading-overlay">
-    <image class="loading-spinner" src="/images/loading.svg" mode="aspectFit"></image>
-    <text class="loading-text">加载中，请稍候...</text>
+    <!-- 会议室列表 -->
+    <scroll-view
+      wx:else
+      class="room-list"
+      scroll-y
+      bindscrolltolower="onReachBottom"
+      refresher-enabled="{{true}}"
+      refresher-triggered="{{refreshing}}"
+      bindrefresherrefresh="onRefresh"
+    >
+      <view class="room-grid">
+        <view wx:for="{{rooms}}" wx:key="id" 
+              class="room-card-wrapper" 
+              data-room-id="{{item.id || item.roomId || item._id}}"
+              bindtap="goToRoomDetail">
+          
+          <view class="room-card">
+            <!-- 房间图片 -->
+            <view class="room-image-container">
+              <image 
+                wx:if="{{!item.imageError}}"
+                class="room-image" 
+                src="{{item.displayImage}}" 
+                mode="aspectFill" 
+                lazy-load
+                binderror="onImageError"
+                bindload="onImageLoad"
+                data-room-id="{{item.id}}"
+              />
+              <view wx:else class="room-image-placeholder">
+                <text class="placeholder-icon">􀎟</text>
+              </view>
+              
+              <!-- 状态指示器 -->
+              <view class="availability-indicator {{item.status === 'available' ? 'available' : 'occupied'}}">
+                <text class="indicator-dot"></text>
+              </view>
+            </view>
+
+            <!-- 房间信息 -->
+            <view class="room-info">
+              <view class="room-header">
+                <text class="room-name">{{item.name}}</text>
+                <view class="capacity-badge">
+                  <text class="sf-mini-icon">􀝊</text>
+                  <text class="capacity-text">{{item.capacity}}</text>
+                </view>
+              </view>
+              
+              <view class="room-location">
+                <text class="location-icon">􀋑</text>
+                <text class="location-text">{{item.location}}</text>
+              </view>
+              
+              <text class="room-description">{{item.description || '暂无描述'}}</text>
+              
+              <!-- 底部行动区域 -->
+              <view class="room-actions">
+                <view class="status-chip {{item.status === 'available' ? 'available' : 'occupied'}}">
+                  <text class="status-text">{{item.status === 'available' ? '可预约' : '已占用'}}</text>
+                </view>
+                <view class="book-button">
+                  <text class="sf-action-icon">􀯶</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载更多 -->
+      <view wx:if="{{loadingMore}}" class="loading-more">
+        <view class="mini-spinner"></view>
+        <text class="loading-more-text">正在加载更多...</text>
+      </view>
+
+      <!-- 底部间距 -->
+      <view class="bottom-spacing"></view>
+    </scroll-view>
   </view>
 
-  <!-- 无会议室数据占位符 -->
-  <view wx:elif="{{!loading && rooms.length === 0}}" class="no-rooms-placeholder">
-    <image class="empty-icon" src="/images/icons/empty.svg" mode="aspectFit"></image>
-    <text class="empty-text">{{searchKeyword ? '抱歉，没有找到符合条件的会议室' : '暂无会议室数据'}}</text>
-    <text class="empty-subtext">{{searchKeyword ? '请尝试其他关键词' : '下拉刷新或联系管理员添加'}}</text>
-    <view wx:if="{{searchKeyword}}" class="clear-search-button" bindtap="clearSearch">
-      <text class="clear-search-text">清除搜索</text>
-    </view>
-  </view>
-
-  <!-- 管理员入口按钮 - Apple风格圆形浮动按钮 -->
-  <view wx:if="{{isAdmin && !loading}}" class="admin-entry-wrapper">
-    <view class="admin-entry-button enhanced-admin-button" bindtap="goToAdminPanel">
-      <image class="admin-icon" src="/images/icons/admin.svg" mode="aspectFit"></image>
+  <!-- 管理员浮动按钮 -->
+  <view wx:if="{{isAdmin}}" class="floating-admin-button" bindtap="goToAdminPanel">
+    <text class="admin-icon">􀢎</text>
+    <view class="admin-badge" wx:if="{{hasAdminNotifications}}">
+      <text class="badge-count">!</text>
     </view>
   </view>
 </view> 

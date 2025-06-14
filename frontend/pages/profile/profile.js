@@ -1,4 +1,5 @@
 const app = getApp();
+const request = require('../../utils/request.js'); // 导入网络请求工具
 
 Page({
     data: {
@@ -10,8 +11,7 @@ Page({
             name: '',
             phone: ''
         },
-        statusBarHeight: 0, // 状态栏高度
-        apiBaseUrl: 'https://www.cacophonyem.me/meeting/api'
+        statusBarHeight: 0 // 状态栏高度
     },
 
     onLoad() {
@@ -85,7 +85,7 @@ Page({
         }
 
         try {
-            const result = await this.requestAPI('GET', '/api/user/bookings');
+            const result = await request.get('/api/user/bookings');
             if (result.success && result.data) {
                 this.setData({
                     upcomingCount: result.data.upcomingBookings.length
@@ -96,37 +96,7 @@ Page({
         }
     },
 
-    /**
-     * 通用API请求方法
-     */
-    async requestAPI(method, url, data = {}) {
-        return new Promise((resolve, reject) => {
-            const requestConfig = {
-                url: `${this.data.apiBaseUrl}${url}`,
-                method: method,
-                header: {
-                    'Content-Type': 'application/json',
-                    'X-User-Openid': this.data.userInfo.openid
-                },
-                success: (res) => {
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        resolve(res.data);
-                    } else {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.data?.message || 'Request failed'}`));
-                    }
-                },
-                fail: (err) => {
-                    reject(new Error(err.errMsg || '网络请求失败'));
-                }
-            };
 
-            if (method !== 'GET' && Object.keys(data).length > 0) {
-                requestConfig.data = data;
-            }
-
-            wx.request(requestConfig);
-        });
-    },
 
     /**
      * 跳转到我的预约页面
@@ -218,7 +188,7 @@ Page({
         try {
             this.setData({ loading: true });
 
-            const result = await this.requestAPI('PUT', '/api/user/contact', {
+            const result = await request.put('/api/user/contact', {
                 contactName: name,
                 contactPhone: phone
             });
