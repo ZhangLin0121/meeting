@@ -1,0 +1,104 @@
+<!-- frontend/pages/profile/profile.wxml -->
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <text class="navbar-title">我的</text>
+    </view>
+  </view>
+
+  <!-- 用户信息卡片 -->
+  <view class="user-info-card">
+    <view wx:if="{{userInfo.avatarUrl}}" class="avatar">
+      <image src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+    </view>
+    <view wx:else class="avatar default-avatar">
+      <text>{{userInfo.nickname ? userInfo.nickname.charAt(0) : '用'}}</text>
+    </view>
+    <view class="user-details">
+      <text class="nickname">{{userInfo.nickname || '微信用户'}}</text>
+      <text class="role-badge">{{userInfo.role === 'admin' ? '管理员' : '员工'}}</text>
+    </view>
+  </view>
+
+  <!-- 功能列表 -->
+  <view class="function-list">
+    <!-- 我的预约 -->
+    <view class="function-item" bindtap="goToMyBookings">
+      <view class="function-icon">
+        <text class="icon-text">📅</text>
+      </view>
+      <view class="function-content">
+        <text class="function-title">我的预约</text>
+        <text class="function-desc">查看我的会议室预约记录</text>
+      </view>
+      <view class="function-badge" wx:if="{{upcomingCount > 0}}">
+        <text>{{upcomingCount}}</text>
+      </view>
+      <view class="function-arrow">
+        <text class="arrow-text">></text>
+      </view>
+    </view>
+
+    <!-- 管理员功能 -->
+    <view wx:if="{{userInfo.role === 'admin'}}" class="function-item" bindtap="goToAdmin">
+      <view class="function-icon">
+        <image src="/images/icons/admin.svg" mode="aspectFit"></image>
+      </view>
+      <view class="function-content">
+        <text class="function-title">会议室管理</text>
+        <text class="function-desc">管理会议室和预约信息</text>
+      </view>
+      <view class="function-arrow">
+        <text class="arrow-text">></text>
+      </view>
+    </view>
+
+    <!-- 联系信息 -->
+    <view class="function-item" bindtap="showContactModal">
+      <view class="function-icon">
+        <text class="icon-text">📞</text>
+      </view>
+      <view class="function-content">
+        <text class="function-title">联系信息</text>
+        <text class="function-desc">{{userInfo.contactName ? userInfo.contactName + ' ' + userInfo.contactPhone : '点击设置联系信息'}}</text>
+      </view>
+      <view class="function-arrow">
+        <text class="arrow-text">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系信息设置弹窗 -->
+  <view wx:if="{{showContactEdit}}" class="modal-mask" bindtap="hideContactModal">
+    <view class="modal-container" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">联系信息</text>
+        <view class="modal-close" bindtap="hideContactModal">
+          <image src="/images/icons/close.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view class="modal-content">
+        <view class="form-item">
+          <text class="form-label">姓名</text>
+          <input class="form-input" value="{{contactForm.name}}" bindinput="onContactNameInput" placeholder="请输入姓名" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">电话</text>
+          <input class="form-input" value="{{contactForm.phone}}" bindinput="onContactPhoneInput" placeholder="请输入手机号" type="number" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="hideContactModal">取消</button>
+        <button class="modal-btn confirm-btn" bindtap="saveContactInfo">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-mask">
+    <view class="loading-content">
+      <text>加载中...</text>
+    </view>
+  </view>
+</view> 

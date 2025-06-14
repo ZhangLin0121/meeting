@@ -3,8 +3,29 @@
         "pages/roomList/roomList",
         "pages/roomDetail/roomDetail",
         "pages/admin/admin",
-        "pages/myBookings/myBookings"
+        "pages/myBookings/myBookings",
+        "pages/profile/profile"
     ],
+    "tabBar": {
+        "color": "#7A7E83",
+        "selectedColor": "#1296db",
+        "backgroundColor": "#ffffff",
+        "borderStyle": "black",
+        "position": "bottom",
+        "list": [{
+                "pagePath": "pages/roomList/roomList",
+                "iconPath": "images/icons/search.svg",
+                "selectedIconPath": "images/icons/search.svg",
+                "text": "会议室"
+            },
+            {
+                "pagePath": "pages/profile/profile",
+                "iconPath": "images/icons/user.svg",
+                "selectedIconPath": "images/icons/user.svg",
+                "text": "我的"
+            }
+        ]
+    },
     "window": {
         "backgroundTextStyle": "dark",
         "navigationBarBackgroundColor": "#ffffff",

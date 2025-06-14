@@ -4,14 +4,29 @@ Page({
     data: {
         upcomingBookings: [], // 即将开始的预约
         pastBookings: [], // 历史预约
-        loading: false, // 加载状态
+        loading: false, // 初始加载状态
+        refreshing: false, // 下拉刷新状态
+        loadingMore: false, // 加载更多状态
         isEmpty: false, // 是否没有预约记录
         error: '', // 错误信息
         userOpenId: '', // 用户openid，用于API请求
+        statusBarHeight: 0, // 状态栏高度
+        hasMore: false, // 是否有更多数据
+        currentPage: 1, // 当前页码
+        pageSize: 10, // 每页数量
         apiBaseUrl: 'https://www.cacophonyem.me/meeting/api' // API基础URL
     },
 
     onLoad() {
+        // 获取系统信息
+        wx.getSystemInfo({
+            success: (res) => {
+                this.setData({
+                    statusBarHeight: res.statusBarHeight
+                });
+            }
+        });
+
         this.getUserOpenId();
     },
 
@@ -71,35 +86,114 @@ Page({
     /**
      * 获取我的预约记录
      */
-    async fetchMyBookings() {
+    async fetchMyBookings(isRefresh = false, isLoadMore = false) {
         if (!this.data.userOpenId) {
             console.log('⚠️ 用户未登录，跳过获取我的预约记录');
             this.setData({ isEmpty: true, upcomingBookings: [], pastBookings: [] });
             return;
         }
 
-        this.setData({ loading: true, error: '', isEmpty: false });
+        // 设置加载状态
+        if (isRefresh) {
+            this.setData({ refreshing: true });
+        } else if (isLoadMore) {
+            this.setData({ loadingMore: true });
+        } else {
+            this.setData({ loading: true });
+        }
+
+        this.setData({ error: '', isEmpty: false });
         console.log('🔍 开始获取我的预约记录...');
 
         try {
-            const result = await this.requestAPI('GET', '/api/user/bookings');
+            const result = await this.requestAPI('GET', '/api/user/bookings', {
+                page: isLoadMore ? this.data.currentPage + 1 : 1,
+                pageSize: this.data.pageSize
+            });
 
             if (result.success && result.data) {
-                const { upcomingBookings, pastBookings } = result.data;
-                this.setData({
-                    upcomingBookings: upcomingBookings,
-                    pastBookings: pastBookings,
-                    isEmpty: upcomingBookings.length === 0 && pastBookings.length === 0
-                });
-                console.log('✅ 获取我的预约记录成功。即将开始:', upcomingBookings.length, '历史:', pastBookings.length);
+                const { upcomingBookings, pastBookings, hasMore, currentPage } = result.data;
+
+                // 格式化预约数据，添加格式化的创建时间
+                const formatBookings = (bookings) => {
+                    return bookings.map(booking => ({
+                        ...booking,
+                        createdAt: this.formatDate(booking.createdAt)
+                    }));
+                };
+
+                const formattedUpcoming = formatBookings(upcomingBookings);
+                const formattedPast = formatBookings(pastBookings);
+
+                if (isLoadMore) {
+                    // 加载更多，追加数据
+                    this.setData({
+                        upcomingBookings: [...this.data.upcomingBookings, ...formattedUpcoming],
+                        pastBookings: [...this.data.pastBookings, ...formattedPast],
+                        hasMore: hasMore || false,
+                        currentPage: currentPage || this.data.currentPage + 1,
+                        isEmpty: this.data.upcomingBookings.length === 0 && this.data.pastBookings.length === 0 && formattedUpcoming.length === 0 && formattedPast.length === 0
+                    });
+                } else {
+                    // 首次加载或刷新，替换数据
+                    this.setData({
+                        upcomingBookings: formattedUpcoming,
+                        pastBookings: formattedPast,
+                        hasMore: hasMore || false,
+                        currentPage: currentPage || 1,
+                        isEmpty: formattedUpcoming.length === 0 && formattedPast.length === 0
+                    });
+                }
+
+                console.log('✅ 获取我的预约记录成功。即将开始:', formattedUpcoming.length, '历史:', formattedPast.length);
             } else {
                 throw new Error(result.message || '获取预约记录失败');
             }
         } catch (error) {
             console.error('❌ 获取我的预约记录失败:', error);
-            this.setData({ error: error.message || '加载预约记录失败，请检查网络' });
+            if (!isLoadMore) {
+                this.setData({ error: error.message || '加载预约记录失败，请检查网络' });
+            } else {
+                wx.showToast({
+                    title: '加载失败',
+                    icon: 'none'
+                });
+            }
         } finally {
-            this.setData({ loading: false });
+            this.setData({
+                loading: false,
+                refreshing: false,
+                loadingMore: false
+            });
+        }
+    },
+
+    /**
+     * 格式化日期时间
+     */
+    formatDate(dateString) {
+        if (!dateString) return '';
+
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = now.getTime() - date.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) {
+                // 今天，显示具体时间
+                return `今天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+            } else if (diffDays === 1) {
+                return '昨天';
+            } else if (diffDays < 7) {
+                return `${diffDays}天前`;
+            } else {
+                // 超过一周，显示具体日期
+                return `${date.getMonth() + 1}月${date.getDate()}日`;
+            }
+        } catch (error) {
+            console.error('日期格式化失败:', error);
+            return '';
         }
     },
 
@@ -131,6 +225,10 @@ Page({
 
             if (method !== 'GET' && Object.keys(data).length > 0) {
                 requestConfig.data = data;
+            } else if (method === 'GET' && Object.keys(data).length > 0) {
+                // GET请求将参数添加到URL
+                const params = new URLSearchParams(data).toString();
+                requestConfig.url += `?${params}`;
             }
 
             wx.request(requestConfig);
@@ -138,12 +236,58 @@ Page({
     },
 
     /**
-     * 跳转到会议室详情页面
+     * 返回上一页
      */
-    goToRoomDetail(e) {
-        const roomId = e.currentTarget.dataset.roomid;
+    goBack() {
+        if (getCurrentPages().length > 1) {
+            wx.navigateBack();
+        } else {
+            // 如果是首页，跳转到会议室列表
+            wx.reLaunch({
+                url: '/pages/roomList/roomList'
+            });
+        }
+    },
+
+    /**
+     * 刷新数据
+     */
+    refreshData() {
+        this.fetchMyBookings();
+    },
+
+    /**
+     * 下拉刷新
+     */
+    onRefresh() {
+        this.fetchMyBookings(true);
+    },
+
+    /**
+     * 加载更多
+     */
+    loadMore() {
+        if (this.data.hasMore && !this.data.loadingMore) {
+            this.fetchMyBookings(false, true);
+        }
+    },
+
+    /**
+     * 预约卡片点击事件
+     */
+    onBookingCardTap(e) {
+        const booking = e.currentTarget.dataset.booking;
+        if (!booking || !booking.roomId) {
+            wx.showToast({
+                title: '会议室信息异常',
+                icon: 'none'
+            });
+            return;
+        }
+
+        // 跳转到会议室详情页
         wx.navigateTo({
-            url: `/pages/roomDetail/roomDetail?roomId=${roomId}`
+            url: `/pages/roomDetail/roomDetail?roomId=${booking.roomId}`
         });
     },
 
@@ -151,7 +295,7 @@ Page({
      * 跳转到会议室列表页面
      */
     goToRoomList() {
-        wx.navigateTo({
+        wx.switchTab({
             url: '/pages/roomList/roomList'
         });
     },
@@ -161,5 +305,14 @@ Page({
      */
     retryLoad() {
         this.fetchMyBookings();
+    },
+
+    /**
+     * 页面滚动到底部
+     */
+    onReachBottom() {
+        if (this.data.hasMore && !this.data.loadingMore) {
+            this.loadMore();
+        }
     }
 });

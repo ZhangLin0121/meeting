@@ -216,7 +216,7 @@ class UserController {
     /**
      * 获取用户自己的预约记录
      * GET /api/user/bookings
-     * @param {Object} req - 请求对象，包含用户信息 (req.user)
+     * @param {Object} req - 请求对象，包含用户信息 (req.user) 和分页参数 (query)
      * @param {Object} res - 响应对象
      */
     static async getUserBookings(req, res) {
@@ -224,12 +224,21 @@ class UserController {
             const userId = req.user._id; // 从认证中间件获取用户ID
             const now = TimeHelper.now(); // 获取当前时间（Moment对象，已考虑时区）
 
-            console.log(`📋 用户 ${userId} 请求获取预约记录...`);
+            // 分页参数
+            const page = parseInt(req.query.page) || 1;
+            const pageSize = parseInt(req.query.pageSize) || 20;
+            const skip = (page - 1) * pageSize;
+
+            console.log(`📋 用户 ${userId} 请求获取预约记录 (第${page}页，每页${pageSize}条)...`);
 
             // 获取当前用户的所有预约记录，排除已删除的预约
+            const totalCount = await Booking.countDocuments({ userId: userId, status: { $ne: 'deleted' } });
+
             const bookings = await Booking.find({ userId: userId, status: { $ne: 'deleted' } })
                 .populate('roomId', 'name capacity location images') // 关联查询会议室信息
-                .sort({ bookingDate: 1, startTime: 1 }) // 按日期和开始时间升序排列
+                .sort({ bookingDate: -1, startTime: -1 }) // 按日期和开始时间倒序排列（最新的在前面）
+                .skip(skip)
+                .limit(pageSize)
                 .lean(); // 返回Plain Old JavaScript Object (POJO)
 
             const upcomingBookings = [];
@@ -288,8 +297,24 @@ class UserController {
             // 即将开始的预约按日期正序排列
             upcomingBookings.sort((a, b) => new Date(a.bookingDate + ' ' + a.startTime) - new Date(b.bookingDate + ' ' + b.startTime));
 
-            console.log(`✅ 用户 ${userId} 获取预约记录成功。即将开始: ${upcomingBookings.length}, 历史: ${pastBookings.length}`);
-            return ResponseHelper.success(res, { upcomingBookings, pastBookings }, '获取预约记录成功');
+            // 计算分页信息
+            const totalPages = Math.ceil(totalCount / pageSize);
+            const hasMore = page < totalPages;
+
+            console.log(`✅ 用户 ${userId} 获取预约记录成功。即将开始: ${upcomingBookings.length}, 历史: ${pastBookings.length}, 总数: ${totalCount}, 页数: ${page}/${totalPages}`);
+
+            return ResponseHelper.success(res, {
+                upcomingBookings,
+                pastBookings,
+                pagination: {
+                    currentPage: page,
+                    totalPages: totalPages,
+                    totalCount: totalCount,
+                    pageSize: pageSize,
+                    hasMore: hasMore
+                },
+                hasMore: hasMore // 兼容前端期望的字段
+            }, '获取预约记录成功');
 
         } catch (error) {
             console.error('❌ 获取用户预约记录失败:', error);
