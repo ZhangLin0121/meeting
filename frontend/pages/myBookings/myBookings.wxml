@@ -1,0 +1,80 @@
+<!-- frontend/pages/myBookings/myBookings.wxml -->
+<view class="container">
+  <view class="header">
+    <text class="title">我的预约</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-tips">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:else>
+    <view wx:if="{{error}}" class="error-tips">
+      <text>{{error}}</text>
+      <button size="mini" bindtap="retryLoad">重试</button>
+    </view>
+
+    <view wx:elif="{{isEmpty}}" class="empty-tips">
+      <text>您还没有任何预约哦</text>
+      <button class="primary-button" bindtap="goToRoomList">去预订</button>
+    </view>
+
+    <scroll-view wx:else scroll-y class="booking-list-scroll">
+      <!-- 即将开始的预约 -->
+      <block wx:if="{{upcomingBookings.length > 0}}">
+        <view class="section-title">即将开始 ({{upcomingBookings.length}})</view>
+        <view class="booking-cards-container">
+          <view wx:for="{{upcomingBookings}}" wx:key="id" class="booking-card" bindtap="goToRoomDetail" data-roomid="{{item.roomId}}">
+            <image wx:if="{{item.roomImage}}" src="{{item.roomImage}}" mode="aspectFill" class="card-image"></image>
+            <view class="card-content">
+              <view class="card-title">{{item.conferenceRoomName}}</view>
+              <view class="card-row">
+                <text class="card-label">日期:</text>
+                <text class="card-value">{{item.bookingDateWithWeekday}}</text>
+              </view>
+              <view class="card-row">
+                <text class="card-label">时间:</text>
+                <text class="card-value">{{item.startTime}} - {{item.endTime}}</text>
+              </view>
+              <view class="card-row">
+                <text class="card-label">主题:</text>
+                <text class="card-value">{{item.topic}}</text>
+              </view>
+              <view class="card-status status-{{item.displayStatus === '已预约' ? 'upcoming' : 'in-progress'}}">
+                {{item.displayStatus}}
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 历史预约 -->
+      <block wx:if="{{pastBookings.length > 0}}">
+        <view class="section-title">历史预约 ({{pastBookings.length}})</view>
+        <view class="booking-cards-container">
+          <view wx:for="{{pastBookings}}" wx:key="id" class="booking-card past-booking" bindtap="goToRoomDetail" data-roomid="{{item.roomId}}">
+            <image wx:if="{{item.roomImage}}" src="{{item.roomImage}}" mode="aspectFill" class="card-image"></image>
+            <view class="card-content">
+              <view class="card-title">{{item.conferenceRoomName}}</view>
+              <view class="card-row">
+                <text class="card-label">日期:</text>
+                <text class="card-value">{{item.bookingDateWithWeekday}}</text>
+              </view>
+              <view class="card-row">
+                <text class="card-label">时间:</text>
+                <text class="card-value">{{item.startTime}} - {{item.endTime}}</text>
+              </view>
+              <view class="card-row">
+                <text class="card-label">主题:</text>
+                <text class="card-value">{{item.topic}}</text>
+              </view>
+              <view class="card-status status-{{item.displayStatus === '已取消' ? 'cancelled' : 'completed'}}">
+                {{item.displayStatus}}
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </scroll-view>
+  </view>
+</view> 

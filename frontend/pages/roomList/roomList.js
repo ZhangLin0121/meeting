@@ -850,5 +850,15 @@ Page({
             icon: 'none',
             duration: 1500
         });
+    },
+
+    /**
+     * 跳转到我的预约页面
+     */
+    goToMyBookings() {
+        console.log('🔗 跳转到我的预约页面');
+        wx.navigateTo({
+            url: '/pages/myBookings/myBookings'
+        });
     }
 });

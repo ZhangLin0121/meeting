@@ -2,7 +2,8 @@
     "pages": [
         "pages/roomList/roomList",
         "pages/roomDetail/roomDetail",
-        "pages/admin/admin"
+        "pages/admin/admin",
+        "pages/myBookings/myBookings"
     ],
     "window": {
         "backgroundTextStyle": "dark",

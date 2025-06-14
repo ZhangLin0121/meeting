@@ -34,4 +34,7 @@ router.put('/contact',
     UserController.updateContact
 );
 
+// 获取用户自己的预约记录
+router.get('/bookings', UserController.getUserBookings);
+
 module.exports = router;

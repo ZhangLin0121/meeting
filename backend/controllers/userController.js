@@ -1,5 +1,7 @@
 const User = require('../models/User');
+const Booking = require('../models/Booking');
 const ResponseHelper = require('../utils/responseHelper');
+const TimeHelper = require('../utils/timeHelper');
 const config = require('../config');
 const axios = require('axios');
 
@@ -208,6 +210,90 @@ class UserController {
         } catch (error) {
             console.error('获取用户角色失败:', error);
             return ResponseHelper.serverError(res, '获取角色信息失败', error.message);
+        }
+    }
+
+    /**
+     * 获取用户自己的预约记录
+     * GET /api/user/bookings
+     * @param {Object} req - 请求对象，包含用户信息 (req.user)
+     * @param {Object} res - 响应对象
+     */
+    static async getUserBookings(req, res) {
+        try {
+            const userId = req.user._id; // 从认证中间件获取用户ID
+            const now = TimeHelper.now(); // 获取当前时间（Moment对象，已考虑时区）
+
+            console.log(`📋 用户 ${userId} 请求获取预约记录...`);
+
+            // 获取当前用户的所有预约记录，排除已删除的预约
+            const bookings = await Booking.find({ userId: userId, status: { $ne: 'deleted' } })
+                .populate('roomId', 'name capacity location images') // 关联查询会议室信息
+                .sort({ bookingDate: 1, startTime: 1 }) // 按日期和开始时间升序排列
+                .lean(); // 返回Plain Old JavaScript Object (POJO)
+
+            const upcomingBookings = [];
+            const pastBookings = [];
+
+            for (const booking of bookings) {
+                // 将预约日期和结束时间合并，用于判断预约是否已结束
+                const bookingEndDateTime = TimeHelper.combineDateAndTime(booking.bookingDate, booking.endTime);
+                // 将预约日期和开始时间合并，用于判断预约是否进行中
+                const bookingStartDateTime = TimeHelper.combineDateAndTime(booking.bookingDate, booking.startTime);
+
+                // 格式化数据，确保前端易于显示
+                const formattedBooking = {
+                    id: booking._id,
+                    roomId: booking.roomId ? booking.roomId._id : null, // 确保roomId存在
+                    conferenceRoomName: booking.roomId ? booking.roomId.name : '未知会议室',
+                    roomLocation: booking.roomId ? booking.roomId.location : '未知地点',
+                    roomImage: (booking.roomId && booking.roomId.images && booking.roomId.images.length > 0) ? booking.roomId.images[0] : '', // 提供默认图片
+                    bookingDate: TimeHelper.formatDate(booking.bookingDate), // YYYY-MM-DD
+                    bookingDateWithWeekday: TimeHelper.formatDateWithWeekday(booking.bookingDate), // YYYY-MM-DD (周X)
+                    startTime: booking.startTime,
+                    endTime: booking.endTime,
+                    topic: booking.topic,
+                    attendeesCount: booking.attendeesCount,
+                    contactName: booking.userName, // 使用预约时的联系人姓名
+                    // 手机号脱敏处理
+                    contactPhone: booking.userPhone ? booking.userPhone.substring(0, 3) + '****' + booking.userPhone.substring(7) : '',
+                    status: booking.status, // 原始状态，如 'booked', 'cancelled'
+                    createdAt: booking.createdAt,
+                };
+
+                // 根据当前时间判断预约的显示状态
+                if (bookingEndDateTime.isBefore(now)) {
+                    // 预约已结束
+                    if (booking.status === 'cancelled') {
+                        formattedBooking.displayStatus = '已取消';
+                    } else {
+                        formattedBooking.displayStatus = '已完成';
+                    }
+                    pastBookings.push(formattedBooking);
+                } else {
+                    // 预约尚未结束或正在进行
+                    if (bookingStartDateTime.isBefore(now) && bookingEndDateTime.isAfter(now)) {
+                        formattedBooking.displayStatus = '进行中';
+                    } else if (booking.status === 'cancelled') {
+                        formattedBooking.displayStatus = '已取消'; // 如果是未来的预约但状态是已取消，也显示已取消
+                    } else {
+                        formattedBooking.displayStatus = '已预约';
+                    }
+                    upcomingBookings.push(formattedBooking);
+                }
+            }
+
+            // 历史预约按日期倒序排列（最近的在前面）
+            pastBookings.sort((a, b) => new Date(b.bookingDate + ' ' + b.endTime) - new Date(a.bookingDate + ' ' + a.endTime));
+            // 即将开始的预约按日期正序排列
+            upcomingBookings.sort((a, b) => new Date(a.bookingDate + ' ' + a.startTime) - new Date(b.bookingDate + ' ' + b.startTime));
+
+            console.log(`✅ 用户 ${userId} 获取预约记录成功。即将开始: ${upcomingBookings.length}, 历史: ${pastBookings.length}`);
+            return ResponseHelper.success(res, { upcomingBookings, pastBookings }, '获取预约记录成功');
+
+        } catch (error) {
+            console.error('❌ 获取用户预约记录失败:', error);
+            return ResponseHelper.serverError(res, '获取预约记录失败', error.message);
         }
     }
 }

@@ -152,6 +152,29 @@ class TimeHelper {
     static formatDateTime(date) {
         return moment(date).tz(config.timezone).format('YYYY-MM-DD HH:MM:SS');
     }
+
+    /**
+     * 将日期和时间字符串合并为一个 Moment 对象
+     * @param {Date|string} date 日期对象或日期字符串 (YYYY-MM-DD)
+     * @param {string} time 时间字符串 (HH:MM)
+     * @returns {moment.Moment} 合并后的Moment对象
+     */
+    static combineDateAndTime(date, time) {
+        const dateStr = this.formatDate(date); // 确保日期格式为 YYYY-MM-DD
+        return moment.tz(`${dateStr} ${time}`, config.timezone);
+    }
+
+    /**
+     * 格式化日期为YYYY-MM-DD (周几) 格式
+     * @param {Date|string} date 日期对象或日期字符串
+     * @returns {string} 格式化后的日期字符串
+     */
+    static formatDateWithWeekday(date) {
+        const momentDate = moment(date).tz(config.timezone);
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const weekdayName = weekdays[momentDate.day()];
+        return `${momentDate.format('YYYY-MM-DD')} (${weekdayName})`;
+    }
 }
 
 module.exports = TimeHelper;

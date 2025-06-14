@@ -11,6 +11,12 @@
           bindtap="goToSearchPage"
           mode="aspectFit"
         ></image>
+        <image 
+          class="navbar-icon" 
+          src="/images/icons/user.svg" 
+          bindtap="goToMyBookings"
+          mode="aspectFit"
+        ></image>
         <!-- 管理员图标移到底部浮动按钮，避免拥挤 -->
       </view>
     </view>
