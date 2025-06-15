@@ -853,6 +853,100 @@ Page({
     },
 
     /**
+     * 打开会议室位置地图
+     */
+    openLocationMap(e) {
+        const roomId = e.currentTarget.dataset.roomId;
+        console.log('打开位置地图，会议室ID:', roomId);
+        
+        // 显示加载中
+        wx.showLoading({
+            title: '获取位置信息...',
+        });
+        
+        // 从当前数据中查找会议室
+        const room = this.data.rooms.find(r => r.id === roomId || r.roomId === roomId || r._id === roomId);
+        
+        if (!room) {
+            wx.hideLoading();
+            wx.showToast({
+                title: '未找到会议室信息',
+                icon: 'none',
+                duration: 2000
+            });
+            return;
+        }
+        
+        // 如果会议室数据中已有经纬度信息
+        if (room.latitude && room.longitude) {
+            this.openMap(room);
+            return;
+        }
+        
+        // 如果没有经纬度，则通过地址获取经纬度
+        this.getLocationFromAddress(room);
+    },
+    
+    /**
+     * 通过地址获取经纬度
+     */
+    getLocationFromAddress(room) {
+        // 这里需要替换为您的高德地图API Key
+        const key = '您的高德地图API Key';
+        const address = room.location || '';
+        const url = `https://restapi.amap.com/v3/geocode/geo?key=${key}&address=${encodeURIComponent(address)}&city=全国`;
+        
+        wx.request({
+            url: url,
+            success: (res) => {
+                wx.hideLoading();
+                
+                if (res.data.status === '1' && res.data.geocodes && res.data.geocodes.length > 0) {
+                    const location = res.data.geocodes[0].location.split(',');
+                    const longitude = parseFloat(location[0]);
+                    const latitude = parseFloat(location[1]);
+                    
+                    // 更新会议室数据，添加经纬度信息
+                    room.latitude = latitude;
+                    room.longitude = longitude;
+                    
+                    // 打开地图
+                    this.openMap(room);
+                } else {
+                    wx.showToast({
+                        title: '无法获取位置坐标',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            },
+            fail: (error) => {
+                console.error('❌ 地理编码失败:', error);
+                wx.hideLoading();
+                
+                wx.showToast({
+                    title: '获取位置坐标失败',
+                    icon: 'none',
+                    duration: 2000
+                });
+            }
+        });
+    },
+    
+    /**
+     * 打开地图
+     */
+    openMap(room) {
+        wx.openLocation({
+            latitude: room.latitude,
+            longitude: room.longitude,
+            name: room.name,
+            address: room.location,
+            scale: 18
+        });
+    },
+
+    /**
      * 跳转到我的预约页面
      */
     goToMyBookings() {

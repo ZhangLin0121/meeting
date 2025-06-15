@@ -101,6 +101,11 @@
               <view class="availability-indicator {{item.status === 'available' ? 'available' : 'occupied'}}">
                 <text class="indicator-dot"></text>
               </view>
+              
+              <!-- 状态标签 -->
+              <view class="status-chip image-status-chip {{item.status === 'available' ? 'available' : 'occupied'}}">
+                <text class="status-text">{{item.status === 'available' ? '可预约' : '已占用'}}</text>
+              </view>
             </view>
 
             <!-- 房间信息 -->
@@ -122,12 +127,6 @@
               
               <!-- 底部行动区域 -->
               <view class="room-actions">
-                <view class="status-chip {{item.status === 'available' ? 'available' : 'occupied'}}">
-                  <text class="status-text">{{item.status === 'available' ? '可预约' : '已占用'}}</text>
-                </view>
-                <view class="book-button">
-                  <text class="sf-action-icon">预约</text>
-                </view>
               </view>
             </view>
           </view>

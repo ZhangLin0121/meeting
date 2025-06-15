@@ -17,7 +17,7 @@
         </view>
         <view class="user-info">
           <view class="user-name-section">
-            <text class="user-name">{{userInfo.nickname || '微信用户'}}</text>
+            <text class="user-name">{{userInfo.nickname || '光谷人'}}</text>
             <view class="edit-indicator">
               <image class="edit-icon" src="/images/icons/edit.png" mode="aspectFit"></image>
             </view>
@@ -99,12 +99,12 @@
       <view class="modal-content">
         <view class="ios-form-group">
           <view class="form-row">
-            <text class="form-label">昵称</text>
+            <text class="form-label">公司</text>
             <input 
               class="form-input" 
               value="{{profileForm.nickname}}" 
               bindinput="onNicknameInput" 
-              placeholder="请输入昵称"
+              placeholder="请输入公司名"
               placeholder-class="input-placeholder"
             />
           </view>

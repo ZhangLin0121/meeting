@@ -478,14 +478,16 @@ Page({
 
     /**
      * 生成时间段数组 (08:30-12:00 和 14:30-17:30，每30分钟一个时间段)
+     * 注意：时间槽代表时间段的开始时间，最后一个可选槽的结束时间不能超出工作时间
      */
     generateTimeSlotsArray() {
         const timeSlots = [];
         let index = 0;
 
         // 上午时段 08:30-12:00
+        // 最后一个可选时间槽是11:30，对应的时间段是11:30-12:00
         const morningStart = { hour: 8, minute: 30 };
-        const morningEnd = { hour: 12, minute: 0 };
+        const morningEnd = { hour: 11, minute: 30 }; // 修改：最后一个槽位是11:30
 
         let currentHour = morningStart.hour;
         let currentMinute = morningStart.minute;
@@ -509,8 +511,9 @@ Page({
         }
 
         // 下午时段 14:30-17:30
+        // 最后一个可选时间槽是17:00，对应的时间段是17:00-17:30
         const afternoonStart = { hour: 14, minute: 30 };
-        const afternoonEnd = { hour: 17, minute: 30 };
+        const afternoonEnd = { hour: 17, minute: 0 }; // 修改：最后一个槽位是17:00
 
         currentHour = afternoonStart.hour;
         currentMinute = afternoonStart.minute;
@@ -719,7 +722,121 @@ Page({
 
         this.setData({
             [`bookingForm.${field}`]: value
+        }, () => {
+            // 保存表单数据到本地缓存
+            this.saveFormDataToCache();
         });
+    },
+
+    /**
+     * 保存表单数据到本地缓存
+     */
+    saveFormDataToCache() {
+        try {
+            // 构建缓存数据，包含表单数据和会议室ID
+            const cacheData = {
+                roomId: this.data.roomId,
+                bookingForm: this.data.bookingForm,
+                selectedDate: this.data.selectedDate,
+                selectedStartIndex: this.data.selectedStartIndex,
+                selectedEndIndex: this.data.selectedEndIndex,
+                timestamp: new Date().getTime() // 添加时间戳，用于判断缓存是否过期
+            };
+
+            // 保存到本地缓存
+            wx.setStorageSync('bookingFormCache', cacheData);
+            console.log('✅ 表单数据已缓存:', cacheData);
+        } catch (error) {
+            console.error('❌ 保存表单缓存失败:', error);
+            // 缓存失败不影响正常功能
+        }
+    },
+
+    /**
+     * 从本地缓存恢复表单数据
+     */
+    restoreFormDataFromCache() {
+        try {
+            const cacheData = wx.getStorageSync('bookingFormCache');
+
+            // 检查缓存是否存在且属于当前会议室
+            if (cacheData && cacheData.roomId === this.data.roomId) {
+                // 检查缓存是否过期（24小时）
+                const now = new Date().getTime();
+                const cacheTime = cacheData.timestamp || 0;
+                const cacheExpired = (now - cacheTime) > (24 * 60 * 60 * 1000);
+
+                if (cacheExpired) {
+                    console.log('⚠️ 表单缓存已过期，不恢复');
+                    this.clearFormCache();
+                    return;
+                }
+
+                console.log('📋 从缓存恢复表单数据:', cacheData);
+
+                // 恢复表单数据
+                this.setData({
+                    bookingForm: cacheData.bookingForm || this.data.bookingForm
+                });
+
+                // 如果缓存中有日期和时间段选择，且日期是今天或未来的日期，则恢复
+                if (cacheData.selectedDate) {
+                    const cacheDate = new Date(cacheData.selectedDate);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (cacheDate >= today) {
+                        console.log('🕒 从缓存恢复日期和时间段选择');
+
+                        // 设置日期
+                        this.setData({
+                            selectedDate: cacheData.selectedDate,
+                            selectedDateWithWeekday: this.formatDateWithWeekday(new Date(cacheData.selectedDate))
+                        });
+
+                        // 获取该日期的可用性后，再尝试恢复时间段选择
+                        this.fetchRoomAvailability(cacheData.selectedDate).then(() => {
+                            // 检查缓存的时间段是否有效
+                            if (cacheData.selectedStartIndex >= 0 &&
+                                cacheData.selectedEndIndex >= 0 &&
+                                cacheData.selectedStartIndex <= cacheData.selectedEndIndex) {
+
+                                // 验证时间段是否可用
+                                const validationResult = this.validateTimeRange(
+                                    cacheData.selectedStartIndex,
+                                    cacheData.selectedEndIndex
+                                );
+
+                                if (validationResult.isValid) {
+                                    // 恢复时间段选择
+                                    this.setStartTime(cacheData.selectedStartIndex);
+                                    this.setEndTime(cacheData.selectedStartIndex, cacheData.selectedEndIndex);
+                                } else {
+                                    console.log('⚠️ 缓存的时间段不可用:', validationResult.message);
+                                }
+                            }
+                        });
+                    } else {
+                        console.log('⚠️ 缓存的日期已过期，不恢复时间选择');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ 恢复表单缓存失败:', error);
+            // 恢复失败不影响正常功能
+        }
+    },
+
+    /**
+     * 清除表单缓存
+     */
+    clearFormCache() {
+        try {
+            wx.removeStorageSync('bookingFormCache');
+            console.log('🗑️ 表单缓存已清除');
+        } catch (error) {
+            console.error('❌ 清除表单缓存失败:', error);
+        }
     },
 
     /**

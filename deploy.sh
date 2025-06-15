@@ -120,4 +120,17 @@ echo -e "  • 查看服务状态: ssh ${SERVER_USER}@${SERVER_HOST} 'pm2 status
 echo -e "  • 查看服务日志: ssh ${SERVER_USER}@${SERVER_HOST} 'pm2 logs ${SERVICE_NAME}'"
 echo -e "  • 重启服务: ssh ${SERVER_USER}@${SERVER_HOST} 'pm2 restart ${SERVICE_NAME}'"
 
-echo -e "\n${GREEN}✨ 部署流程完成，服务正常运行！${NC}" 
+echo -e "\n${GREEN}✨ 部署流程完成，服务正常运行！${NC}"
+
+echo "🚀 开始部署后端代码..."
+
+# 部署到服务器
+ssh root@47.122.68.192 << 'EOF'
+cd /root/meeting/backend
+git pull origin main
+pm2 restart meeting-backend
+pm2 status
+echo "✅ 部署完成"
+EOF
+
+echo "🎉 部署流程完成" 

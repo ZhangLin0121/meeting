@@ -33,8 +33,17 @@ async function authenticate(req, res, next) {
         let user = await User.findOne({ openid });
 
         if (!user) {
-            console.log('❌ 用户不存在:', openid);
-            return ResponseHelper.unauthorized(res, '用户不存在，请先注册');
+            console.log('👤 用户不存在，创建新用户:', openid);
+            // 如果用户不存在，创建新用户
+            user = new User({
+                openid,
+                nickname: req.headers['x-nickname'] || req.headers.nickname || '微信用户',
+                avatarUrl: req.headers['x-avatar-url'] || req.headers.avatarurl || '',
+                role: 'employee' // 默认为普通员工
+            });
+
+            await user.save();
+            console.log(`✅ 新用户注册成功: ${openid}`);
         } else {
             console.log(`✅ 用户认证成功: ${openid}`);
         }
