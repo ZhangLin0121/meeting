@@ -869,26 +869,7 @@ Page({
         // 生成选中时间的文本描述
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
-
-        // 结束时间直接使用下一个时间槽的时间
-        // 如果selectedEndIndex + 1 超出数组范围，则计算结束时间
-        let endTime;
-        if (selectedEndIndex + 1 < timeSlots.length) {
-            endTime = timeSlots[selectedEndIndex + 1].time;
-        } else {
-            // 如果是最后一个时间槽，计算结束时间
-            const lastSelectedSlot = timeSlots[selectedEndIndex];
-            const endTimeParts = lastSelectedSlot.time.split(':');
-            let endHour = parseInt(endTimeParts[0]);
-            let endMinute = parseInt(endTimeParts[1]) + 30;
-
-            if (endMinute >= 60) {
-                endHour += 1;
-                endMinute = 0;
-            }
-
-            endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
-        }
+        const endTime = timeSlots[selectedEndIndex].time;
 
         const selectedTimeText = `${startTime} - ${endTime}`;
 
@@ -981,26 +962,7 @@ Page({
         // 获取选中的时间段
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
-
-        // 结束时间直接使用下一个时间槽的时间
-        // 如果selectedEndIndex + 1 超出数组范围，则计算结束时间
-        let endTime;
-        if (selectedEndIndex + 1 < timeSlots.length) {
-            endTime = timeSlots[selectedEndIndex + 1].time;
-        } else {
-            // 如果是最后一个时间槽，计算结束时间
-            const lastSelectedSlot = timeSlots[selectedEndIndex];
-            const endTimeParts = lastSelectedSlot.time.split(':');
-            let endHour = parseInt(endTimeParts[0]);
-            let endMinute = parseInt(endTimeParts[1]) + 30;
-
-            if (endMinute >= 60) {
-                endHour += 1;
-                endMinute = 0;
-            }
-
-            endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
-        }
+        const endTime = timeSlots[selectedEndIndex].time;
 
         console.log('🕒 预约时间:', {
             selectedStartIndex,
