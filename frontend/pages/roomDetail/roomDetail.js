@@ -478,44 +478,87 @@ Page({
     },
 
     /**
-     * 生成时间段数组 - 按时间段进行预约
+     * 生成时间段数组 - 按时间段分组，每30分钟一个时间槽
      * 上午：08:30-12:00、中午：12:00-14:30、下午：14:30-22:00
      */
     generateTimeSlotsArray() {
-        const timeSlots = [{
-                id: 'morning',
-                period: 'morning',
-                title: '上午时段',
-                time: '08:30-12:00',
-                startTime: '08:30',
-                endTime: '12:00',
+        const timeSlots = [];
+        let index = 0;
+
+        // 上午时段 08:30-12:00
+        const morningStart = { hour: 8, minute: 30 };
+        const morningEnd = { hour: 12, minute: 0 };
+
+        let currentHour = morningStart.hour;
+        let currentMinute = morningStart.minute;
+
+        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute < morningEnd.minute)) {
+            const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+            timeSlots.push({
+                time: timeStr,
                 status: 'available',
                 isSelected: false,
-                index: 0
-            },
-            {
-                id: 'noon',
-                period: 'noon',
-                title: '中午时段',
-                time: '12:00-14:30',
-                startTime: '12:00',
-                endTime: '14:30',
-                status: 'available',
-                isSelected: false,
-                index: 1
-            },
-            {
-                id: 'afternoon',
-                period: 'afternoon',
-                title: '下午时段',
-                time: '14:30-22:00',
-                startTime: '14:30',
-                endTime: '22:00',
-                status: 'available',
-                isSelected: false,
-                index: 2
+                index: index++,
+                period: 'morning'
+            });
+
+            // 增加30分钟
+            currentMinute += 30;
+            if (currentMinute >= 60) {
+                currentHour += 1;
+                currentMinute = 0;
             }
-        ];
+        }
+
+        // 中午时段 12:00-14:30
+        const noonStart = { hour: 12, minute: 0 };
+        const noonEnd = { hour: 14, minute: 30 };
+
+        currentHour = noonStart.hour;
+        currentMinute = noonStart.minute;
+
+        while (currentHour < noonEnd.hour || (currentHour === noonEnd.hour && currentMinute < noonEnd.minute)) {
+            const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+            timeSlots.push({
+                time: timeStr,
+                status: 'available',
+                isSelected: false,
+                index: index++,
+                period: 'noon'
+            });
+
+            // 增加30分钟
+            currentMinute += 30;
+            if (currentMinute >= 60) {
+                currentHour += 1;
+                currentMinute = 0;
+            }
+        }
+
+        // 下午时段 14:30-22:00
+        const afternoonStart = { hour: 14, minute: 30 };
+        const afternoonEnd = { hour: 22, minute: 0 };
+
+        currentHour = afternoonStart.hour;
+        currentMinute = afternoonStart.minute;
+
+        while (currentHour < afternoonEnd.hour || (currentHour === afternoonEnd.hour && currentMinute < afternoonEnd.minute)) {
+            const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+            timeSlots.push({
+                time: timeStr,
+                status: 'available',
+                isSelected: false,
+                index: index++,
+                period: 'afternoon'
+            });
+
+            // 增加30分钟
+            currentMinute += 30;
+            if (currentMinute >= 60) {
+                currentHour += 1;
+                currentMinute = 0;
+            }
+        }
 
         return timeSlots;
     },
@@ -547,7 +590,7 @@ Page({
     },
 
     /**
-     * 时间段点击事件 - 单选模式
+     * 时间段点击事件 - 支持多时间槽选择
      */
     onTimeSlotTap(e) {
         const index = parseInt(e.currentTarget.dataset.index);
@@ -563,37 +606,90 @@ Page({
             return;
         }
 
-        // 清空所有选择
-        timeSlots.forEach(slot => slot.isSelected = false);
+        const { selectedStartIndex, selectedEndIndex } = this.data;
 
-        // 如果点击的是已选中的时间段，则取消选择
-        if (this.data.selectedTimeSlot && this.data.selectedTimeSlot.index === index) {
-            this.setData({
-                timeSlots: timeSlots,
-                selectedTimeSlot: null,
-                selectedStartIndex: -1,
-                selectedEndIndex: -1
-            });
-            this.clearBookingForm();
+        // 如果点击的是已选中的开始时间段，清空所有选择
+        if (index === selectedStartIndex) {
+            this.clearTimeSelection();
             return;
         }
 
-        // 选择新的时间段
-        timeSlots[index].isSelected = true;
+        // 如果还没有选择开始时间，或者点击的时间早于已选开始时间
+        if (selectedStartIndex === -1 || index < selectedStartIndex) {
+            this.setStartTime(index);
+        }
+        // 如果已有开始时间，设置结束时间
+        else {
+            this.setEndTime(selectedStartIndex, index);
+        }
+    },
+
+    /**
+     * 设置开始时间
+     */
+    setStartTime(startIndex) {
+        // 清空之前的选择
+        const timeSlots = [...this.data.timeSlots];
+        timeSlots.forEach(slot => slot.isSelected = false);
+
+        // 设置新的开始时间
+        timeSlots[startIndex].isSelected = true;
 
         this.setData({
             timeSlots: timeSlots,
-            selectedTimeSlot: clickedSlot,
-            selectedStartIndex: index,
-            selectedEndIndex: index
+            selectedStartIndex: startIndex,
+            selectedEndIndex: -1
         });
+    },
 
-        console.log('📅 选择时间段:', {
-            period: clickedSlot.period,
-            time: clickedSlot.time,
-            startTime: clickedSlot.startTime,
-            endTime: clickedSlot.endTime
+    /**
+     * 设置结束时间并验证时间段连续性
+     */
+    setEndTime(startIndex, endIndex) {
+        const timeSlots = [...this.data.timeSlots];
+
+        // 验证选中的时间段是否连续且都可用
+        const validationResult = this.validateTimeRange(startIndex, endIndex);
+
+        if (!validationResult.isValid) {
+            wx.showToast({
+                title: validationResult.message,
+                icon: 'none'
+            });
+            return;
+        }
+
+        // 清空之前的选择
+        timeSlots.forEach(slot => slot.isSelected = false);
+
+        // 设置选中的时间段
+        for (let i = startIndex; i <= endIndex; i++) {
+            timeSlots[i].isSelected = true;
+        }
+
+        this.setData({
+            timeSlots: timeSlots,
+            selectedEndIndex: endIndex
         });
+    },
+
+    /**
+     * 验证时间段范围 - 支持跨时间段选择，但检查是否连续可用
+     */
+    validateTimeRange(startIndex, endIndex) {
+        const timeSlots = this.data.timeSlots;
+
+        // 检查选中范围内是否有不可用时间段
+        for (let i = startIndex; i <= endIndex; i++) {
+            if (timeSlots[i].status !== 'available') {
+                return {
+                    isValid: false,
+                    message: '选中时间段包含不可用时段'
+                };
+            }
+        }
+
+        return { isValid: true };
     },
 
     /**
@@ -762,7 +858,7 @@ Page({
      */
     showBookingModal() {
         // 验证时间选择
-        if (!this.data.selectedTimeSlot) {
+        if (this.data.selectedStartIndex === -1 || this.data.selectedEndIndex === -1) {
             wx.showToast({
                 title: '请选择预约时间段',
                 icon: 'none'
@@ -771,8 +867,22 @@ Page({
         }
 
         // 生成选中时间的文本描述
-        const selectedTimeSlot = this.data.selectedTimeSlot;
-        const selectedTimeText = `${selectedTimeSlot.startTime} - ${selectedTimeSlot.endTime}`;
+        const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
+        const startTime = timeSlots[selectedStartIndex].time;
+
+        // 计算结束时间：最后一个选中时间槽 + 30分钟
+        const lastSelectedSlot = timeSlots[selectedEndIndex];
+        const endTimeParts = lastSelectedSlot.time.split(':');
+        let endHour = parseInt(endTimeParts[0]);
+        let endMinute = parseInt(endTimeParts[1]) + 30;
+
+        if (endMinute >= 60) {
+            endHour += 1;
+            endMinute = 0;
+        }
+
+        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+        const selectedTimeText = `${startTime} - ${endTime}`;
 
         // 如果用户已有联系人信息但表单中没有，则自动填入
         const currentContactName = this.data.bookingForm.contactName;
@@ -815,7 +925,7 @@ Page({
      */
     async submitBooking() {
         // 验证时间选择
-        if (!this.data.selectedTimeSlot) {
+        if (this.data.selectedStartIndex === -1 || this.data.selectedEndIndex === -1) {
             wx.showToast({
                 title: '请选择预约时间段',
                 icon: 'none'
@@ -861,15 +971,27 @@ Page({
         }
 
         // 获取选中的时间段
-        const selectedTimeSlot = this.data.selectedTimeSlot;
-        const startTime = selectedTimeSlot.startTime;
-        const endTime = selectedTimeSlot.endTime;
+        const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
+        const startTime = timeSlots[selectedStartIndex].time;
+
+        // 计算结束时间：最后一个选中时间槽 + 30分钟
+        const lastSelectedSlot = timeSlots[selectedEndIndex];
+        const endTimeParts = lastSelectedSlot.time.split(':');
+        let endHour = parseInt(endTimeParts[0]);
+        let endMinute = parseInt(endTimeParts[1]) + 30;
+
+        if (endMinute >= 60) {
+            endHour += 1;
+            endMinute = 0;
+        }
+
+        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
 
         console.log('🕒 预约时间:', {
-            period: selectedTimeSlot.period,
-            time: selectedTimeSlot.time,
-            startTime: startTime,
-            endTime: endTime
+            selectedStartIndex,
+            selectedEndIndex,
+            startTime,
+            endTime
         });
 
         // 构建预约数据 - 注意日期格式转换
