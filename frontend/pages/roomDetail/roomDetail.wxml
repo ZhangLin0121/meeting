@@ -92,46 +92,27 @@
         </picker>
       </view>
 
-      <!-- 时间段选择网格 -->
+      <!-- 时间段选择 -->
       <view class="time-slots-container">
         <text class="time-slots-title">选择时间段</text>
         
-        <!-- 上午时段 -->
-        <view class="time-period-section">
-          <view class="period-header">
-            <text class="period-title">上午时段</text>
-            <text class="period-subtitle">08:30 - 12:00 (最晚11:30开始)</text>
-          </view>
-          <view class="time-slots-grid">
-            <view 
-              wx:for="{{timeSlots}}" 
-              wx:key="index"
-              wx:if="{{item.period === 'morning'}}"
-              class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
-              data-index="{{index}}"
-              bindtap="onTimeSlotTap"
-            >
-              <text class="time-slot-text">{{item.time}}</text>
+        <!-- 时间段列表 -->
+        <view class="time-periods-list">
+          <view 
+            wx:for="{{timeSlots}}" 
+            wx:key="id"
+            class="time-period-item {{item.status}} {{item.isSelected ? 'selected' : ''}}"
+            data-index="{{index}}"
+            bindtap="onTimeSlotTap"
+          >
+            <view class="period-info">
+              <text class="period-title">{{item.title}}</text>
+              <text class="period-time">{{item.time}}</text>
             </view>
-          </view>
-        </view>
-
-        <!-- 下午时段 -->
-        <view class="time-period-section">
-          <view class="period-header">
-            <text class="period-title">下午时段</text>
-            <text class="period-subtitle">14:30 - 17:30 (最晚17:00开始)</text>
-          </view>
-          <view class="time-slots-grid">
-            <view 
-              wx:for="{{timeSlots}}" 
-              wx:key="index"
-              wx:if="{{item.period === 'afternoon'}}"
-              class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
-              data-index="{{index}}"
-              bindtap="onTimeSlotTap"
-            >
-              <text class="time-slot-text">{{item.time}}</text>
+            <view class="period-status">
+              <text class="status-text" wx:if="{{item.status === 'available'}}">可预约</text>
+              <text class="status-text" wx:if="{{item.status === 'booked'}}">已预约</text>
+              <text class="status-text" wx:if="{{item.status === 'closed'}}">临时关闭</text>
             </view>
           </view>
         </view>
@@ -160,7 +141,7 @@
   <!-- 提交预约按钮 -->
   <view 
     class="submit-button-container" 
-    wx:if="{{!loading && roomDetails.id && selectedStartIndex >= 0 && selectedEndIndex >= 0}}"
+    wx:if="{{!loading && roomDetails.id && selectedTimeSlot}}"
   >
     <view class="submit-button" bindtap="showBookingModal">
       <text class="submit-text">提交预约</text>
