@@ -123,6 +123,18 @@
             <text class="period-subtitle">12:00 - 14:30</text>
           </view>
           <view class="time-slots-grid">
+            <!-- 显示12:00 -->
+            <view 
+              wx:for="{{timeSlots}}" 
+              wx:key="index"
+              wx:if="{{item.time === '12:00'}}"
+              class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
+              data-index="{{index}}"
+              bindtap="onTimeSlotTap"
+            >
+              <text class="time-slot-text">{{item.time}}</text>
+            </view>
+            <!-- 显示中午时段的其他时间槽 -->
             <view 
               wx:for="{{timeSlots}}" 
               wx:key="index"
@@ -143,6 +155,18 @@
             <text class="period-subtitle">14:30 - 22:00</text>
           </view>
           <view class="time-slots-grid">
+            <!-- 显示14:30 -->
+            <view 
+              wx:for="{{timeSlots}}" 
+              wx:key="index"
+              wx:if="{{item.time === '14:30'}}"
+              class="time-slot {{item.status}} {{item.isSelected ? 'selected' : ''}}"
+              data-index="{{index}}"
+              bindtap="onTimeSlotTap"
+            >
+              <text class="time-slot-text">{{item.time}}</text>
+            </view>
+            <!-- 显示下午时段的其他时间槽 -->
             <view 
               wx:for="{{timeSlots}}" 
               wx:key="index"

@@ -492,7 +492,7 @@ Page({
         let currentHour = morningStart.hour;
         let currentMinute = morningStart.minute;
 
-        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute < morningEnd.minute)) {
+        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute <= morningEnd.minute)) {
             const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
             timeSlots.push({
                 time: timeStr,
@@ -510,14 +510,14 @@ Page({
             }
         }
 
-        // 中午时段 12:00-14:30
-        const noonStart = { hour: 12, minute: 0 };
+        // 中午时段 12:00-14:30 (跳过12:00因为上午已经包含)
+        const noonStart = { hour: 12, minute: 30 };
         const noonEnd = { hour: 14, minute: 30 };
 
         currentHour = noonStart.hour;
         currentMinute = noonStart.minute;
 
-        while (currentHour < noonEnd.hour || (currentHour === noonEnd.hour && currentMinute < noonEnd.minute)) {
+        while (currentHour < noonEnd.hour || (currentHour === noonEnd.hour && currentMinute <= noonEnd.minute)) {
             const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
             timeSlots.push({
                 time: timeStr,
@@ -535,14 +535,14 @@ Page({
             }
         }
 
-        // 下午时段 14:30-22:00
-        const afternoonStart = { hour: 14, minute: 30 };
+        // 下午时段 14:30-22:00 (跳过14:30因为中午已经包含)
+        const afternoonStart = { hour: 15, minute: 0 };
         const afternoonEnd = { hour: 22, minute: 0 };
 
         currentHour = afternoonStart.hour;
         currentMinute = afternoonStart.minute;
 
-        while (currentHour < afternoonEnd.hour || (currentHour === afternoonEnd.hour && currentMinute < afternoonEnd.minute)) {
+        while (currentHour < afternoonEnd.hour || (currentHour === afternoonEnd.hour && currentMinute <= afternoonEnd.minute)) {
             const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
             timeSlots.push({
                 time: timeStr,
@@ -870,18 +870,26 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 计算结束时间：最后一个选中时间槽 + 30分钟
-        const lastSelectedSlot = timeSlots[selectedEndIndex];
-        const endTimeParts = lastSelectedSlot.time.split(':');
-        let endHour = parseInt(endTimeParts[0]);
-        let endMinute = parseInt(endTimeParts[1]) + 30;
+        // 结束时间直接使用下一个时间槽的时间
+        // 如果selectedEndIndex + 1 超出数组范围，则计算结束时间
+        let endTime;
+        if (selectedEndIndex + 1 < timeSlots.length) {
+            endTime = timeSlots[selectedEndIndex + 1].time;
+        } else {
+            // 如果是最后一个时间槽，计算结束时间
+            const lastSelectedSlot = timeSlots[selectedEndIndex];
+            const endTimeParts = lastSelectedSlot.time.split(':');
+            let endHour = parseInt(endTimeParts[0]);
+            let endMinute = parseInt(endTimeParts[1]) + 30;
 
-        if (endMinute >= 60) {
-            endHour += 1;
-            endMinute = 0;
+            if (endMinute >= 60) {
+                endHour += 1;
+                endMinute = 0;
+            }
+
+            endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
         }
 
-        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
         const selectedTimeText = `${startTime} - ${endTime}`;
 
         // 如果用户已有联系人信息但表单中没有，则自动填入
@@ -974,24 +982,32 @@ Page({
         const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         const startTime = timeSlots[selectedStartIndex].time;
 
-        // 计算结束时间：最后一个选中时间槽 + 30分钟
-        const lastSelectedSlot = timeSlots[selectedEndIndex];
-        const endTimeParts = lastSelectedSlot.time.split(':');
-        let endHour = parseInt(endTimeParts[0]);
-        let endMinute = parseInt(endTimeParts[1]) + 30;
+        // 结束时间直接使用下一个时间槽的时间
+        // 如果selectedEndIndex + 1 超出数组范围，则计算结束时间
+        let endTime;
+        if (selectedEndIndex + 1 < timeSlots.length) {
+            endTime = timeSlots[selectedEndIndex + 1].time;
+        } else {
+            // 如果是最后一个时间槽，计算结束时间
+            const lastSelectedSlot = timeSlots[selectedEndIndex];
+            const endTimeParts = lastSelectedSlot.time.split(':');
+            let endHour = parseInt(endTimeParts[0]);
+            let endMinute = parseInt(endTimeParts[1]) + 30;
 
-        if (endMinute >= 60) {
-            endHour += 1;
-            endMinute = 0;
+            if (endMinute >= 60) {
+                endHour += 1;
+                endMinute = 0;
+            }
+
+            endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
         }
-
-        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
 
         console.log('🕒 预约时间:', {
             selectedStartIndex,
             selectedEndIndex,
             startTime,
-            endTime
+            endTime,
+            totalSlots: timeSlots.length
         });
 
         // 构建预约数据 - 注意日期格式转换
