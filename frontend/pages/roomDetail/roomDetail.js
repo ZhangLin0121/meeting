@@ -70,7 +70,13 @@ Page({
             return;
         }
 
-        this.setData({ roomId });
+        // 获取系统信息，设置状态栏高度
+        const systemInfo = wx.getSystemInfoSync();
+        this.setData({
+            roomId,
+            statusBarHeight: systemInfo.statusBarHeight || 44
+        });
+
         this.getUserOpenId();
         this.initializePage();
 
