@@ -34,11 +34,11 @@ Page({
      */
     getUserOpenId() {
         const app = getApp();
-        if (app ? .globalData ? .userInfo ? .openid) {
+        if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
             this.setData({ userOpenId: app.globalData.userInfo.openid });
         } else {
             const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo ? .openid) {
+            if (userInfo && userInfo.openid) {
                 this.setData({ userOpenId: userInfo.openid });
             }
         }
@@ -77,7 +77,7 @@ Page({
             console.log('🔐 开始页面初始化登录流程...');
 
             const userInfo = await this.loginUser();
-            if (userInfo ? .openid) {
+            if (userInfo && userInfo.openid) {
                 console.log('✅ 用户登录成功，开始加载页面数据...');
 
                 // 更新页面数据
@@ -215,7 +215,7 @@ Page({
     async loginUser() {
         try {
             const existingUser = wx.getStorageSync('userInfo');
-            if (existingUser ? .openid) return existingUser;
+            if (existingUser && existingUser.openid) return existingUser;
 
             return new Promise((resolve) => {
                 wx.login({
@@ -467,7 +467,7 @@ Page({
      */
     goToRoomDetail(e) {
         const room = e.currentTarget.dataset.room;
-        if (room ? .id) {
+        if (room && room.id) {
             wx.navigateTo({
                 url: `/pages/roomDetail/roomDetail?roomId=${room.id}`
             });
