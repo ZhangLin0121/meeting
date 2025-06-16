@@ -453,14 +453,19 @@ class RoomController {
         const morningStart = TimeHelper.timeToMinutes(config.office.startTime);
         const morningEnd = TimeHelper.timeToMinutes(config.office.endTimeMorning);
 
-        // 下午时间段 14:30-17:30
+        // 中午时间段 12:00-14:30
+        const noonStart = TimeHelper.timeToMinutes(config.office.startTimeNoon);
+        const noonEnd = TimeHelper.timeToMinutes(config.office.endTimeNoon);
+
+        // 下午时间段 14:30-22:00
         const afternoonStart = TimeHelper.timeToMinutes(config.office.startTimeAfternoon);
         const afternoonEnd = TimeHelper.timeToMinutes(config.office.endTime);
 
-        // 生成30分钟间隔的时间段
+        // 生成30分钟间隔的时间段 - 修复：添加中午时段
         const periods = [
-            { start: morningStart, end: morningEnd, name: '上午' },
-            { start: afternoonStart, end: afternoonEnd, name: '下午' }
+            { start: morningStart, end: morningEnd, name: 'morning' },
+            { start: noonStart, end: noonEnd, name: 'noon' },
+            { start: afternoonStart, end: afternoonEnd, name: 'afternoon' }
         ];
 
         periods.forEach(period => {

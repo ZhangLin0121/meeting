@@ -294,20 +294,43 @@ Page({
                 const timeSlots = this.generateTimeSlotsArray();
                 const timePeriods = this.generateTimePeriodsArray();
 
-                // 处理已预约时间
+                // 处理已预约时间 - 修复整时段预约状态更新问题
                 if (result.data && result.data.timeSlots) {
-                    result.data.timeSlots.forEach(slot => {
-                        if (slot.status === 'booked') {
-                            const index = timeSlots.findIndex(ts => ts.time === slot.startTime);
-                            if (index !== -1) timeSlots[index].status = 'booked';
+                    console.log('🔍 后端返回的时间槽数据:', result.data.timeSlots);
+
+                    result.data.timeSlots.forEach(backendSlot => {
+                        if (backendSlot.status === 'booked' || backendSlot.status === 'closed') {
+                            // 找到对应的前端时间槽并更新状态
+                            // 注意：后端返回的是时间段范围(startTime-endTime)，前端是单个时间点
+                            const matchingSlot = timeSlots.find(frontendSlot =>
+                                frontendSlot.time === backendSlot.startTime
+                            );
+
+                            if (matchingSlot) {
+                                matchingSlot.status = backendSlot.status;
+                                console.log(`✅ 更新时间槽状态: ${matchingSlot.time} -> ${backendSlot.status}`);
+                            } else {
+                                console.log(`⚠️ 未找到匹配的前端时间槽: ${backendSlot.startTime}`);
+                            }
                         }
                     });
+
+                    console.log('🕐 更新后的前端时间槽:', timeSlots.filter(slot => slot.status !== 'available'));
                 }
 
                 this.updatePeriodAvailability(timePeriods, timeSlots);
                 this.setData({ timeSlots, timePeriods });
+
+                console.log('📊 更新后的时段状态:', timePeriods.map(p => ({
+                    name: p.name,
+                    status: p.status,
+                    availableCount: p.availableCount,
+                    totalCount: p.totalCount,
+                    canBookWhole: p.canBookWhole
+                })));
             }
         } catch (error) {
+            console.error('❌ 获取时间段失败:', error);
             wx.showToast({ title: '获取时间段失败', icon: 'none' });
         }
     },

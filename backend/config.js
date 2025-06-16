@@ -21,12 +21,14 @@ module.exports = {
         appSecret: process.env.WECHAT_APP_SECRET || '1ebfd5606d696d1dbba7d3a44cd02877'
     },
 
-    // 会议室开放时间配置
+    // 会议室开放时间配置 - 修复时间段配置以匹配前端
     office: {
         startTime: process.env.OFFICE_START_TIME || '08:30',
         endTimeMorning: process.env.OFFICE_END_TIME_MORNING || '12:00',
+        startTimeNoon: process.env.OFFICE_START_TIME_NOON || '12:00',
+        endTimeNoon: process.env.OFFICE_END_TIME_NOON || '14:30',
         startTimeAfternoon: process.env.OFFICE_START_TIME_AFTERNOON || '14:30',
-        endTime: process.env.OFFICE_END_TIME || '17:30'
+        endTime: process.env.OFFICE_END_TIME || '22:00'
     },
 
     // 预约时间限制
