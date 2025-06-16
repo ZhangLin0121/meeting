@@ -39,7 +39,6 @@ page {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 44px;
     padding: 0 20px;
 }
 
@@ -81,7 +80,6 @@ page {
     flex: 1;
     padding-bottom: 80px;
     /* 为底部按钮留出空间 */
-    /* 动态计算顶部间距，通过JS设置 */
 }
 
 

@@ -70,31 +70,22 @@ Page({
             return;
         }
 
-        // 获取系统信息，设置状态栏高度
+        // 获取系统信息 - 使用标准方案
         const systemInfo = wx.getSystemInfoSync();
-        console.log('📱 系统信息:', systemInfo);
+        const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
-        // 计算更精确的状态栏高度
-        let statusBarHeight = systemInfo.statusBarHeight || 44;
+        // 计算导航栏高度 - 标准公式
+        const statusBarHeight = systemInfo.statusBarHeight || 44;
+        const menuButtonHeight = menuButtonInfo.height || 32;
+        const navigationBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonHeight;
 
-        // 针对不同设备进行调整
-        if (systemInfo.model && systemInfo.model.includes('iPhone')) {
-            // iPhone设备，特别是刘海屏设备
-            if (systemInfo.screenHeight >= 812) {
-                // iPhone X及以上设备
-                statusBarHeight = Math.max(statusBarHeight, 44);
-            }
-        }
-
-        console.log('📏 计算的状态栏高度:', statusBarHeight);
-
-        // 计算主内容区域的顶部间距
-        const navbarTotalHeight = statusBarHeight + 44 + 8; // 状态栏 + 导航栏 + 缓冲间距
+        console.log('📱 状态栏高度:', statusBarHeight);
+        console.log('📱 导航栏高度:', navigationBarHeight);
 
         this.setData({
             roomId,
             statusBarHeight: statusBarHeight,
-            navbarTotalHeight: navbarTotalHeight
+            navigationBarHeight: navigationBarHeight
         });
 
         this.getUserOpenId();
