@@ -3,11 +3,7 @@
   <!-- iOS 风格导航栏 -->
   <view class="ios-navbar" style="padding-top: {{statusBarHeight}}px;">
     <view class="navbar-content">
-      <view class="nav-left" bindtap="goToMyBookings">
-        <view class="nav-button">
-          <image class="nav-icon" src="/images/icons/booking.png" mode="aspectFit"></image>
-        </view>
-      </view>
+      <view class="nav-left"></view>
       <text class="nav-title">会议室列表</text>
       <view class="nav-right" bindtap="goToAdminPanel" wx:if="{{isAdmin}}">
         <view class="nav-button">
