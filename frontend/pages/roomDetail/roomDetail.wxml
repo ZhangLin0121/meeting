@@ -12,7 +12,7 @@
   </view>
 
   <!-- 主内容区域 -->
-  <scroll-view class="main-content" scroll-y wx:if="{{!loading && roomDetails.id}}">
+  <scroll-view class="main-content" style="margin-top: {{navbarTotalHeight}}px;" scroll-y wx:if="{{!loading && roomDetails.id}}">
     
     <!-- 会议室基本信息展示区 -->
     <view class="room-info-section">
@@ -246,13 +246,13 @@
   </view>
 
   <!-- 页面加载状态 -->
-  <view wx:if="{{loading}}" class="loading-overlay">
+  <view wx:if="{{loading}}" class="loading-overlay" style="margin-top: {{navbarTotalHeight}}px;">
     <image class="loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
     <text class="loading-text">加载中，请稍候...</text>
   </view>
 
   <!-- 无数据状态 -->
-  <view wx:elif="{{!loading && !roomDetails.id}}" class="no-data-placeholder">
+  <view wx:elif="{{!loading && !roomDetails.id}}" class="no-data-placeholder" style="margin-top: {{navbarTotalHeight}}px;">
     <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
     <text class="empty-text">未找到会议室信息</text>
     <text class="empty-subtext">请检查会议室ID是否正确</text>
