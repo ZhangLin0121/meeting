@@ -381,13 +381,6 @@ Page({
                         imageUrl = this.data.apiBaseUrl + room.images[0];
                     }
 
-                    console.log('🖼️ 会议室图片处理:', {
-                        roomName: room.name,
-                        hasImages: !!(room.images && room.images.length > 0),
-                        imagesArray: room.images,
-                        finalImageUrl: imageUrl
-                    });
-
                     return {
                         ...room,
                         equipmentDisplay: equipmentDisplay,
