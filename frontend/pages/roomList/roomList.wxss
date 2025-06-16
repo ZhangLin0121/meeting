@@ -288,15 +288,36 @@
 
 .room-card {
     background: white;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 0.5px solid rgba(0, 0, 0, 0.04);
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    border: 0.5px solid rgba(0, 0, 0, 0.03);
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.room-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .room-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.room-card:hover::before {
+    opacity: 1;
 }
 
 
@@ -304,19 +325,42 @@
 
 .room-image-container {
     position: relative;
-    height: 160px;
+    height: 180px;
     overflow: hidden;
+    margin: 12px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.room-image-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
+    pointer-events: none;
+    border-radius: 0 0 16px 16px;
+    transition: opacity 0.3s ease;
 }
 
 .room-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .room-card:hover .room-image {
-    transform: scale(1.05);
+    transform: scale(1.08);
+    filter: brightness(1.05) saturate(1.1);
+}
+
+.room-card:hover .room-image-container::after {
+    opacity: 0.8;
 }
 
 .room-image-placeholder {
@@ -381,73 +425,88 @@
 /* ==================== 房间信息 ==================== */
 
 .room-info {
-    padding: 16px;
+    padding: 0 20px 20px 20px;
+    background: linear-gradient(to bottom, rgba(248, 249, 250, 0.3) 0%, transparent 30%);
+    position: relative;
 }
 
 .room-header {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    margin-top: 16px;
     width: 100%;
 }
 
 .room-name {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     color: #1c1c1e;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.6px;
     flex: 1;
     text-align: left;
+    line-height: 1.2;
 }
 
 .capacity-badge {
     display: flex;
     align-items: center;
-    gap: 4px;
-    background: rgba(0, 122, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 8px;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.12) 0%, rgba(88, 86, 214, 0.12) 100%);
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 122, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .capacity-icon {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
+    opacity: 0.9;
 }
 
 .capacity-text {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #007AFF;
+    letter-spacing: -0.2px;
 }
 
 .room-location {
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    background: rgba(142, 142, 147, 0.08);
+    border-radius: 12px;
+    width: fit-content;
 }
 
 .location-icon {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
 }
 
 .location-text {
     font-size: 14px;
-    color: #8e8e93;
-    font-weight: 400;
+    color: #6c6c70;
+    font-weight: 500;
 }
 
 .room-description {
-    font-size: 14px;
-    color: #3a3a3c;
-    line-height: 1.4;
-    margin-bottom: 12px;
+    font-size: 15px;
+    color: #48484a;
+    line-height: 1.5;
+    margin-bottom: 16px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    padding: 0 2px;
 }
 
 
