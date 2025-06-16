@@ -547,6 +547,13 @@ Page({
             equipment: room.equipment,
             fullRoomObject: room
         });
+
+        // 临时调试弹窗
+        wx.showModal({
+            title: '调试信息',
+            content: `会议室: ${room.name}\n图片URL: ${room.imageUrl || '无'}\n原始图片: ${room.images ? room.images[0] : '无'}`,
+            showCancel: false
+        });
     },
 
     /**
