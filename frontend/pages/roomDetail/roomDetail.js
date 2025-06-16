@@ -8,7 +8,7 @@ Page({
      */
     data: {
         roomId: null,
-        room: null,
+        roomDetails: {},
         loading: true,
         userOpenId: '',
         bookingData: {
@@ -19,7 +19,7 @@ Page({
         },
         showBookingModal: false,
         submittingBooking: false,
-        apiBaseUrl: '',
+        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
         statusBarHeight: 0,
 
         // 日期选择相关
@@ -28,8 +28,11 @@ Page({
         minDate: '',
         maxDate: '',
 
-        // 时间段相关
-        timeSlots: [], // 时间段数组
+        // 时间段相关 - 新增两层级时段选择
+        timePeriods: [], // 时段分组数组（上午、中午、下午）
+        timeSlots: [], // 详细时间段数组
+        selectedPeriod: null, // 当前选中的时段（morning/noon/afternoon）
+        expandedPeriod: null, // 当前展开的时段
         selectedTimeSlot: null, // 当前选中的时间段对象
         selectedStartIndex: -1, // 选中的开始时间段索引
         selectedEndIndex: -1, // 选中的结束时间段索引
@@ -47,38 +50,23 @@ Page({
         imageLoading: true,
         imageError: false,
         selectedTimeText: '',
+        wholePeriodBooking: null, // 整时段预约信息
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad(options) {
-        console.log('会议室详情页面加载，参数:', options);
-
-        // 安全获取房间ID
         const roomId = options.roomId || options.id;
         if (!roomId) {
-            console.error('❌ 会议室ID缺失');
-            wx.showToast({
-                title: '会议室ID缺失',
-                icon: 'none',
-                duration: 2000
-            });
-            setTimeout(() => {
-                wx.navigateBack();
-            }, 2000);
+            wx.showToast({ title: '房间ID缺失', icon: 'none' });
+            wx.navigateBack();
             return;
         }
 
-        this.setData({
-            roomId: roomId
-        });
-
-        // 安全获取App数据
-        this.safeGetAppData();
-
-        // 获取系统信息
-        this.getSystemInfo();
+        this.setData({ roomId });
+        this.getUserOpenId();
+        this.initializePage();
     },
 
     /**
@@ -129,150 +117,39 @@ Page({
      * 初始化页面数据
      */
     async initializePage() {
-        if (this.data.roomId) {
-            console.log('✅ 开始获取会议室详情:', this.data.roomId);
-
-            // 并行获取会议室详情和用户联系人信息
-            await Promise.all([
-                this.fetchRoomDetails(),
-                this.fetchUserContactInfo().catch(error => {
-                    console.warn('⚠️ 获取用户联系人信息失败:', error);
-                    // 不影响页面正常加载
-                })
-            ]);
-
-            this.initializeDates();
-        } else {
-            console.error('❌ 房间ID缺失，无法初始化页面');
-        }
+        await this.fetchRoomDetails();
+        this.initializeDates();
     },
 
     /**
      * 获取用户openid
      */
     getUserOpenId() {
-        try {
-            // 先从全局数据获取
-            const app = getApp();
-            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
-                this.setData({
-                    userOpenId: app.globalData.userInfo.openid
-                });
-                console.log('✅ 从全局数据获取用户openid:', app.globalData.userInfo.openid);
-                return;
-            }
-
-            // 从本地存储获取
+        const app = getApp();
+        if (app ? .globalData ? .userInfo ? .openid) {
+            this.setData({ userOpenId: app.globalData.userInfo.openid });
+        } else {
             const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo && userInfo.openid) {
+            if (userInfo ? .openid) {
+                this.setData({ userOpenId: userInfo.openid });
+            }
+        }
+    },
+
+    /**
+     * 获取会议室详情
+     */
+    async fetchRoomDetails() {
+        try {
+            const result = await this.requestAPI('GET', `/api/rooms/${this.data.roomId}`);
+            if (result.success) {
                 this.setData({
-                    userOpenId: userInfo.openid
-                });
-                console.log('✅ 从本地存储获取用户openid:', userInfo.openid);
-                return;
-            }
-
-            // 如果都没有，尝试重新登录
-            console.log('⚠️ 未找到用户openid，尝试重新登录');
-            if (app && app.forceLogin) {
-                app.forceLogin().then(() => {
-                    this.getUserOpenId();
-                }).catch(error => {
-                    console.error('强制登录失败:', error);
+                    roomDetails: result.data,
+                    loading: false
                 });
             }
         } catch (error) {
-            console.error('❌ 获取用户openid失败:', error);
-            // 不影响页面正常加载，只是没有用户信息
-        }
-    },
-
-    /**
-     * 获取用户联系人信息
-     */
-    async fetchUserContactInfo() {
-        try {
-            if (!this.data.userOpenId) {
-                console.log('⚠️ 用户未登录，跳过获取联系人信息');
-                return;
-            }
-
-            console.log('👤 开始获取用户联系人信息...');
-
-            const result = await this.requestAPI('GET', '/api/user/profile');
-
-            if (result.success && result.data) {
-                const { contactName, contactPhone } = result.data;
-
-                if (contactName && contactPhone) {
-                    console.log('✅ 获取用户联系人信息成功:', {
-                        contactName,
-                        contactPhone: contactPhone.substring(0, 3) + '****' + contactPhone.substring(7)
-                    });
-
-                    // 存储用户的联系人信息，但不立即填入表单
-                    // 表单填入会在显示预订弹窗时进行
-                    this.setData({
-                        'bookingForm.contactName': contactName,
-                        'bookingForm.contactPhone': contactPhone
-                    });
-                } else {
-                    console.log('ℹ️ 用户尚未设置联系人信息');
-                }
-            }
-        } catch (error) {
-            console.error('❌ 获取用户联系人信息失败:', error);
-            // 不抛出错误，避免影响页面正常加载
-        }
-    },
-
-    /**
-     * 生命周期函数--监听页面显示
-     */
-    async onShow() {
-        if (this.data.roomId) {
-            this.fetchRoomDetails();
-
-            // 确保selectedDate已初始化，如果没有则初始化日期
-            if (!this.data.selectedDate) {
-                console.log('⚠️ selectedDate未初始化，先初始化日期');
-                this.initializeDates();
-
-                // 等待setData完成
-                await new Promise(resolve => {
-                    wx.nextTick(() => {
-                        resolve();
-                    });
-                });
-            }
-
-            // 确保selectedDate有值后再获取可用性
-            if (this.data.selectedDate) {
-                this.fetchRoomAvailability(this.data.selectedDate);
-            } else {
-                // 如果还是没有，使用今天的日期作为默认值
-                const today = new Date();
-                const todayStr = this.formatDate(today);
-                console.log('🔧 使用今天日期作为默认值:', todayStr);
-                this.fetchRoomAvailability(todayStr);
-            }
-        }
-    },
-
-    /**
-     * 获取系统信息
-     */
-    getSystemInfo() {
-        try {
-            const systemInfo = wx.getSystemInfoSync();
-            this.setData({
-                statusBarHeight: systemInfo.statusBarHeight || 20
-            });
-        } catch (error) {
-            console.error('获取系统信息失败:', error);
-            this.setData({
-                statusBarHeight: 20
-            });
+            wx.showToast({ title: '获取房间信息失败', icon: 'none' });
         }
     },
 
@@ -281,8 +158,8 @@ Page({
      */
     initializeDates() {
         const today = new Date();
-        const maxDate = new Date(today);
-        maxDate.setDate(today.getDate() + 3); // 修改为只能预约未来3天
+        const maxDate = new Date();
+        maxDate.setDate(today.getDate() + 30);
 
         this.setData({
             selectedDate: this.formatDate(today),
@@ -290,190 +167,50 @@ Page({
             minDate: this.formatDate(today),
             maxDate: this.formatDate(maxDate)
         });
+
+        this.fetchRoomAvailability(this.formatDate(today));
     },
 
     /**
      * 格式化日期为YYYY-MM-DD格式
      */
     formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     },
 
     /**
      * 格式化日期为YYYY-MM-DD格式，并添加周几信息
      */
     formatDateWithWeekday(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const weekday = this.getWeekdayName(date.getDay());
-        return `${year}-${month}-${day} (${weekday})`;
-    },
-
-    /**
-     * 获取周几的中文名称
-     */
-    getWeekdayName(day) {
         const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        return weekdays[day];
-    },
-
-    /**
-     * 检查日期是否为周末
-     */
-    isWeekend(dateString) {
-        const date = new Date(dateString);
-        const dayOfWeek = date.getDay();
-        return dayOfWeek === 0 || dayOfWeek === 6; // 0是周日，6是周六
-    },
-
-    /**
-     * 获取会议室详情
-     */
-    async fetchRoomDetails() {
-        try {
-            this.setData({ imageLoading: true });
-
-            console.log('🔍 开始获取会议室详情:', {
-                roomId: this.data.roomId,
-                apiBaseUrl: this.data.apiBaseUrl,
-                fullUrl: `${this.data.apiBaseUrl}/api/rooms/${this.data.roomId}`
-            });
-
-            const result = await this.requestAPI('GET', `/api/rooms/${this.data.roomId}`);
-
-            console.log('📡 会议室详情API响应:', result);
-
-            if (result.success && result.data) {
-                // 处理图片路径
-                const roomDetails = result.data;
-
-                console.log('🏢 收到的会议室详情数据:', roomDetails);
-                console.log('🆔 会议室ID字段检查:', {
-                    id: roomDetails.id,
-                    roomId: roomDetails.roomId,
-                    _id: roomDetails._id,
-                    name: roomDetails.name
-                });
-
-                if (roomDetails.images && roomDetails.images.length > 0) {
-                    roomDetails.displayImage = `${this.data.apiBaseUrl}${roomDetails.images[0]}`;
-                } else {
-                    roomDetails.displayImage = '/images/default_room.png';
-                }
-
-                this.setData({
-                    roomDetails: roomDetails,
-                    loading: false
-                });
-
-                console.log('✅ 会议室详情设置完成:', {
-                    hasId: !!roomDetails.id,
-                    name: roomDetails.name,
-                    displayImage: roomDetails.displayImage
-                });
-            } else {
-                console.error('❌ API返回格式错误:', result);
-                throw new Error(result.message || '获取会议室详情失败');
-            }
-        } catch (error) {
-            console.error('❌ 获取会议室详情失败:', error);
-            console.error('❌ 错误详情:', {
-                message: error.message,
-                roomId: this.data.roomId,
-                apiBaseUrl: this.data.apiBaseUrl
-            });
-
-            this.setData({
-                loading: false,
-                roomDetails: null
-            });
-
-            wx.showToast({
-                title: '加载失败，请重试',
-                icon: 'none'
-            });
-        }
+        return `${this.formatDate(date)} ${weekdays[date.getDay()]}`;
     },
 
     /**
      * 获取会议室指定日期的可用性
      */
     async fetchRoomAvailability(date) {
-        // 检查日期参数是否有效
-        if (!date || typeof date !== 'string' || date.trim() === '') {
-            console.error('❌ fetchRoomAvailability 接收到无效的日期参数:', date);
-            // 使用今天的日期作为默认值
-            const today = new Date();
-            date = this.formatDate(today);
-            console.log('🔧 使用今天日期作为默认值:', date);
-        }
-
         try {
-            console.log('🔍 获取会议室可用性，日期:', date);
             const result = await this.requestAPI('GET', `/api/rooms/${this.data.roomId}/availability?date=${date}`);
-
-            if (result.success && result.data) {
-                // 生成时间段数组
+            if (result.success) {
                 const timeSlots = this.generateTimeSlotsArray();
+                const timePeriods = this.generateTimePeriodsArray();
 
-                // 根据后端返回的数据更新时间段状态
-                const availabilityData = result.data;
-
-                // 处理已预约时间段
-                if (availabilityData.timeSlots) {
-                    availabilityData.timeSlots.forEach(slot => {
+                // 处理已预约时间
+                if (result.data ? .timeSlots) {
+                    result.data.timeSlots.forEach(slot => {
                         if (slot.status === 'booked') {
-                            // 找到对应的时间槽并标记为已预约
                             const index = timeSlots.findIndex(ts => ts.time === slot.startTime);
-                            if (index !== -1) {
-                                timeSlots[index].status = 'booked';
-                            }
-                        } else if (slot.status === 'closed') {
-                            // 处理临时关闭的时间段
-                            const index = timeSlots.findIndex(ts => ts.time === slot.startTime);
-                            if (index !== -1) {
-                                timeSlots[index].status = 'closed';
-                            }
+                            if (index !== -1) timeSlots[index].status = 'booked';
                         }
                     });
                 }
 
-                // 处理临时关闭时间段
-                if (availabilityData.temporaryClosures) {
-                    availabilityData.temporaryClosures.forEach(closure => {
-                        const startIndex = timeSlots.findIndex(ts => ts.time === closure.startTime);
-                        const endIndex = timeSlots.findIndex(ts => ts.time === closure.endTime);
-
-                        if (startIndex !== -1 && endIndex !== -1) {
-                            for (let i = startIndex; i <= endIndex; i++) {
-                                timeSlots[i].status = 'closed';
-                            }
-                        }
-                    });
-                }
-
-                this.setData({
-                    timeSlots: timeSlots,
-                    selectedStartIndex: -1,
-                    selectedEndIndex: -1
-                });
-
-                // 清空选中状态
-                this.clearBookingForm();
-
-            } else {
-                throw new Error(result.message || '获取时间段失败');
+                this.updatePeriodAvailability(timePeriods, timeSlots);
+                this.setData({ timeSlots, timePeriods });
             }
         } catch (error) {
-            console.error('获取会议室可用性失败:', error);
-            wx.showToast({
-                title: '获取时间段失败',
-                icon: 'none'
-            });
+            wx.showToast({ title: '获取时间段失败', icon: 'none' });
         }
     },
 
@@ -485,82 +222,83 @@ Page({
         const timeSlots = [];
         let index = 0;
 
-        // 上午时段 08:30-12:00
-        const morningStart = { hour: 8, minute: 30 };
-        const morningEnd = { hour: 12, minute: 0 };
-
-        let currentHour = morningStart.hour;
-        let currentMinute = morningStart.minute;
-
-        while (currentHour < morningEnd.hour || (currentHour === morningEnd.hour && currentMinute <= morningEnd.minute)) {
-            const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
-            timeSlots.push({
-                time: timeStr,
-                status: 'available',
-                isSelected: false,
-                index: index++,
-                period: 'morning'
-            });
-
-            // 增加30分钟
-            currentMinute += 30;
-            if (currentMinute >= 60) {
-                currentHour += 1;
-                currentMinute = 0;
+        // 上午 08:30-12:00
+        for (let h = 8; h < 12; h++) {
+            for (let m = (h === 8 ? 30 : 0); m < 60; m += 30) {
+                if (h === 11 && m > 30) break;
+                timeSlots.push({
+                    time: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+                    status: 'available',
+                    isSelected: false,
+                    index: index++,
+                    period: 'morning'
+                });
             }
         }
 
-        // 中午时段 12:00-14:30 (跳过12:00因为上午已经包含)
-        const noonStart = { hour: 12, minute: 30 };
-        const noonEnd = { hour: 14, minute: 30 };
-
-        currentHour = noonStart.hour;
-        currentMinute = noonStart.minute;
-
-        while (currentHour < noonEnd.hour || (currentHour === noonEnd.hour && currentMinute <= noonEnd.minute)) {
-            const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
-            timeSlots.push({
-                time: timeStr,
-                status: 'available',
-                isSelected: false,
-                index: index++,
-                period: 'noon'
-            });
-
-            // 增加30分钟
-            currentMinute += 30;
-            if (currentMinute >= 60) {
-                currentHour += 1;
-                currentMinute = 0;
+        // 中午 12:30-14:30
+        for (let h = 12; h <= 14; h++) {
+            for (let m = (h === 12 ? 30 : 0); m < 60; m += 30) {
+                if (h === 14 && m > 30) break;
+                timeSlots.push({
+                    time: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+                    status: 'available',
+                    isSelected: false,
+                    index: index++,
+                    period: 'noon'
+                });
             }
         }
 
-        // 下午时段 14:30-22:00 (跳过14:30因为中午已经包含)
-        const afternoonStart = { hour: 15, minute: 0 };
-        const afternoonEnd = { hour: 22, minute: 0 };
-
-        currentHour = afternoonStart.hour;
-        currentMinute = afternoonStart.minute;
-
-        while (currentHour < afternoonEnd.hour || (currentHour === afternoonEnd.hour && currentMinute <= afternoonEnd.minute)) {
-            const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
-            timeSlots.push({
-                time: timeStr,
-                status: 'available',
-                isSelected: false,
-                index: index++,
-                period: 'afternoon'
-            });
-
-            // 增加30分钟
-            currentMinute += 30;
-            if (currentMinute >= 60) {
-                currentHour += 1;
-                currentMinute = 0;
+        // 下午 15:00-22:00
+        for (let h = 15; h <= 22; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                if (h === 22 && m > 0) break;
+                timeSlots.push({
+                    time: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+                    status: 'available',
+                    isSelected: false,
+                    index: index++,
+                    period: 'afternoon'
+                });
             }
         }
 
         return timeSlots;
+    },
+
+    /**
+     * 生成时段分组数组（上午、中午、下午）
+     */
+    generateTimePeriodsArray() {
+        return [
+            { id: 'morning', name: '上午时段', timeRange: '08:30 - 12:00', icon: '🌅', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'noon', name: '中午时段', timeRange: '12:00 - 14:30', icon: '☀️', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'afternoon', name: '下午时段', timeRange: '14:30 - 22:00', icon: '🌆', status: 'available', availableCount: 0, totalCount: 0 }
+        ];
+    },
+
+    /**
+     * 更新时段分组的可用性状态
+     */
+    updatePeriodAvailability(timePeriods, timeSlots) {
+        timePeriods.forEach(period => {
+            let periodSlots = [];
+            if (period.id === 'morning') {
+                periodSlots = timeSlots.filter(slot => slot.period === 'morning');
+            } else if (period.id === 'noon') {
+                periodSlots = timeSlots.filter(slot => slot.time === '12:00' || slot.period === 'noon');
+            } else if (period.id === 'afternoon') {
+                periodSlots = timeSlots.filter(slot => slot.time === '14:30' || slot.period === 'afternoon');
+            }
+
+            const totalCount = periodSlots.length;
+            const availableCount = periodSlots.filter(slot => slot.status === 'available').length;
+
+            period.totalCount = totalCount;
+            period.availableCount = availableCount;
+            period.status = availableCount === 0 ? 'unavailable' : availableCount < totalCount ? 'partial' : 'available';
+        });
     },
 
     /**
@@ -569,76 +307,90 @@ Page({
     bindDateChange(e) {
         const selectedDate = e.detail.value;
         const selectedDateObj = new Date(selectedDate);
-
-        // 移除周末限制，允许周末预约
-        // if (this.isWeekend(selectedDate)) {
-        //     wx.showToast({
-        //         title: '周末暂不可预约',
-        //         icon: 'none',
-        //         duration: 2000
-        //     });
-        //     return;
-        // }
-
         this.setData({
-            selectedDate: selectedDate,
+            selectedDate,
             selectedDateWithWeekday: this.formatDateWithWeekday(selectedDateObj)
         });
-
-        // 获取新日期的可用性信息
         this.fetchRoomAvailability(selectedDate);
     },
 
     /**
-     * 时间段点击事件 - 支持多时间槽选择
+     * 时段点击事件 - 选择或展开时段
+     */
+    onPeriodTap(e) {
+        const periodId = e.currentTarget.dataset.period;
+        const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
+        this.setData({ expandedPeriod });
+    },
+
+    /**
+     * 时间段点击事件 - 支持多时间槽选择（在展开的时段内）
      */
     onTimeSlotTap(e) {
         const index = parseInt(e.currentTarget.dataset.index);
-        const timeSlots = [...this.data.timeSlots];
-        const clickedSlot = timeSlots[index];
+        const timeSlot = this.data.timeSlots[index];
 
-        // 如果点击的是不可用时间段，直接返回
-        if (clickedSlot.status === 'booked' || clickedSlot.status === 'closed') {
-            wx.showToast({
-                title: clickedSlot.status === 'booked' ? '该时段已被预约' : '该时段临时关闭',
-                icon: 'none'
-            });
-            return;
-        }
+        if (timeSlot.status !== 'available') return;
 
-        const { selectedStartIndex, selectedEndIndex } = this.data;
-
-        // 如果点击的是已选中的开始时间段，清空所有选择
-        if (index === selectedStartIndex) {
-            this.clearTimeSelection();
-            return;
-        }
-
-        // 如果还没有选择开始时间，或者点击的时间早于已选开始时间
-        if (selectedStartIndex === -1 || index < selectedStartIndex) {
+        if (this.data.selectedStartIndex === -1) {
+            this.setStartTime(index);
+        } else if (this.data.selectedEndIndex === -1) {
+            this.setEndTime(this.data.selectedStartIndex, index);
+        } else {
             this.setStartTime(index);
         }
-        // 如果已有开始时间，设置结束时间
-        else {
-            this.setEndTime(selectedStartIndex, index);
+    },
+
+    /**
+     * 快速预约整个时段 - 预约完整的时段时间范围
+     */
+    onQuickBookPeriod(e) {
+        e.stopPropagation();
+        const periodId = e.currentTarget.dataset.period;
+        const selectedPeriod = this.data.timePeriods.find(p => p.id === periodId);
+        if (!selectedPeriod) return;
+        this.bookWholePeriod(periodId, selectedPeriod);
+    },
+
+    /**
+     * 预约整个时段
+     */
+    bookWholePeriod(periodId, selectedPeriod) {
+        let startTime, endTime;
+
+        if (periodId === 'morning') {
+            startTime = '08:30';
+            endTime = '12:00';
+        } else if (periodId === 'noon') {
+            startTime = '12:00';
+            endTime = '14:30';
+        } else if (periodId === 'afternoon') {
+            startTime = '14:30';
+            endTime = '22:00';
         }
+
+        this.setData({
+            wholePeriodBooking: { periodId, startTime, endTime, periodName: selectedPeriod.name },
+            selectedStartIndex: -2,
+            selectedEndIndex: -2
+        });
+
+        this.showBookingModal();
     },
 
     /**
      * 设置开始时间
      */
     setStartTime(startIndex) {
-        // 清空之前的选择
         const timeSlots = [...this.data.timeSlots];
         timeSlots.forEach(slot => slot.isSelected = false);
-
-        // 设置新的开始时间
         timeSlots[startIndex].isSelected = true;
 
         this.setData({
-            timeSlots: timeSlots,
+            timeSlots,
             selectedStartIndex: startIndex,
-            selectedEndIndex: -1
+            selectedEndIndex: -1,
+            wholePeriodBooking: null
         });
     },
 
@@ -647,83 +399,20 @@ Page({
      */
     setEndTime(startIndex, endIndex) {
         const timeSlots = [...this.data.timeSlots];
-
-        // 验证选中的时间段是否连续且都可用
-        const validationResult = this.validateTimeRange(startIndex, endIndex);
-
-        if (!validationResult.isValid) {
-            wx.showToast({
-                title: validationResult.message,
-                icon: 'none'
-            });
-            return;
-        }
-
-        // 清空之前的选择
         timeSlots.forEach(slot => slot.isSelected = false);
 
-        // 设置选中的时间段
         for (let i = startIndex; i <= endIndex; i++) {
+            if (timeSlots[i].status !== 'available') {
+                wx.showToast({ title: '选中时间段包含不可用时段', icon: 'none' });
+                return;
+            }
             timeSlots[i].isSelected = true;
         }
 
         this.setData({
-            timeSlots: timeSlots,
-            selectedEndIndex: endIndex
-        });
-    },
-
-    /**
-     * 验证时间段范围 - 支持跨时间段选择，但检查是否连续可用
-     */
-    validateTimeRange(startIndex, endIndex) {
-        const timeSlots = this.data.timeSlots;
-
-        // 检查选中范围内是否有不可用时间段
-        for (let i = startIndex; i <= endIndex; i++) {
-            if (timeSlots[i].status !== 'available') {
-                return {
-                    isValid: false,
-                    message: '选中时间段包含不可用时段'
-                };
-            }
-        }
-
-        return { isValid: true };
-    },
-
-    /**
-     * 清空时间选择
-     */
-    clearTimeSelection() {
-        const timeSlots = [...this.data.timeSlots];
-        timeSlots.forEach(slot => slot.isSelected = false);
-
-        this.setData({
-            timeSlots: timeSlots,
-            selectedTimeSlot: null,
-            selectedStartIndex: -1,
-            selectedEndIndex: -1
-        });
-
-        this.clearBookingForm();
-    },
-
-    /**
-     * 清空预约表单
-     */
-    clearBookingForm() {
-        this.setData({
-            bookingForm: {
-                topic: '',
-                contactName: '',
-                contactPhone: '',
-                date: '',
-                startTime: '',
-                endTime: '',
-                attendeesCount: 1,
-                requirements: ''
-            }
+            timeSlots,
+            selectedEndIndex: endIndex,
+            wholePeriodBooking: null
         });
     },
 
@@ -731,330 +420,95 @@ Page({
      * 表单输入事件
      */
     onFormInput(e) {
-        const field = e.currentTarget.dataset.field;
-        const value = e.detail.value;
-
+        const { field } = e.currentTarget.dataset;
         this.setData({
-            [`bookingForm.${field}`]: value
-        }, () => {
-            // 保存表单数据到本地缓存
-            this.saveFormDataToCache();
+            [`bookingForm.${field}`]: e.detail.value
         });
-    },
-
-    /**
-     * 保存表单数据到本地缓存
-     */
-    saveFormDataToCache() {
-        try {
-            // 构建缓存数据，包含表单数据和会议室ID
-            const cacheData = {
-                roomId: this.data.roomId,
-                bookingForm: this.data.bookingForm,
-                selectedDate: this.data.selectedDate,
-                selectedStartIndex: this.data.selectedStartIndex,
-                selectedEndIndex: this.data.selectedEndIndex,
-                timestamp: new Date().getTime() // 添加时间戳，用于判断缓存是否过期
-            };
-
-            // 保存到本地缓存
-            wx.setStorageSync('bookingFormCache', cacheData);
-            console.log('✅ 表单数据已缓存:', cacheData);
-        } catch (error) {
-            console.error('❌ 保存表单缓存失败:', error);
-            // 缓存失败不影响正常功能
-        }
-    },
-
-    /**
-     * 从本地缓存恢复表单数据
-     */
-    restoreFormDataFromCache() {
-        try {
-            const cacheData = wx.getStorageSync('bookingFormCache');
-
-            // 检查缓存是否存在且属于当前会议室
-            if (cacheData && cacheData.roomId === this.data.roomId) {
-                // 检查缓存是否过期（24小时）
-                const now = new Date().getTime();
-                const cacheTime = cacheData.timestamp || 0;
-                const cacheExpired = (now - cacheTime) > (24 * 60 * 60 * 1000);
-
-                if (cacheExpired) {
-                    console.log('⚠️ 表单缓存已过期，不恢复');
-                    this.clearFormCache();
-                    return;
-                }
-
-                console.log('📋 从缓存恢复表单数据:', cacheData);
-
-                // 恢复表单数据
-                this.setData({
-                    bookingForm: cacheData.bookingForm || this.data.bookingForm
-                });
-
-                // 如果缓存中有日期和时间段选择，且日期是今天或未来的日期，则恢复
-                if (cacheData.selectedDate) {
-                    const cacheDate = new Date(cacheData.selectedDate);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-
-                    if (cacheDate >= today) {
-                        console.log('🕒 从缓存恢复日期和时间段选择');
-
-                        // 设置日期
-                        this.setData({
-                            selectedDate: cacheData.selectedDate,
-                            selectedDateWithWeekday: this.formatDateWithWeekday(new Date(cacheData.selectedDate))
-                        });
-
-                        // 获取该日期的可用性后，再尝试恢复时间段选择
-                        this.fetchRoomAvailability(cacheData.selectedDate).then(() => {
-                            // 检查缓存的时间段是否有效
-                            if (cacheData.selectedStartIndex >= 0 &&
-                                cacheData.selectedEndIndex >= 0 &&
-                                cacheData.selectedStartIndex <= cacheData.selectedEndIndex) {
-
-                                // 验证时间段是否可用
-                                const validationResult = this.validateTimeRange(
-                                    cacheData.selectedStartIndex,
-                                    cacheData.selectedEndIndex
-                                );
-
-                                if (validationResult.isValid) {
-                                    // 恢复时间段选择
-                                    this.setStartTime(cacheData.selectedStartIndex);
-                                    this.setEndTime(cacheData.selectedStartIndex, cacheData.selectedEndIndex);
-                                } else {
-                                    console.log('⚠️ 缓存的时间段不可用:', validationResult.message);
-                                }
-                            }
-                        });
-                    } else {
-                        console.log('⚠️ 缓存的日期已过期，不恢复时间选择');
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('❌ 恢复表单缓存失败:', error);
-            // 恢复失败不影响正常功能
-        }
-    },
-
-    /**
-     * 清除表单缓存
-     */
-    clearFormCache() {
-        try {
-            wx.removeStorageSync('bookingFormCache');
-            console.log('🗑️ 表单缓存已清除');
-        } catch (error) {
-            console.error('❌ 清除表单缓存失败:', error);
-        }
     },
 
     /**
      * 显示预约弹窗
      */
     showBookingModal() {
-        // 验证时间选择
-        if (this.data.selectedStartIndex === -1 || this.data.selectedEndIndex === -1) {
-            wx.showToast({
-                title: '请选择预约时间段',
-                icon: 'none'
-            });
-            return;
+        const { wholePeriodBooking } = this.data;
+        let selectedTimeText = '';
+        if (wholePeriodBooking) {
+            selectedTimeText = `${wholePeriodBooking.startTime} - ${wholePeriodBooking.endTime} (整${wholePeriodBooking.periodName})`;
         }
-
-        // 生成选中时间的文本描述
-        const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
-        const startTime = timeSlots[selectedStartIndex].time;
-        const endTime = timeSlots[selectedEndIndex].time;
-
-        const selectedTimeText = `${startTime} - ${endTime}`;
-
-        // 如果用户已有联系人信息但表单中没有，则自动填入
-        const currentContactName = this.data.bookingForm.contactName;
-        const currentContactPhone = this.data.bookingForm.contactPhone;
-
-        // 检查是否需要自动填入联系人信息
-        if (!currentContactName && !currentContactPhone) {
-            // 重新获取用户联系人信息并填入表单
-            this.fetchUserContactInfo().then(() => {
-                console.log('💡 自动填入用户联系人信息');
-            }).catch(error => {
-                console.warn('⚠️ 获取联系人信息失败:', error);
-            });
-        }
-
-        this.setData({
-            showBookingModal: true,
-            selectedTimeText: selectedTimeText
-        });
+        this.setData({ showBookingModal: true, selectedTimeText });
     },
 
     /**
      * 隐藏预约弹窗
      */
     hideBookingModal() {
-        this.setData({
-            showBookingModal: false
-        });
+        this.setData({ showBookingModal: false });
     },
 
     /**
      * 阻止弹窗关闭（点击弹窗内容区域）
      */
-    preventClose() {
-        // 什么都不做，阻止事件冒泡
-    },
+    preventClose() {},
 
     /**
      * 提交预约
      */
     async submitBooking() {
-        // 验证时间选择
-        if (this.data.selectedStartIndex === -1 || this.data.selectedEndIndex === -1) {
-            wx.showToast({
-                title: '请选择预约时间段',
-                icon: 'none'
-            });
-            return;
-        }
-
-        // 验证表单
+        const { wholePeriodBooking } = this.data;
         const { topic, contactName, contactPhone } = this.data.bookingForm;
 
-        if (!topic || !topic.trim()) {
-            wx.showToast({
-                title: '请输入会议主题',
-                icon: 'none'
-            });
+        if (!topic ? .trim()) {
+            wx.showToast({ title: '请输入会议主题', icon: 'none' });
+            return;
+        }
+        if (!contactName ? .trim()) {
+            wx.showToast({ title: '请输入联系人', icon: 'none' });
+            return;
+        }
+        if (!contactPhone ? .trim()) {
+            wx.showToast({ title: '请输入联系方式', icon: 'none' });
+            return;
+        }
+        if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
+            wx.showToast({ title: '请输入正确的手机号', icon: 'none' });
             return;
         }
 
-        if (!contactName || !contactName.trim()) {
-            wx.showToast({
-                title: '请输入联系人',
-                icon: 'none'
-            });
-            return;
-        }
+        const startTime = wholePeriodBooking.startTime;
+        const endTime = wholePeriodBooking.endTime;
 
-        if (!contactPhone || !contactPhone.trim()) {
-            wx.showToast({
-                title: '请输入联系方式',
-                icon: 'none'
-            });
-            return;
-        }
-
-        // 验证手机号格式
-        const phoneRegex = /^1[3-9]\d{9}$/;
-        if (!phoneRegex.test(contactPhone)) {
-            wx.showToast({
-                title: '请输入正确的手机号',
-                icon: 'none'
-            });
-            return;
-        }
-
-        // 获取选中的时间段
-        const { selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
-        const startTime = timeSlots[selectedStartIndex].time;
-        const endTime = timeSlots[selectedEndIndex].time;
-
-        console.log('🕒 预约时间:', {
-            selectedStartIndex,
-            selectedEndIndex,
-            startTime,
-            endTime,
-            totalSlots: timeSlots.length
-        });
-
-        // 构建预约数据 - 注意日期格式转换
         const bookingData = {
             roomId: this.data.roomId,
-            bookingDate: new Date(this.data.selectedDate).toISOString(), // 转换为ISO格式
-            startTime: startTime,
-            endTime: endTime,
+            bookingDate: new Date(this.data.selectedDate).toISOString(),
+            startTime,
+            endTime,
             topic: topic.trim(),
             contactName: contactName.trim(),
             contactPhone: contactPhone.trim()
         };
 
-        // 只有当参会人数有值时才添加该字段
-        if (this.data.bookingForm.attendeesCount) {
-            // 处理数字或字符串类型的参会人数
-            const attendeeCount = typeof this.data.bookingForm.attendeesCount === 'string' ?
-                this.data.bookingForm.attendeesCount.trim() :
-                String(this.data.bookingForm.attendeesCount);
-
-            if (attendeeCount && attendeeCount !== '0') {
-                bookingData.attendeesCount = parseInt(attendeeCount);
-            }
-        }
-
         try {
-            wx.showLoading({
-                title: '提交中...'
-            });
-
+            wx.showLoading({ title: '提交中...' });
             const result = await this.requestAPI('POST', '/api/bookings', bookingData);
-
             wx.hideLoading();
 
             if (result.success) {
-                wx.showToast({
-                    title: '预约成功',
-                    icon: 'success'
-                });
-
-                // 检查并更新用户联系人信息
-                await this.updateUserContactInfo(contactName.trim(), contactPhone.trim());
-
-                // 关闭弹窗
+                wx.showToast({ title: '预约成功', icon: 'success' });
                 this.hideBookingModal();
-
-                // 清空选择和表单
-                this.clearTimeSelection();
-
-                // 重新获取可用性
+                this.setData({
+                    selectedStartIndex: -1,
+                    selectedEndIndex: -1,
+                    wholePeriodBooking: null,
+                    bookingForm: { topic: '', contactName: '', contactPhone: '', attendeesCount: 1 }
+                });
                 this.fetchRoomAvailability(this.data.selectedDate);
-
             } else {
                 throw new Error(result.message || '预约失败');
             }
-
         } catch (error) {
             wx.hideLoading();
-            console.error('预约失败:', error);
-
-            wx.showToast({
-                title: error.message || '预约失败，请重试',
-                icon: 'none'
-            });
+            wx.showToast({ title: error.message || '预约失败，请重试', icon: 'none' });
         }
-    },
-
-    /**
-     * 图片加载成功
-     */
-    onImageLoad() {
-        this.setData({
-            imageLoading: false,
-            imageError: false
-        });
-    },
-
-    /**
-     * 图片加载失败
-     */
-    onImageError() {
-        this.setData({
-            imageLoading: false,
-            imageError: true
-        });
     },
 
     /**
@@ -1069,17 +523,15 @@ Page({
      */
     async requestAPI(method, url, data = {}) {
         return new Promise((resolve, reject) => {
-            const requestConfig = {
+            wx.request({
                 url: `${this.data.apiBaseUrl}${url}`,
-                method: method,
+                method,
                 header: {
                     'Content-Type': 'application/json',
                     'X-User-Openid': this.data.userOpenId
                 },
+                data: method !== 'GET' ? data : undefined,
                 success: (res) => {
-                    console.log(`${method} ${url} 响应:`, res);
-
-                    // 2xx状态码都认为是成功
                     if (res.statusCode >= 200 && res.statusCode < 300) {
                         resolve(res.data);
                     } else {
@@ -1087,58 +539,9 @@ Page({
                     }
                 },
                 fail: (err) => {
-                    console.error(`${method} ${url} 请求失败:`, err);
                     reject(new Error(err.errMsg || '网络请求失败'));
                 }
-            };
-
-            if (method !== 'GET' && Object.keys(data).length > 0) {
-                requestConfig.data = data;
-            }
-
-            wx.request(requestConfig);
+            });
         });
-    },
-
-    /**
-     * 更新用户联系人信息
-     */
-    async updateUserContactInfo(contactName, contactPhone) {
-        try {
-            // 检查是否需要更新（联系人信息有变化）
-            const currentContactName = this.data.bookingForm.contactName;
-            const currentContactPhone = this.data.bookingForm.contactPhone;
-
-            if (currentContactName === contactName && currentContactPhone === contactPhone) {
-                console.log('ℹ️ 联系人信息无变化，跳过更新');
-                return;
-            }
-
-            console.log('📝 更新用户联系人信息:', {
-                contactName,
-                contactPhone: contactPhone.substring(0, 3) + '****' + contactPhone.substring(7)
-            });
-
-            const result = await this.requestAPI('PUT', '/api/user/contact', {
-                contactName: contactName,
-                contactPhone: contactPhone
-            });
-
-            if (result.success) {
-                console.log('✅ 用户联系人信息更新成功');
-
-                // 更新本地缓存的联系人信息
-                this.setData({
-                    'bookingForm.contactName': contactName,
-                    'bookingForm.contactPhone': contactPhone
-                });
-            } else {
-                throw new Error(result.message || '更新用户联系人信息失败');
-            }
-        } catch (error) {
-            console.error('❌ 更新用户联系人信息失败:', error);
-            // 不显示错误提示，避免干扰用户体验
-            // 联系人信息更新失败不影响预订流程
-        }
     }
 });

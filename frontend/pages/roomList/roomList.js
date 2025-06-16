@@ -14,7 +14,7 @@ Page({
         isAdmin: false,
         statusBarHeight: 0,
         userOpenId: '',
-        apiBaseUrl: '',
+        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
         // 胶囊按钮信息
         menuButtonInfo: null,
         customNavBarHeight: 0
@@ -26,94 +26,21 @@ Page({
     onLoad() {
         console.log('会议室列表页面加载');
 
-        // 安全获取App实例和API基础URL
-        this.safeGetAppData();
-
-        this.getSystemInfo();
-    },
-
-    /**
-     * 安全获取App数据，避免getApp()返回undefined
-     */
-    safeGetAppData() {
-        try {
-            const app = getApp();
-
-            if (app && app.globalData) {
-                this.setData({
-                    apiBaseUrl: app.globalData.apiBaseUrl || 'https://www.cacophonyem.me/meeting'
-                });
-                console.log('✅ 成功获取App全局数据');
-
-                // 获取用户openid
-                this.getUserOpenId();
-            } else {
-                console.warn('⚠️ App实例未就绪，使用默认配置');
-                this.setData({
-                    apiBaseUrl: 'https://www.cacophonyem.me/meeting'
-                });
-
-                // 延迟重试获取用户数据
-                setTimeout(() => {
-                    this.safeGetAppData();
-                }, 500);
-            }
-        } catch (error) {
-            console.error('❌ 获取App数据失败:', error);
-
-            // 使用默认配置
-            this.setData({
-                apiBaseUrl: 'https://www.cacophonyem.me/meeting'
-            });
-
-            // 显示错误提示但不阻塞页面
-            wx.showToast({
-                title: '初始化中，请稍候',
-                icon: 'loading',
-                duration: 1500
-            });
-
-            // 延迟重试
-            setTimeout(() => {
-                this.safeGetAppData();
-            }, 1000);
-        }
+        this.getUserOpenId();
     },
 
     /**
      * 获取用户openid
      */
     getUserOpenId() {
-        try {
-            // 先从全局数据获取
-            const app = getApp();
-            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
-                this.setData({
-                    userOpenId: app.globalData.userInfo.openid
-                });
-                console.log('✅ 从全局数据获取用户openid:', app.globalData.userInfo.openid);
-                return;
-            }
-
-            // 从本地存储获取
+        const app = getApp();
+        if (app ? .globalData ? .userInfo ? .openid) {
+            this.setData({ userOpenId: app.globalData.userInfo.openid });
+        } else {
             const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo && userInfo.openid) {
-                this.setData({
-                    userOpenId: userInfo.openid
-                });
-                console.log('✅ 从本地存储获取用户openid:', userInfo.openid);
-
-                // 同时更新全局数据
-                if (app) {
-                    app.globalData.userInfo = userInfo;
-                }
-                return;
+            if (userInfo ? .openid) {
+                this.setData({ userOpenId: userInfo.openid });
             }
-
-            console.log('ℹ️ 未找到用户openid，等待页面初始化登录流程处理');
-        } catch (error) {
-            console.error('❌ 获取用户openid失败:', error);
-            // 不影响页面正常加载，只是没有用户信息
         }
     },
 
@@ -127,7 +54,7 @@ Page({
     /**
      * 生命周期函数--监听页面显示 - 优化版本，确保登录后再获取数据
      */
-    onShow() {
+    async onShow() {
         console.log('📱 页面显示，开始初始化...');
 
         // 打印当前页面状态，帮助调试
@@ -139,21 +66,18 @@ Page({
             isAdmin: this.data.isAdmin
         });
 
-        // 使用智能登录流程，确保用户已登录后再获取数据
-        this.initializePageWithLogin();
+        await this.initializePage();
     },
 
     /**
      * 智能初始化页面 - 确保登录后再加载数据
      */
-    async initializePageWithLogin() {
+    async initializePage() {
         try {
             console.log('🔐 开始页面初始化登录流程...');
 
-            // 直接执行智能登录，不需要等待应用级登录
             const userInfo = await this.loginUser();
-
-            if (userInfo && userInfo.openid) {
+            if (userInfo ? .openid) {
                 console.log('✅ 用户登录成功，开始加载页面数据...');
 
                 // 更新页面数据
@@ -190,7 +114,7 @@ Page({
                 success: (res) => {
                     if (res.confirm) {
                         // 用户选择重试
-                        this.initializePageWithLogin();
+                        this.initializePage();
                     }
                 }
             });
@@ -290,25 +214,31 @@ Page({
      */
     async loginUser() {
         try {
-            const WechatAuth = require('../../utils/auth.js');
+            const existingUser = wx.getStorageSync('userInfo');
+            if (existingUser ? .openid) return existingUser;
 
-            // 使用智能登录，避免重复弹窗
-            console.log('🔐 页面级智能登录...');
-            const userInfo = await WechatAuth.smartLogin();
-
-            if (userInfo && userInfo.openid) {
-                // 更新页面的用户ID
-                this.setData({
-                    userOpenId: userInfo.openid
+            return new Promise((resolve) => {
+                wx.login({
+                    success: async(res) => {
+                        if (res.code) {
+                            try {
+                                const result = await this.requestAPI('POST', '/api/user/wechat-login', { code: res.code });
+                                if (result.success && result.data) {
+                                    wx.setStorageSync('userInfo', result.data);
+                                    resolve(result.data);
+                                }
+                            } catch (error) {
+                                resolve(null);
+                            }
+                        } else {
+                            resolve(null);
+                        }
+                    },
+                    fail: () => resolve(null)
                 });
-                console.log('✅ 用户登录成功，openid:', userInfo.openid);
-                return userInfo;
-            } else {
-                throw new Error('无法获取用户信息');
-            }
+            });
         } catch (error) {
-            console.error('用户登录失败:', error);
-            throw error;
+            return null;
         }
     },
 
@@ -317,33 +247,12 @@ Page({
      */
     async checkUserRole() {
         try {
-            // 检查是否有用户ID
-            if (!this.data.userOpenId) {
-                console.log('ℹ️ 用户ID未设置，默认为普通用户');
-                this.setData({
-                    isAdmin: false
-                });
-                return;
-            }
-
-            const result = await this.requestAPI('GET', '/api/user/role');
+            const result = await this.requestAPI('GET', '/api/user/admin-status');
             if (result.success) {
-                this.setData({
-                    isAdmin: result.data.role === 'admin'
-                });
-                console.log('✅ 用户角色检查完成:', result.data.role);
-            } else {
-                console.warn('⚠️ 用户角色检查失败，使用默认权限');
-                this.setData({
-                    isAdmin: false
-                });
+                this.setData({ isAdmin: result.data.isAdmin });
             }
         } catch (error) {
-            console.error('❌ 检查用户角色失败:', error);
-            // 默认为普通用户
-            this.setData({
-                isAdmin: false
-            });
+            this.setData({ isAdmin: false });
         }
     },
 
@@ -378,18 +287,7 @@ Page({
                 fullUrl: `${this.data.apiBaseUrl}/api/rooms`
             });
 
-            // 明确传递用户标识到请求头，确保API能正确识别用户
-            const requestOptions = {
-                header: {
-                    'X-User-Openid': this.data.userOpenId,
-                    'x-user-openid': this.data.userOpenId, // 小写版本
-                    'openid': this.data.userOpenId // 简化版本
-                }
-            };
-
-            console.log('🔑 请求配置:', requestOptions);
-
-            const result = await request.get('/api/rooms', {}, requestOptions);
+            const result = await this.requestAPI('GET', '/api/rooms');
 
             console.log('✅ 获取会议室列表成功:', result);
 
@@ -542,35 +440,25 @@ Page({
      */
     requestAPI(method, url, data = {}) {
         return new Promise((resolve, reject) => {
-            const requestConfig = {
+            wx.request({
                 url: `${this.data.apiBaseUrl}${url}`,
-                method: method,
+                method,
                 header: {
                     'Content-Type': 'application/json',
-                    'X-User-Openid': this.data.userOpenId,
-                    'x-user-openid': this.data.userOpenId, // 小写版本  
-                    'openid': this.data.userOpenId // 简化版本
+                    'X-User-Openid': this.data.userOpenId
                 },
+                data: method !== 'GET' ? data : undefined,
                 success: (res) => {
-                    console.log(`✅ requestAPI成功: ${method} ${url}`, res);
-                    resolve(res.data);
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                        resolve(res.data);
+                    } else {
+                        reject(new Error(`HTTP ${res.statusCode}`));
+                    }
                 },
-                fail: (error) => {
-                    console.error(`❌ requestAPI失败: ${method} ${url}`, error);
-                    reject(error);
+                fail: (err) => {
+                    reject(new Error(err.errMsg || '网络请求失败'));
                 }
-            };
-
-            if (method === 'POST' || method === 'PUT') {
-                requestConfig.data = data;
-            }
-
-            console.log(`🌐 requestAPI请求: ${method} ${url}`, {
-                header: requestConfig.header,
-                data: method === 'POST' || method === 'PUT' ? data : undefined
             });
-
-            wx.request(requestConfig);
         });
     },
 
@@ -578,63 +466,28 @@ Page({
      * 跳转到会议室详情页
      */
     goToRoomDetail(e) {
-        console.log('🖱️ 点击会议室卡片');
-        console.log('📥 事件对象:', e);
-        console.log('📥 dataset:', e.currentTarget.dataset);
-        console.log('📥 当前会议室数据:', this.data.rooms);
-
-        const roomId = e.currentTarget.dataset.roomId;
-        console.log('🏢 获取到的roomId:', roomId);
-        console.log('🏢 roomId类型:', typeof roomId);
-
-        if (!roomId) {
-            console.error('❌ roomId 为空，无法跳转');
-            console.error('❌ dataset内容:', e.currentTarget.dataset);
-            console.error('❌ 当前rooms数据:', this.data.rooms);
-
-            wx.showModal({
-                title: '调试信息',
-                content: `roomId为空\ndataset: ${JSON.stringify(e.currentTarget.dataset)}\n\n检查点：\n1. 请查看控制台完整日志\n2. 数据是否正确加载`,
-                showCancel: false
+        const room = e.currentTarget.dataset.room;
+        if (room ? .id) {
+            wx.navigateTo({
+                url: `/pages/roomDetail/roomDetail?roomId=${room.id}`
             });
-            return;
         }
-
-        const targetUrl = `/pages/roomDetail/roomDetail?roomId=${roomId}`;
-        console.log('🔗 准备跳转URL:', targetUrl);
-
-        wx.navigateTo({
-            url: targetUrl,
-            success: () => {
-                console.log('✅ 跳转成功到会议室详情页');
-            },
-            fail: (error) => {
-                console.error('❌ 跳转失败:', error);
-                wx.showModal({
-                    title: '跳转失败',
-                    content: `错误: ${JSON.stringify(error)}\nURL: ${targetUrl}`,
-                    showCancel: false
-                });
-            }
-        });
     },
 
     /**
      * 跳转到管理员面板
      */
     goToAdminPanel() {
-        if (!this.data.isAdmin) {
+        if (this.data.isAdmin) {
+            wx.navigateTo({
+                url: '/pages/admin/admin'
+            });
+        } else {
             wx.showToast({
                 title: '您没有管理员权限',
-                icon: 'none',
-                duration: 2000
+                icon: 'none'
             });
-            return;
         }
-
-        wx.navigateTo({
-            url: '/pages/admin/admin'
-        });
     },
 
     /**
@@ -658,12 +511,12 @@ Page({
     /**
      * 搜索确认处理
      */
-    onSearchConfirm(e) {
-        const keyword = e.detail.value.trim();
+    async onSearchConfirm() {
+        const keyword = this.data.searchKeyword.trim();
         if (keyword) {
-            this.performSearch(keyword);
+            await this.performSearch(keyword);
         } else {
-            this.fetchRooms();
+            await this.fetchRooms();
         }
     },
 
@@ -671,32 +524,16 @@ Page({
      * 执行搜索
      */
     async performSearch(keyword) {
-        this.setData({ loading: true, searchKeyword: keyword });
-
+        this.setData({ loading: true });
         try {
-            const result = await this.requestAPI('GET', `/api/rooms?search=${encodeURIComponent(keyword)}`);
-
-            if (result.success && result.data) {
-                const processedRooms = await this.processRoomsData(result.data);
-                this.setData({
-                    rooms: processedRooms,
-                    loading: false
-                });
-            } else {
-                throw new Error(result.message || '搜索失败');
+            const result = await this.requestAPI('GET', `/api/rooms/search?keyword=${encodeURIComponent(keyword)}`);
+            if (result.success) {
+                this.setData({ rooms: result.data || [] });
             }
         } catch (error) {
-            console.error('搜索失败:', error);
-            this.setData({
-                loading: false,
-                rooms: []
-            });
-
-            wx.showToast({
-                title: '搜索失败，请重试',
-                icon: 'none',
-                duration: 2000
-            });
+            wx.showToast({ title: '搜索失败', icon: 'none' });
+        } finally {
+            this.setData({ loading: false });
         }
     },
 
@@ -858,15 +695,15 @@ Page({
     openLocationMap(e) {
         const roomId = e.currentTarget.dataset.roomId;
         console.log('打开位置地图，会议室ID:', roomId);
-        
+
         // 显示加载中
         wx.showLoading({
             title: '获取位置信息...',
         });
-        
+
         // 从当前数据中查找会议室
         const room = this.data.rooms.find(r => r.id === roomId || r.roomId === roomId || r._id === roomId);
-        
+
         if (!room) {
             wx.hideLoading();
             wx.showToast({
@@ -876,17 +713,17 @@ Page({
             });
             return;
         }
-        
+
         // 如果会议室数据中已有经纬度信息
         if (room.latitude && room.longitude) {
             this.openMap(room);
             return;
         }
-        
+
         // 如果没有经纬度，则通过地址获取经纬度
         this.getLocationFromAddress(room);
     },
-    
+
     /**
      * 通过地址获取经纬度
      */
@@ -895,21 +732,21 @@ Page({
         const key = '您的高德地图API Key';
         const address = room.location || '';
         const url = `https://restapi.amap.com/v3/geocode/geo?key=${key}&address=${encodeURIComponent(address)}&city=全国`;
-        
+
         wx.request({
             url: url,
             success: (res) => {
                 wx.hideLoading();
-                
+
                 if (res.data.status === '1' && res.data.geocodes && res.data.geocodes.length > 0) {
                     const location = res.data.geocodes[0].location.split(',');
                     const longitude = parseFloat(location[0]);
                     const latitude = parseFloat(location[1]);
-                    
+
                     // 更新会议室数据，添加经纬度信息
                     room.latitude = latitude;
                     room.longitude = longitude;
-                    
+
                     // 打开地图
                     this.openMap(room);
                 } else {
@@ -923,7 +760,7 @@ Page({
             fail: (error) => {
                 console.error('❌ 地理编码失败:', error);
                 wx.hideLoading();
-                
+
                 wx.showToast({
                     title: '获取位置坐标失败',
                     icon: 'none',
@@ -932,7 +769,7 @@ Page({
             }
         });
     },
-    
+
     /**
      * 打开地图
      */

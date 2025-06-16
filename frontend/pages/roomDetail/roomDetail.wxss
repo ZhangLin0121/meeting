@@ -303,7 +303,7 @@ page {
 }
 
 
-/* 时间段选择 */
+/* 时间段选择 - 两层级设计 */
 
 .time-slots-container {
     margin-bottom: 24px;
@@ -313,39 +313,218 @@ page {
     font-size: 16px;
     font-weight: 600;
     color: #333333;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
-
-/* 时段分组样式 */
-
-.time-period-section {
+.time-slots-subtitle {
+    font-size: 13px;
+    color: #666666;
+    line-height: 1.5;
     margin-bottom: 20px;
 }
 
-.time-period-section:last-of-type {
-    margin-bottom: 16px;
+
+/* 时段卡片容器 */
+
+.period-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.period-header {
+
+/* 时段卡片样式 */
+
+.period-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #e8e8e8;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.period-card.available {
+    border-color: #c3f0d0;
+    background-color: #fafffe;
+}
+
+.period-card.partial {
+    border-color: #ffd6a6;
+    background-color: #fffbf5;
+}
+
+.period-card.unavailable {
+    border-color: #f0b3b3;
+    background-color: #fefafa;
+    opacity: 0.7;
+}
+
+.period-card.expanded {
+    border-color: #007aff;
+    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
+}
+
+.period-card:active {
+    transform: scale(0.99);
+}
+
+
+/* 时段卡片头部 */
+
+.period-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 16px;
+    cursor: pointer;
 }
 
-.period-title {
-    font-size: 14px;
+.period-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.period-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.period-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.period-name {
+    font-size: 16px;
     font-weight: 600;
     color: #333333;
 }
 
-.period-subtitle {
+.period-time {
+    font-size: 13px;
+    color: #666666;
+}
+
+.period-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+/* 可用性指示器 */
+
+.availability-indicator {
+    text-align: right;
+}
+
+.availability-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: #38a169;
+}
+
+.availability-text.partial {
+    color: #d69e2e;
+}
+
+.availability-text.unavailable {
+    color: #e53e3e;
+}
+
+
+/* 快速预约按钮 */
+
+.quick-book-btn {
+    background: linear-gradient(135deg, #38a169 0%, #2d8659 100%);
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(56, 161, 105, 0.25);
+}
+
+.quick-book-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 4px rgba(56, 161, 105, 0.4);
+}
+
+.quick-book-text {
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+
+/* 展开图标 */
+
+.expand-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expand-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.expand-arrow {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+}
+
+
+/* 展开箭头文本样式 */
+
+.expand-arrow-text {
     font-size: 12px;
     color: #666666;
-    font-weight: 400;
+    line-height: 1;
+    font-weight: normal;
+}
+
+
+/* 详细时间段区域 */
+
+.period-detail-slots {
+    border-top: 1px solid #f0f0f0;
+    padding: 16px;
+    background-color: #fafafa;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+}
+
+.detail-slots-header {
+    margin-bottom: 12px;
+}
+
+.detail-title {
+    font-size: 14px;
+    color: #666666;
+    font-weight: 500;
 }
 
 .time-slots-grid {
@@ -353,6 +532,13 @@ page {
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     margin-bottom: 16px;
+}
+
+
+/* 详细时间段区域内的时间段网格 */
+
+.period-detail-slots .time-slots-grid {
+    margin-bottom: 12px;
 }
 
 .time-slot {
@@ -536,11 +722,25 @@ page {
     box-shadow: 0 2px 12px rgba(56, 161, 105, 0.4);
 }
 
+.submit-button.disabled {
+    background: linear-gradient(135deg, #e0e0e0 0%, #cccccc 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: not-allowed;
+}
+
+.submit-button.disabled:active {
+    transform: none;
+}
+
 .submit-text {
     font-size: 16px;
     font-weight: 600;
     color: #ffffff;
     letter-spacing: 0.5px;
+}
+
+.submit-button.disabled .submit-text {
+    color: #888888;
 }
 
 
