@@ -77,7 +77,7 @@
       <view class="room-grid">
         <view wx:for="{{rooms}}" wx:key="id" 
               class="room-card-wrapper" 
-              data-room-id="{{item.id || item.roomId || item._id}}"
+              data-room="{{item}}"
               bindtap="goToRoomDetail">
           
           <view class="room-card">

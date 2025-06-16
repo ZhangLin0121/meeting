@@ -30,13 +30,13 @@
         <view wx:else class="room-image-placeholder">
           <image 
             class="room-default-image" 
-            src="/images/default_room.png" 
+            src="/images/icons/meeting-room.png" 
             mode="aspectFit"
           ></image>
         </view>
         <!-- 加载状态 -->
         <view wx:if="{{imageLoading}}" class="image-loading-overlay">
-          <image class="image-loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
+          <view class="image-loading-spinner"></view>
         </view>
       </view>
 
@@ -87,7 +87,7 @@
         >
           <view class="picker-display">
             <text class="picker-text">{{selectedDateWithWeekday}}</text>
-            <image class="picker-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
+            <image class="picker-arrow" src="/images/icons/arrow.png" mode="aspectFit"></image>
           </view>
         </picker>
       </view>
@@ -95,20 +95,18 @@
       <!-- 时间段选择 - 两层级设计 -->
       <view class="time-slots-container">
         <text class="time-slots-title">选择预约时段</text>
-        <text class="time-slots-subtitle">🎯 两种预约方式：1️⃣ 点击"预约整时段"直接预约整个时段  2️⃣ 点击时段卡片展开选择具体时间</text>
+        <text class="time-slots-subtitle">🎯 三种预约方式：1️⃣ 点击"预约全天"预约整个工作日  2️⃣ 点击"预约整时段"预约单个时段  3️⃣ 点击时段卡片展开选择具体时间</text>
         
         <!-- 时段选择卡片 -->
         <view class="period-cards-container">
           <view 
             wx:for="{{timePeriods}}" 
             wx:key="id"
-            class="period-card {{item.status}} {{expandedPeriod === item.id ? 'expanded' : ''}}"
-            data-period="{{item.id}}"
-            bindtap="onPeriodTap"
+            class="period-card {{item.status}} {{expandedPeriod === item.id ? 'expanded' : ''}} {{item.isFullDay ? 'fullday-card' : ''}}"
           >
             <!-- 时段卡片头部 -->
             <view class="period-card-header">
-              <view class="period-info">
+              <view class="period-info" bindtap="onPeriodTap" data-period="{{item.id}}">
                 <text class="period-icon">{{item.icon}}</text>
                 <view class="period-details">
                   <text class="period-name">{{item.name}}</text>
@@ -130,107 +128,58 @@
                   </text>
                 </view>
                 
-                                 <!-- 快速预约按钮 -->
-                 <view 
-                   wx:if="{{item.availableCount > 0}}"
-                   class="quick-book-btn" 
-                   data-period="{{item.id}}"
-                   bindtap="onQuickBookPeriod"
-                   catch:tap="true"
-                 >
-                   <text class="quick-book-text">预约整时段</text>
-                 </view>
+                <!-- 快速预约按钮 -->
+                <!-- 完全可用时显示正常预约按钮 -->
+                <view 
+                  wx:if="{{item.canBookWhole}}"
+                  class="quick-book-btn {{item.isFullDay ? 'fullday-btn' : ''}}" 
+                  data-period="{{item.id}}"
+                  catchtap="onQuickBookPeriod"
+                >
+                  <text class="quick-book-text">{{item.isFullDay ? '预约全天' : '预约整时段'}}</text>
+                </view>
                 
-                <!-- 展开/收起图标 -->
-                <view class="expand-icon {{expandedPeriod === item.id ? 'rotated' : ''}}">
+                <!-- 部分被占用时显示禁用按钮 -->
+                <view 
+                  wx:elif="{{item.status === 'partial'}}"
+                  class="quick-book-btn disabled" 
+                >
+                  <text class="quick-book-text">部分已占用</text>
+                </view>
+                
+                <!-- 展开/收起图标（全天预约不显示展开图标） -->
+                <view 
+                  wx:if="{{!item.isFullDay}}"
+                  class="expand-icon {{expandedPeriod === item.id ? 'rotated' : ''}}" 
+                  catchtap="onPeriodTap" 
+                  data-period="{{item.id}}"
+                >
                   <text class="expand-arrow-text">▼</text>
                 </view>
               </view>
             </view>
             
-            <!-- 详细时间段选择区域（展开时显示） -->
-            <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id}}">
+            <!-- 详细时间段选择区域（展开时显示，全天预约不显示） -->
+            <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id && !item.isFullDay}}" catchtap="preventClose">
               <view class="detail-slots-header">
                 <text class="detail-title">选择具体时间段（可选择多个连续时间段）</text>
               </view>
               
               <!-- 详细时间段网格 -->
               <view class="time-slots-grid">
-                <!-- 上午时段的详细时间 -->
-                <block wx:if="{{item.id === 'morning'}}">
-                  <view 
-                    wx:for="{{timeSlots}}" 
-                    wx:key="index"
-                    wx:for-item="slot"
-                    wx:for-index="slotIndex"
-                    wx:if="{{slot.period === 'morning'}}"
-                    class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
-                    data-index="{{slot.index}}"
-                    bindtap="onTimeSlotTap"
-                  >
-                    <text class="time-slot-text">{{slot.time}}</text>
-                  </view>
-                </block>
-                
-                <!-- 中午时段的详细时间 -->
-                <block wx:elif="{{item.id === 'noon'}}">
-                  <!-- 12:00 -->
-                  <view 
-                    wx:for="{{timeSlots}}" 
-                    wx:key="index"
-                    wx:for-item="slot"
-                    wx:for-index="slotIndex"
-                    wx:if="{{slot.time === '12:00'}}"
-                    class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
-                    data-index="{{slot.index}}"
-                    bindtap="onTimeSlotTap"
-                  >
-                    <text class="time-slot-text">{{slot.time}}</text>
-                  </view>
-                  <!-- 中午其他时间段 -->
-                  <view 
-                    wx:for="{{timeSlots}}" 
-                    wx:key="index"
-                    wx:for-item="slot"
-                    wx:for-index="slotIndex"
-                    wx:if="{{slot.period === 'noon'}}"
-                    class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
-                    data-index="{{slot.index}}"
-                    bindtap="onTimeSlotTap"
-                  >
-                    <text class="time-slot-text">{{slot.time}}</text>
-                  </view>
-                </block>
-                
-                <!-- 下午时段的详细时间 -->
-                <block wx:elif="{{item.id === 'afternoon'}}">
-                  <!-- 14:30 -->
-                  <view 
-                    wx:for="{{timeSlots}}" 
-                    wx:key="index"
-                    wx:for-item="slot"
-                    wx:for-index="slotIndex"
-                    wx:if="{{slot.time === '14:30'}}"
-                    class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
-                    data-index="{{slot.index}}"
-                    bindtap="onTimeSlotTap"
-                  >
-                    <text class="time-slot-text">{{slot.time}}</text>
-                  </view>
-                  <!-- 下午其他时间段 -->
-                  <view 
-                    wx:for="{{timeSlots}}" 
-                    wx:key="index"
-                    wx:for-item="slot"
-                    wx:for-index="slotIndex"
-                    wx:if="{{slot.period === 'afternoon'}}"
-                    class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
-                    data-index="{{slot.index}}"
-                    bindtap="onTimeSlotTap"
-                  >
-                    <text class="time-slot-text">{{slot.time}}</text>
-                  </view>
-                </block>
+                <!-- 显示当前时段的所有时间槽 -->
+                <view 
+                  wx:for="{{timeSlots}}" 
+                  wx:key="index"
+                  wx:for-item="slot"
+                  wx:for-index="slotIndex"
+                  wx:if="{{slot.period === item.id}}"
+                  class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
+                  data-index="{{slot.index}}"
+                  catchtap="onTimeSlotTap"
+                >
+                  <text class="time-slot-text">{{slot.time}}</text>
+                </view>
               </view>
               
               <!-- 时间段说明 -->
@@ -356,6 +305,7 @@
             value="{{bookingForm.contactName}}"
             maxlength="20"
           />
+          <text wx:if="{{bookingForm.contactName}}" class="auto-fill-hint">✅ 已自动填充个人信息</text>
         </view>
         
         <view class="form-group">
@@ -370,6 +320,7 @@
             type="number"
             maxlength="11"
           />
+          <text wx:if="{{bookingForm.contactPhone}}" class="auto-fill-hint">✅ 已自动填充个人信息</text>
         </view>
         
         <view class="form-group">

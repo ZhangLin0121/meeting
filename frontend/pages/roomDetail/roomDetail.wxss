@@ -104,7 +104,13 @@ page {
 .room-image {
     width: 100%;
     height: 100%;
+    object-fit: cover;
     background-color: #f8f8f8;
+    transition: transform 0.3s ease;
+}
+
+.room-image:active {
+    transform: scale(1.02);
 }
 
 .room-image-placeholder {
@@ -113,13 +119,13 @@ page {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f8f8f8;
+    background: linear-gradient(135deg, #f8f8f8 0%, #eeeeee 100%);
 }
 
 .room-default-image {
     width: 80px;
     height: 80px;
-    opacity: 0.6;
+    opacity: 0.4;
 }
 
 .image-loading-overlay {
@@ -131,12 +137,25 @@ page {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(248, 248, 248, 0.9);
+    background-color: rgba(248, 248, 248, 0.95);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .image-loading-spinner {
     width: 40px;
     height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007AFF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 
@@ -364,6 +383,32 @@ page {
     box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
 }
 
+.period-card.fullday-card {
+    border: 3px solid #ff6b35;
+    background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+    position: relative;
+    overflow: visible;
+}
+
+.period-card.fullday-card::before {
+    content: '🔥 热门';
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.period-card.fullday-card.available {
+    border-color: #ff6b35;
+    background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+}
+
 .period-card:active {
     transform: scale(0.99);
 }
@@ -454,10 +499,37 @@ page {
     box-shadow: 0 1px 4px rgba(56, 161, 105, 0.4);
 }
 
+.quick-book-btn.disabled {
+    background: #cccccc;
+    color: #666666;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.quick-book-btn.disabled:active {
+    transform: none;
+    box-shadow: none;
+}
+
 .quick-book-text {
     font-size: 12px;
     color: #ffffff;
     font-weight: 500;
+}
+
+.quick-book-btn.disabled .quick-book-text {
+    color: #666666;
+}
+
+.quick-book-btn.fullday-btn {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+    font-weight: 600;
+    padding: 8px 16px;
+}
+
+.quick-book-btn.fullday-btn:active {
+    box-shadow: 0 1px 4px rgba(255, 107, 53, 0.5);
 }
 
 
@@ -690,6 +762,13 @@ page {
 .form-placeholder {
     color: #999999;
     font-size: 30rpx;
+}
+
+.auto-fill-hint {
+    font-size: 24rpx;
+    color: #38a169;
+    margin-top: 8rpx;
+    display: block;
 }
 
 

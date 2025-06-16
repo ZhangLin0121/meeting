@@ -247,7 +247,7 @@ Page({
      */
     async checkUserRole() {
         try {
-            const result = await this.requestAPI('GET', '/api/user/admin-status');
+            const result = await this.requestAPI('GET', '/api/user/role');
             if (result.success) {
                 this.setData({ isAdmin: result.data.isAdmin });
             }
@@ -465,13 +465,47 @@ Page({
     /**
      * 跳转到会议室详情页
      */
+    /**
+     * 跳转到会议室详情页
+     */
     goToRoomDetail(e) {
+        console.log('🔗 点击跳转到会议室详情:', e.currentTarget.dataset);
+
         const room = e.currentTarget.dataset.room;
-        if (room && room.id) {
-            wx.navigateTo({
-                url: `/pages/roomDetail/roomDetail?roomId=${room.id}`
+
+        if (!room) {
+            console.error('❌ 无法获取会议室数据');
+            wx.showToast({
+                title: '会议室信息错误',
+                icon: 'none'
             });
+            return;
         }
+
+        // 获取会议室ID，兼容不同的字段名
+        const roomId = room.id || room.roomId || room._id;
+
+        if (!roomId) {
+            console.error('❌ 无法获取会议室ID:', room);
+            wx.showToast({
+                title: '会议室ID错误',
+                icon: 'none'
+            });
+            return;
+        }
+
+        console.log('✅ 跳转到详情页，会议室ID:', roomId);
+
+        wx.navigateTo({
+            url: `/pages/roomDetail/roomDetail?roomId=${roomId}`,
+            fail: (err) => {
+                console.error('❌ 页面跳转失败:', err);
+                wx.showToast({
+                    title: '页面跳转失败',
+                    icon: 'none'
+                });
+            }
+        });
     },
 
     /**

@@ -208,7 +208,7 @@ Page({
      */
     async checkAdminPermission() {
         try {
-            const result = await this.requestAPI('GET', '/api/user/admin-status');
+            const result = await this.requestAPI('GET', '/api/user/role');
             if (!result.success || !result.data.isAdmin) {
                 wx.showModal({
                     title: '权限不足',
@@ -512,17 +512,35 @@ Page({
      */
     editRoom(e) {
         const room = e.currentTarget.dataset.room;
+
+        // 设置设备选中状态
+        const equipmentSelection = {};
+        this.data.equipmentOptions.forEach(option => {
+            equipmentSelection[option] = Array.isArray(room.equipment) && room.equipment.includes(option);
+        });
+
         this.setData({
             showRoomModal: true,
             isEditMode: true,
             editingRoomId: room.id,
+            equipmentSelection: equipmentSelection,
             roomForm: {
                 name: room.name || '',
                 capacity: room.capacity ? room.capacity.toString() : '',
                 location: room.location || '',
                 equipment: Array.isArray(room.equipment) ? room.equipment : [],
-                description: room.description || ''
+                description: room.description || '',
+                currentImage: room.imageUrl || '', // 设置当前图片路径
+                newImagePath: '',
+                uploadedImagePath: '',
+                removedCurrentImage: false
             }
+        });
+
+        console.log('📝 编辑会议室数据:', {
+            roomId: room.id,
+            currentImage: room.imageUrl,
+            equipment: room.equipment
         });
     },
 
