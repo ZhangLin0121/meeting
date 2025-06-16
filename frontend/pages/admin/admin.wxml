@@ -62,10 +62,10 @@
           
           <!-- 悬浮操作按钮 -->
           <view class="room-actions-overlay">
-            <view class="action-button-new edit" bindtap="editRoom" data-room-id="{{item.id}}">
+            <view class="action-button-new edit" bindtap="editRoom" data-room="{{item}}">
               <image class="action-icon-new" src="/images/icons/edit.png" mode="aspectFit"></image>
             </view>
-            <view class="action-button-new delete" bindtap="deleteRoom" data-room-id="{{item.id}}" data-room-name="{{item.name}}">
+            <view class="action-button-new delete" bindtap="deleteRoom" data-room="{{item}}">
               <image class="action-icon-new" src="/images/icons/delete.png" mode="aspectFit"></image>
             </view>
           </view>
