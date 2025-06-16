@@ -539,8 +539,13 @@ Page({
 
         console.log('📝 编辑会议室数据:', {
             roomId: room.id,
-            currentImage: room.imageUrl,
-            equipment: room.equipment
+            roomName: room.name,
+            hasImageUrl: !!room.imageUrl,
+            imageUrl: room.imageUrl,
+            hasImages: !!(room.images && room.images.length > 0),
+            images: room.images,
+            equipment: room.equipment,
+            fullRoomObject: room
         });
     },
 
