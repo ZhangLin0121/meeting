@@ -375,10 +375,12 @@ Page({
                         equipmentDisplay = room.equipment.join(', ');
                     }
 
-                    // 处理图片URL
+                    // 处理图片URL - 统一图片显示逻辑
                     let imageUrl = null;
                     if (room.images && Array.isArray(room.images) && room.images.length > 0) {
-                        imageUrl = this.data.apiBaseUrl + room.images[0];
+                        // 确保图片路径正确处理
+                        const imagePath = room.images[0];
+                        imageUrl = imagePath.startsWith('/') ? this.data.apiBaseUrl + imagePath : this.data.apiBaseUrl + '/' + imagePath;
                     }
 
                     return {
@@ -530,7 +532,7 @@ Page({
                 location: room.location || '',
                 equipment: Array.isArray(room.equipment) ? room.equipment : [],
                 description: room.description || '',
-                currentImage: room.imageUrl || '', // 设置当前图片路径
+                currentImage: room.imageUrl ? room.imageUrl.replace(this.data.apiBaseUrl, '') : '', // 设置当前图片路径，移除baseUrl前缀
                 newImagePath: '',
                 uploadedImagePath: '',
                 removedCurrentImage: false
@@ -540,19 +542,8 @@ Page({
         console.log('📝 编辑会议室数据:', {
             roomId: room.id,
             roomName: room.name,
-            hasImageUrl: !!room.imageUrl,
             imageUrl: room.imageUrl,
-            hasImages: !!(room.images && room.images.length > 0),
-            images: room.images,
-            equipment: room.equipment,
-            fullRoomObject: room
-        });
-
-        // 临时调试弹窗
-        wx.showModal({
-            title: '调试信息',
-            content: `会议室: ${room.name}\n图片URL: ${room.imageUrl || '无'}\n原始图片: ${room.images ? room.images[0] : '无'}`,
-            showCancel: false
+            equipment: room.equipment
         });
     },
 
