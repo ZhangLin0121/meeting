@@ -7,7 +7,7 @@ class RequestUtil {
     constructor() {
         try {
             const app = getApp();
-            this.baseURL = (app ? .globalData ? .apiBaseUrl) || 'https://www.cacophonyem.me/meeting';
+            this.baseURL = (app && app.globalData && app.globalData.apiBaseUrl) || 'https://www.cacophonyem.me/meeting';
         } catch (error) {
             this.baseURL = 'https://www.cacophonyem.me/meeting';
         }
@@ -25,7 +25,7 @@ class RequestUtil {
             };
 
             const userInfo = this.getUserInfo();
-            if (userInfo ? .openid) {
+            if (userInfo && userInfo.openid) {
                 requestHeader['X-User-Openid'] = userInfo.openid;
             }
 
@@ -52,11 +52,11 @@ class RequestUtil {
     getUserInfo() {
         try {
             const app = getApp();
-            if (app ? .globalData ? .userInfo ? .openid) {
+            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
                 return app.globalData.userInfo;
             }
             const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo ? .openid) {
+            if (userInfo && userInfo.openid) {
                 return userInfo;
             }
             return null;
