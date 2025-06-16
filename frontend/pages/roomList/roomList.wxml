@@ -1,21 +1,24 @@
 <!-- 🎨 Apple iOS Design - 会议室列表页面 -->
 <view class="ios-app-container">
   <!-- iOS 风格导航栏 -->
-  <view class="ios-nav-bar" style="padding-top: {{statusBarHeight}}px;">
-    <view class="nav-bar-content">
-      <text class="nav-bar-title">会议室</text>
-      <view class="nav-bar-actions">
-        <view class="nav-action-button" bindtap="goToSearchPage">
-          <image class="nav-icon" src="/images/icons/search.png" mode="aspectFit"></image>
-        </view>
-        <view class="nav-action-button" bindtap="goToMyBookings">
-          <image class="nav-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+  <view class="ios-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="nav-left" bindtap="goToMyBookings">
+        <view class="nav-button">
+          <image class="nav-icon" src="/images/icons/booking.png" mode="aspectFit"></image>
         </view>
       </view>
+      <text class="nav-title">会议室列表</text>
+      <view class="nav-right" bindtap="goToAdminPanel" wx:if="{{isAdmin}}">
+        <view class="nav-button">
+          <image class="nav-icon" src="/images/icons/admin.png" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view class="nav-right" wx:else></view>
     </view>
   </view>
 
-  <!-- 搜索栏 -->
+  <!-- 搜索栏 - 调整位置 -->
   <view class="search-section" style="top: {{statusBarHeight + 44}}px;">
     <view class="search-bar">
       <image class="search-icon" src="/images/icons/search.png" mode="aspectFit"></image>
@@ -40,7 +43,7 @@
   </view>
 
   <!-- 主要内容区域 -->
-  <view class="main-content" style="padding-top: {{statusBarHeight + 44 + 80}}px;">
+  <view class="main-content" style="padding-top: {{statusBarHeight + 56}}px;">
     
     <!-- 加载状态 -->
     <view wx:if="{{loading}}" class="loading-view">

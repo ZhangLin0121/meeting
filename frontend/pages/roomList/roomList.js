@@ -26,6 +26,10 @@ Page({
     onLoad() {
         console.log('会议室列表页面加载');
 
+        // 获取系统信息，包括状态栏高度
+        this.getSystemInfo();
+        
+        // 获取用户openid
         this.getUserOpenId();
     },
 

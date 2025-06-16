@@ -70,16 +70,26 @@ Page({
             return;
         }
 
-        // 最简单的方案：直接获取状态栏高度
+        // 获取状态栏高度并调试
         const systemInfo = wx.getSystemInfoSync();
         const statusBarHeight = systemInfo.statusBarHeight || 44;
 
-        console.log('📱 状态栏高度:', statusBarHeight);
+        console.log('🔍 调试信息:');
+        console.log('📱 完整系统信息:', systemInfo);
+        console.log('📱 原始状态栏高度:', systemInfo.statusBarHeight);
+        console.log('📱 最终状态栏高度:', statusBarHeight);
+        console.log('📱 设备型号:', systemInfo.model);
+        console.log('📱 系统:', systemInfo.system);
 
         this.setData({
             roomId,
             statusBarHeight: statusBarHeight
         });
+
+        // 延迟检查数据是否正确设置
+        setTimeout(() => {
+            console.log('✅ 页面数据中的状态栏高度:', this.data.statusBarHeight);
+        }, 100);
 
         this.getUserOpenId();
         this.initializePage();

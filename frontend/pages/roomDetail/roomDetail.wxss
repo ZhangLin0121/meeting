@@ -24,6 +24,11 @@ page {
 /* 自定义导航栏 */
 
 .custom-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     background-color: #ffffff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }

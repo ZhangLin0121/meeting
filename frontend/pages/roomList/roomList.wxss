@@ -1,18 +1,9 @@
 /* 🎨 Apple iOS Design System - 会议室列表页面 */
 
 
-/* ==================== 基础容器 ==================== */
-
-.ios-app-container {
-    min-height: 100vh;
-    background: linear-gradient(180deg, #f2f2f7 0%, #ffffff 100%);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-}
-
-
 /* ==================== iOS 导航栏 ==================== */
 
-.ios-nav-bar {
+.ios-navbar {
     position: fixed;
     top: 0;
     left: 0;
@@ -24,31 +15,27 @@
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
 }
 
-.nav-bar-content {
+.navbar-content {
     height: 44px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 20rpx;
 }
 
-.nav-bar-title {
-    font-size: 34px;
-    font-weight: 700;
-    color: #1c1c1e;
-    letter-spacing: -1px;
-}
-
-.nav-bar-actions {
+.nav-left,
+.nav-right {
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
 }
 
-.nav-action-button {
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
+.nav-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,7 +43,7 @@
     transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.nav-action-button:active {
+.nav-button:active {
     background: rgba(0, 0, 0, 0.15);
     transform: scale(0.9);
 }
@@ -64,6 +51,38 @@
 .nav-icon {
     width: 18px;
     height: 18px;
+}
+
+.nav-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1c1c1e;
+    letter-spacing: -0.4px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .ios-navbar {
+        background: rgba(28, 28, 30, 0.8);
+        border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
+    }
+    .nav-title {
+        color: #ffffff;
+    }
+    .nav-button {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-button:active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+
+/* ==================== 基础容器 ==================== */
+
+.ios-app-container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f2f2f7 0%, #ffffff 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
 }
 
 
@@ -126,27 +145,6 @@
 .clear-button .sf-icon {
     font-size: 12px;
     color: white;
-}
-
-.location-button {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    background: rgba(255, 149, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.location-button:active {
-    background: rgba(255, 149, 0, 0.2);
-    transform: scale(0.9);
-}
-
-.location-icon {
-    width: 18px;
-    height: 18px;
 }
 
 .filter-button {
@@ -265,13 +263,19 @@
 
 .room-list {
     height: calc(100vh - 180px);
+    width: 100%;
 }
 
 .room-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-    padding: 16px 0;
+    width: 600px;
+    padding: 16px;
+    margin: 0 auto;
+}
+
+@media screen and (max-width: 600px) {
+    .room-grid {
+        width: 100%;
+    }
 }
 
 .room-card-wrapper {
@@ -357,7 +361,9 @@
     background: #ff3b30;
 }
 
+
 /* 图片内状态标签 */
+
 .image-status-chip {
     position: absolute;
     top: 12px;
@@ -381,8 +387,9 @@
 .room-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     margin-bottom: 8px;
+    width: 100%;
 }
 
 .room-name {
@@ -391,6 +398,7 @@
     color: #1c1c1e;
     letter-spacing: -0.5px;
     flex: 1;
+    text-align: left;
 }
 
 .capacity-badge {
@@ -509,12 +517,6 @@
     .search-section {
         padding: 12px 16px;
     }
-    .nav-bar-content {
-        padding: 0 16px;
-    }
-    .nav-bar-title {
-        font-size: 28px;
-    }
 }
 
 @media (max-width: 375px) {
@@ -533,12 +535,10 @@
     .ios-app-container {
         background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
     }
-    .ios-nav-bar,
     .search-section {
         background: rgba(28, 28, 30, 0.8);
         border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
     }
-    .nav-bar-title,
     .room-name,
     .empty-title {
         color: #ffffff;
