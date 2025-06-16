@@ -70,22 +70,15 @@ Page({
             return;
         }
 
-        // 获取系统信息 - 使用标准方案
+        // 最简单的方案：直接获取状态栏高度
         const systemInfo = wx.getSystemInfoSync();
-        const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
-
-        // 计算导航栏高度 - 标准公式
         const statusBarHeight = systemInfo.statusBarHeight || 44;
-        const menuButtonHeight = menuButtonInfo.height || 32;
-        const navigationBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonHeight;
 
         console.log('📱 状态栏高度:', statusBarHeight);
-        console.log('📱 导航栏高度:', navigationBarHeight);
 
         this.setData({
             roomId,
-            statusBarHeight: statusBarHeight,
-            navigationBarHeight: navigationBarHeight
+            statusBarHeight: statusBarHeight
         });
 
         this.getUserOpenId();

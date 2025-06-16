@@ -1,11 +1,11 @@
 <!--会议室详情页面 - Apple Design风格-->
 <view class="container fade-in">
+  <!-- 状态栏占位 -->
+  <view style="height: {{statusBarHeight}}px; background-color: #ffffff;"></view>
+  
   <!-- 自定义导航栏 -->
-  <view class="custom-navbar" style="height: {{statusBarHeight + navigationBarHeight}}px;">
-    <!-- 状态栏占位 -->
-    <view style="height: {{statusBarHeight}}px;"></view>
-    <!-- 导航栏内容 -->
-    <view class="navbar-content" style="height: {{navigationBarHeight}}px;">
+  <view class="custom-navbar">
+    <view class="navbar-content">
       <view class="navbar-left" bindtap="goBack">
         <image class="back-icon" src="/images/icons/back.png" mode="aspectFit"></image>
       </view>
@@ -13,9 +13,6 @@
       <view class="navbar-right"></view>
     </view>
   </view>
-
-  <!-- 占位元素，避免内容被固定导航栏遮挡 -->
-  <view style="height: {{statusBarHeight + navigationBarHeight}}px;"></view>
 
   <!-- 主内容区域 -->
   <scroll-view class="main-content" scroll-y wx:if="{{!loading && roomDetails.id}}">
@@ -253,8 +250,8 @@
 
   <!-- 页面加载状态 -->
   <view wx:if="{{loading}}">
-    <!-- 占位元素 -->
-    <view style="height: {{statusBarHeight + navigationBarHeight}}px;"></view>
+    <!-- 状态栏占位 -->
+    <view style="height: {{statusBarHeight}}px; background-color: #ffffff;"></view>
     <view class="loading-overlay">
       <image class="loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
       <text class="loading-text">加载中，请稍候...</text>
@@ -263,8 +260,8 @@
 
   <!-- 无数据状态 -->
   <view wx:elif="{{!loading && !roomDetails.id}}">
-    <!-- 占位元素 -->
-    <view style="height: {{statusBarHeight + navigationBarHeight}}px;"></view>
+    <!-- 状态栏占位 -->
+    <view style="height: {{statusBarHeight}}px; background-color: #ffffff;"></view>
     <view class="no-data-placeholder">
       <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
       <text class="empty-text">未找到会议室信息</text>
