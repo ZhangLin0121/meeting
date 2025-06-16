@@ -39,7 +39,7 @@ class RequestUtil {
                     if (res.statusCode >= 200 && res.statusCode < 300) {
                         resolve(res.data);
                     } else {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.data?.message || '请求失败'}`));
+                        reject(new Error(`HTTP ${res.statusCode}: ${res.data && res.data.message || '请求失败'}`));
                     }
                 },
                 fail: (error) => {

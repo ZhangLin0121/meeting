@@ -126,11 +126,11 @@ Page({
      */
     getUserOpenId() {
         const app = getApp();
-        if (app ? .globalData ? .userInfo ? .openid) {
+        if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
             this.setData({ userOpenId: app.globalData.userInfo.openid });
         } else {
             const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo ? .openid) {
+            if (userInfo && userInfo.openid) {
                 this.setData({ userOpenId: userInfo.openid });
             }
         }
@@ -197,7 +197,7 @@ Page({
                 const timePeriods = this.generateTimePeriodsArray();
 
                 // 处理已预约时间
-                if (result.data ? .timeSlots) {
+                if (result.data && result.data.timeSlots) {
                     result.data.timeSlots.forEach(slot => {
                         if (slot.status === 'booked') {
                             const index = timeSlots.findIndex(ts => ts.time === slot.startTime);
@@ -457,15 +457,15 @@ Page({
         const { wholePeriodBooking } = this.data;
         const { topic, contactName, contactPhone } = this.data.bookingForm;
 
-        if (!topic ? .trim()) {
+        if (!topic || !topic.trim()) {
             wx.showToast({ title: '请输入会议主题', icon: 'none' });
             return;
         }
-        if (!contactName ? .trim()) {
+        if (!contactName || !contactName.trim()) {
             wx.showToast({ title: '请输入联系人', icon: 'none' });
             return;
         }
-        if (!contactPhone ? .trim()) {
+        if (!contactPhone || !contactPhone.trim()) {
             wx.showToast({ title: '请输入联系方式', icon: 'none' });
             return;
         }
@@ -535,7 +535,7 @@ Page({
                     if (res.statusCode >= 200 && res.statusCode < 300) {
                         resolve(res.data);
                     } else {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.data?.message || 'Request failed'}`));
+                        reject(new Error(`HTTP ${res.statusCode}: ${res.data && res.data.message || 'Request failed'}`));
                     }
                 },
                 fail: (err) => {
