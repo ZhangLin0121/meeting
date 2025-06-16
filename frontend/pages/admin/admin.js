@@ -708,6 +708,13 @@ Page({
     },
 
     /**
+     * 阻止事件冒泡
+     */
+    stopPropagation() {
+        // 阻止事件冒泡，什么都不做
+    },
+
+    /**
      * 移除当前图片
      */
     removeCurrentImage() {
@@ -772,6 +779,18 @@ Page({
             equipment,
             description: description.trim()
         };
+
+        // 处理图片数据
+        if (this.data.roomForm.uploadedImagePath) {
+            // 有新上传的图片
+            roomData.images = [this.data.roomForm.uploadedImagePath];
+        } else if (this.data.roomForm.currentImage && !this.data.roomForm.removedCurrentImage) {
+            // 保留当前图片
+            roomData.images = [this.data.roomForm.currentImage];
+        } else {
+            // 没有图片或已移除
+            roomData.images = [];
+        }
 
         try {
             wx.showLoading({ title: this.data.isEditMode ? '更新中...' : '创建中...' });

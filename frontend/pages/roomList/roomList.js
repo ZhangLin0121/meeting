@@ -165,6 +165,21 @@ Page({
     },
 
     /**
+     * 下拉刷新处理函数
+     */
+    onRefresh() {
+        console.log('🔄 下拉刷新触发');
+        this.fetchRooms()
+            .catch(error => {
+                console.error('❌ 刷新失败:', error);
+                wx.showToast({
+                    title: '刷新失败',
+                    icon: 'none'
+                });
+            });
+    },
+
+    /**
      * 用户点击右上角分享
      */
     onShareAppMessage() {
