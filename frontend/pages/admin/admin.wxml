@@ -50,14 +50,17 @@
         <!-- 会议室图片展示区域 -->
         <view class="room-image-container">
           <image 
-            wx:if="{{item.imageUrl}}" 
+            wx:if="{{!item.imageError}}"
             class="room-image" 
-            src="{{item.imageUrl}}" 
+            src="{{item.displayImage}}" 
             mode="aspectFill"
+            lazy-load
+            binderror="onImageError"
+            bindload="onImageLoad"
+            data-room-id="{{item.id}}"
           ></image>
           <view wx:else class="room-image-placeholder">
-            <view class="placeholder-icon">🏢</view>
-            <text class="placeholder-text">暂无图片</text>
+            <image class="placeholder-icon" src="/images/icons/image-placeholder.png" mode="aspectFit"></image>
           </view>
           
           <!-- 悬浮操作按钮 -->

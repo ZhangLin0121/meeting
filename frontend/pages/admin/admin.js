@@ -304,11 +304,51 @@ Page({
     async loadRooms() {
         this.setData({ roomsLoading: true });
         try {
-            const result = await this.requestAPI('GET', '/api/rooms?includeDetails=true');
-            if (result.success) {
-                this.setData({ rooms: result.data || [] });
+            // 添加时间戳防止缓存
+            const timestamp = Date.now();
+            const result = await this.requestAPI('GET', `/api/rooms?includeDetails=true&t=${timestamp}`);
+
+            if (result.success && result.data) {
+                // 🔧 预处理数据：为每个房间添加Apple Design所需字段
+                const processedRooms = result.data.map(room => {
+                    // 处理设备数量显示
+                    let equipmentCount = 0;
+                    let equipmentDisplay = '暂无设备';
+
+                    if (room.equipment && Array.isArray(room.equipment) && room.equipment.length > 0) {
+                        equipmentCount = room.equipment.length;
+                        equipmentDisplay = room.equipment.join(', ');
+                    }
+
+                    // 处理图片URL - 与roomList保持一致的逻辑
+                    let displayImage = '/images/default_room.png';
+                    if (room.images && Array.isArray(room.images) && room.images.length > 0) {
+                        // 构建完整的图片URL，与roomList逻辑保持一致
+                        const imagePath = room.images[0];
+                        displayImage = imagePath.startsWith('http') ? imagePath : `${this.data.apiBaseUrl}${imagePath}`;
+                        console.log('🖼️ 处理图片URL (loadRooms):', {
+                            roomName: room.name,
+                            originalImagePath: imagePath,
+                            finalDisplayImage: displayImage,
+                            apiBaseUrl: this.data.apiBaseUrl
+                        });
+                    }
+
+                    return {
+                        ...room,
+                        equipmentDisplay: equipmentDisplay,
+                        equipmentCount: equipmentCount,
+                        displayImage: displayImage,
+                        imageUrl: displayImage, // 保持向后兼容
+                        imageLoading: false,
+                        imageError: false
+                    };
+                });
+
+                this.setData({ rooms: processedRooms });
             }
         } catch (error) {
+            console.error('加载会议室失败:', error);
             wx.showToast({ title: '加载会议室失败', icon: 'none' });
         } finally {
             this.setData({ roomsLoading: false });
@@ -375,19 +415,28 @@ Page({
                         equipmentDisplay = room.equipment.join(', ');
                     }
 
-                    // 处理图片URL - 统一图片显示逻辑
-                    let imageUrl = null;
+                    // 处理图片URL - 与roomList保持一致的逻辑
+                    let displayImage = '/images/default_room.png';
                     if (room.images && Array.isArray(room.images) && room.images.length > 0) {
-                        // 确保图片路径正确处理
+                        // 构建完整的图片URL，与roomList逻辑保持一致
                         const imagePath = room.images[0];
-                        imageUrl = imagePath.startsWith('/') ? this.data.apiBaseUrl + imagePath : this.data.apiBaseUrl + '/' + imagePath;
+                        displayImage = imagePath.startsWith('http') ? imagePath : `${this.data.apiBaseUrl}${imagePath}`;
+                        console.log('🖼️ 处理图片URL:', {
+                            roomName: room.name,
+                            originalImagePath: imagePath,
+                            finalDisplayImage: displayImage,
+                            apiBaseUrl: this.data.apiBaseUrl
+                        });
                     }
 
                     return {
                         ...room,
                         equipmentDisplay: equipmentDisplay,
                         equipmentCount: equipmentCount,
-                        imageUrl: imageUrl
+                        displayImage: displayImage,
+                        imageUrl: displayImage, // 保持向后兼容
+                        imageLoading: false,
+                        imageError: false
                     };
                 });
 
@@ -532,7 +581,8 @@ Page({
                 location: room.location || '',
                 equipment: Array.isArray(room.equipment) ? room.equipment : [],
                 description: room.description || '',
-                currentImage: room.imageUrl ? room.imageUrl.replace(this.data.apiBaseUrl, '') : '', // 设置当前图片路径，移除baseUrl前缀
+                currentImage: room.displayImage && room.displayImage !== '/images/default_room.png' ?
+                    (room.displayImage.startsWith(this.data.apiBaseUrl) ? room.displayImage.replace(this.data.apiBaseUrl, '') : room.displayImage) : '', // 设置当前图片路径，智能处理baseUrl
                 newImagePath: '',
                 uploadedImagePath: '',
                 removedCurrentImage: false
@@ -542,8 +592,10 @@ Page({
         console.log('📝 编辑会议室数据:', {
             roomId: room.id,
             roomName: room.name,
-            imageUrl: room.imageUrl,
-            equipment: room.equipment
+            displayImage: room.displayImage,
+            imageUrl: room.imageUrl, // 向后兼容字段
+            equipment: room.equipment,
+            currentImageSet: room.displayImage && room.displayImage !== '/images/default_room.png' ? room.displayImage.replace(this.data.apiBaseUrl, '') : ''
         });
     },
 
@@ -593,16 +645,28 @@ Page({
     toggleEquipment(e) {
         const equipment = e.currentTarget.dataset.equipment;
         const currentEquipment = [...this.data.roomForm.equipment];
+        const currentSelection = {...this.data.equipmentSelection };
         const index = currentEquipment.indexOf(equipment);
 
         if (index > -1) {
+            // 取消选择
             currentEquipment.splice(index, 1);
+            currentSelection[equipment] = false;
         } else {
+            // 选择设备
             currentEquipment.push(equipment);
+            currentSelection[equipment] = true;
         }
 
+        console.log('🔧 设备选择变更:', {
+            equipment: equipment,
+            selected: currentSelection[equipment],
+            currentEquipmentArray: currentEquipment
+        });
+
         this.setData({
-            'roomForm.equipment': currentEquipment
+            'roomForm.equipment': currentEquipment,
+            equipmentSelection: currentSelection
         });
     },
 
@@ -712,6 +776,37 @@ Page({
      */
     stopPropagation() {
         // 阻止事件冒泡，什么都不做
+    },
+
+    /**
+     * 图片加载成功
+     */
+    onImageLoad(e) {
+        const roomId = e.currentTarget.dataset.roomId;
+        this.updateRoomImageStatus(roomId, { imageLoading: false, imageError: false });
+    },
+
+    /**
+     * 图片加载失败
+     */
+    onImageError(e) {
+        const roomId = e.currentTarget.dataset.roomId;
+        this.updateRoomImageStatus(roomId, { imageLoading: false, imageError: true });
+    },
+
+    /**
+     * 更新特定会议室的图片状态
+     */
+    updateRoomImageStatus(roomId, updates) {
+        const rooms = this.data.rooms;
+        const index = rooms.findIndex(room => room.id === roomId);
+        if (index !== -1) {
+            const updatePath = {};
+            Object.keys(updates).forEach(key => {
+                updatePath[`rooms[${index}].${key}`] = updates[key];
+            });
+            this.setData(updatePath);
+        }
     },
 
     /**
