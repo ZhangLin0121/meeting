@@ -122,15 +122,49 @@ echo -e "  • 重启服务: ssh ${SERVER_USER}@${SERVER_HOST} 'pm2 restart ${SE
 
 echo -e "\n${GREEN}✨ 部署流程完成，服务正常运行！${NC}"
 
-echo "🚀 开始部署后端代码..."
+echo "🚀 开始部署会议室预订系统修复代码..."
 
-# 部署到服务器
-ssh root@47.122.68.192 << 'EOF'
-cd /root/meeting/backend
-git pull origin main
-pm2 restart meeting-backend
-pm2 status
-echo "✅ 部署完成"
+# 检查Git状态
+echo "📋 检查Git状态..."
+git status
+
+# 推送代码到远程仓库
+echo "📤 推送代码到远程仓库..."
+git push origin main
+
+if [ $? -eq 0 ]; then
+    echo "✅ 代码推送成功"
+    
+    # 部署到服务器
+    echo "🚀 开始部署到服务器..."
+    ssh root@47.122.68.192 << 'EOF'
+    cd /root/meeting-backend
+    
+    echo "📥 拉取最新代码..."
+    git pull origin main
+    
+    echo "📦 安装依赖..."
+    npm install
+    
+    echo "🔄 重启服务..."
+    pm2 restart meeting-backend
+    
+    echo "📊 检查服务状态..."
+    pm2 status
+    
+    echo "📋 查看最近日志..."
+    pm2 logs meeting-backend --lines 10
+    
+    echo "✅ 部署完成"
 EOF
-
-echo "🎉 部署流程完成" 
+    
+    echo "🎉 部署流程完成！"
+    echo "请验证以下内容："
+    echo "1. 访问 https://www.cacophonyem.me/meeting/api/health 检查API健康状态"
+    echo "2. 在小程序中测试添加会议室功能"
+    echo "3. 验证设备配置点选功能是否正常工作"
+    
+else
+    echo "❌ 代码推送失败，请检查网络连接"
+    echo "修复内容已在本地完成，等网络恢复后再次运行此脚本"
+fi 
