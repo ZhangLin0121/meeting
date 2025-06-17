@@ -41,8 +41,9 @@ class RoomController {
             }
 
             // 设备筛选
-            if (equipment && equipment.length > 0) {
+            if (equipment) {
                 const equipmentArray = Array.isArray(equipment) ? equipment : [equipment];
+                console.log('🔧 设备筛选条件:', { original: equipment, processed: equipmentArray });
                 query.equipment = { $in: equipmentArray };
             }
 
