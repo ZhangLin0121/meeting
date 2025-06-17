@@ -43,6 +43,15 @@ class RoomController {
             // 设备筛选
             if (equipment) {
                 const equipmentArray = Array.isArray(equipment) ? equipment : [equipment];
+
+                // 验证设备类型是否有效
+                const validEquipment = ['投屏设备', '麦克风', '音响系统', '白板', '电子白板', '视频会议设备', '网络接口/Wi-Fi', '空调', '电话'];
+                const invalidEquipment = equipmentArray.filter(eq => !validEquipment.includes(eq));
+
+                if (invalidEquipment.length > 0) {
+                    return ResponseHelper.error(res, `无效的设备类型: ${invalidEquipment.join(', ')}`, 400);
+                }
+
                 console.log('🔧 设备筛选条件:', { original: equipment, processed: equipmentArray });
                 query.equipment = { $in: equipmentArray };
             }

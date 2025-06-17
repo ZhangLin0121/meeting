@@ -77,10 +77,10 @@ const validationSchemas = {
             search: Joi.string().allow('').optional(),
             capacityMin: Joi.number().integer().min(1).optional(),
             capacityMax: Joi.number().integer().min(1).optional(),
-            equipment: Joi.alternatives().try(
-                Joi.string().valid('投屏设备', '麦克风', '音响系统', '白板', '电子白板', '视频会议设备', '网络接口/Wi-Fi', '空调', '电话'),
-                Joi.array().items(Joi.string().valid('投屏设备', '麦克风', '音响系统', '白板', '电子白板', '视频会议设备', '网络接口/Wi-Fi', '空调', '电话'))
-            ).optional(),
+            equipment: Joi.alternatives([
+                Joi.string(),
+                Joi.array().items(Joi.string())
+            ]).optional(),
             page: Joi.number().integer().min(1).default(1),
             limit: Joi.number().integer().min(1).max(100).default(10)
         })
