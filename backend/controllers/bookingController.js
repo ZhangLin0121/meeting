@@ -204,12 +204,24 @@ class BookingController {
             const skip = (page - 1) * limit;
 
             const bookings = await Booking.find(query)
-                .sort({ bookingDate: -1, startTime: -1 })
                 .skip(skip)
                 .limit(parseInt(limit))
                 .populate('roomId', 'name location');
 
             const total = await Booking.countDocuments(query);
+
+            // 按照距离当前时间的远近排序，最近的在前面
+            const now = TimeHelper.now();
+            bookings.sort((a, b) => {
+                const aDateTime = TimeHelper.combineDateAndTime(a.bookingDate, a.startTime);
+                const bDateTime = TimeHelper.combineDateAndTime(b.bookingDate, b.startTime);
+
+                // 计算与当前时间的绝对差值
+                const aDiff = Math.abs(aDateTime.diff(now));
+                const bDiff = Math.abs(bDateTime.diff(now));
+
+                return aDiff - bDiff; // 时间差小的排在前面
+            });
 
             const bookingList = bookings.map(booking => ({
                 id: booking._id,
