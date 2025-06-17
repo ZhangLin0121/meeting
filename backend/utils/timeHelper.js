@@ -61,10 +61,13 @@ class TimeHelper {
         const timeMinutes = this.timeToMinutes(time);
         const morningStart = this.timeToMinutes(config.office.startTime);
         const morningEnd = this.timeToMinutes(config.office.endTimeMorning);
+        const noonStart = this.timeToMinutes(config.office.startTimeNoon);
+        const noonEnd = this.timeToMinutes(config.office.endTimeNoon);
         const afternoonStart = this.timeToMinutes(config.office.startTimeAfternoon);
         const afternoonEnd = this.timeToMinutes(config.office.endTime);
 
         return (timeMinutes >= morningStart && timeMinutes <= morningEnd) ||
+            (timeMinutes >= noonStart && timeMinutes <= noonEnd) ||
             (timeMinutes >= afternoonStart && timeMinutes <= afternoonEnd);
     }
 

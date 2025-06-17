@@ -95,13 +95,17 @@
       <!-- 时间段选择 - 两层级设计 -->
       <view class="time-slots-container">
         <text class="time-slots-title">选择预约时段</text>
-        <text class="time-slots-subtitle">🎯 三种预约方式：1️⃣ 点击"预约全天"预约整个工作日  2️⃣ 点击"预约整时段"预约单个时段  3️⃣ 点击时段卡片展开选择具体时间</text>
+        <text class="time-slots-subtitle">🎯 三种预约方式：
+1️⃣ 点击"预约全天"预约整个工作日
+2️⃣ 点击"预约整时段"预约单个时段  
+3️⃣ 点击时段卡片展开选择具体时间</text>
         
         <!-- 时段选择卡片 -->
         <view class="period-cards-container">
           <view 
             wx:for="{{timePeriods}}" 
             wx:key="id"
+            wx:if="{{item.isFullDay || !isFullDayUnavailable}}"
             class="period-card {{item.status}} {{expandedPeriod === item.id ? 'expanded' : ''}} {{item.isFullDay ? 'fullday-card' : ''}}"
           >
             <!-- 时段卡片头部 -->
@@ -124,7 +128,7 @@
                     {{item.availableCount}}/{{item.totalCount}} 可用
                   </text>
                   <text class="availability-text unavailable" wx:else>
-                    暂不可用
+                    已约满
                   </text>
                 </view>
                 

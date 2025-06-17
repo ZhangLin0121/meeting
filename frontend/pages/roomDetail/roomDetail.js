@@ -57,6 +57,7 @@ Page({
         imageError: false,
         selectedTimeText: '',
         wholePeriodBooking: null, // 整时段预约信息
+        isFullDayUnavailable: false, // 全天是否约满
     },
 
     /**
@@ -310,36 +311,39 @@ Page({
     async fetchRoomAvailability(date) {
         try {
             const result = await this.requestAPI('GET', `/api/rooms/${this.data.roomId}/availability?date=${date}`);
-            if (result.success) {
-                const timeSlots = this.generateTimeSlotsArray();
+            if (result.success && result.data && result.data.timeSlots) {
+                console.log('🔍 后端返回的时间槽数据:', result.data.timeSlots);
+
+                // 直接使用后端返回的时间槽数据，转换为前端需要的格式
+                const timeSlots = result.data.timeSlots.map((backendSlot, index) => ({
+                    time: backendSlot.startTime,
+                    endTime: backendSlot.endTime,
+                    status: backendSlot.status,
+                    period: backendSlot.period,
+                    isSelected: false,
+                    index: index
+                }));
+
+                console.log('🕐 转换后的前端时间槽:', timeSlots);
+
+                // 生成时段分组
                 const timePeriods = this.generateTimePeriodsArray();
 
-                // 处理已预约时间 - 修复整时段预约状态更新问题
-                if (result.data && result.data.timeSlots) {
-                    console.log('🔍 后端返回的时间槽数据:', result.data.timeSlots);
-
-                    result.data.timeSlots.forEach(backendSlot => {
-                        if (backendSlot.status === 'booked' || backendSlot.status === 'closed') {
-                            // 找到对应的前端时间槽并更新状态
-                            // 注意：后端返回的是时间段范围(startTime-endTime)，前端是单个时间点
-                            const matchingSlot = timeSlots.find(frontendSlot =>
-                                frontendSlot.time === backendSlot.startTime
-                            );
-
-                            if (matchingSlot) {
-                                matchingSlot.status = backendSlot.status;
-                                console.log(`✅ 更新时间槽状态: ${matchingSlot.time} -> ${backendSlot.status}`);
-                            } else {
-                                console.log(`⚠️ 未找到匹配的前端时间槽: ${backendSlot.startTime}`);
-                            }
-                        }
-                    });
-
-                    console.log('🕐 更新后的前端时间槽:', timeSlots.filter(slot => slot.status !== 'available'));
-                }
-
+                // 更新时段可用性
                 this.updatePeriodAvailability(timePeriods, timeSlots);
-                this.setData({ timeSlots, timePeriods });
+
+                // 清除原始状态缓存，确保数据是最新的
+                this.originalPeriodStates = null;
+
+                // 重置选择状态
+                this.setData({
+                    timeSlots,
+                    timePeriods,
+                    selectedStartIndex: -1,
+                    selectedEndIndex: -1,
+                    wholePeriodBooking: null,
+                    expandedPeriod: null
+                });
 
                 console.log('📊 更新后的时段状态:', timePeriods.map(p => ({
                     name: p.name,
@@ -355,88 +359,7 @@ Page({
         }
     },
 
-    /**
-     * 生成时间段数组 - 按时间段分组，每30分钟一个时间槽
-     * 上午：08:30-12:00、中午：12:00-14:30、下午：14:30-22:00
-     * 注意：交叉时间点(12:00, 14:30)会同时属于两个时段
-     */
-    generateTimeSlotsArray() {
-        const timeSlots = [];
-        let index = 0;
 
-        // 生成从08:30到22:00的所有时间槽
-        for (let h = 8; h <= 22; h++) {
-            const startMinute = h === 8 ? 30 : 0;
-            for (let m = startMinute; m < 60; m += 30) {
-                if (h === 22 && m > 0) break; // 22:00结束
-
-                const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-
-                // 根据时间确定属于哪个时段
-                let period = '';
-                if ((h === 8 && m >= 30) || (h >= 9 && h < 12) || (h === 12 && m === 0)) {
-                    period = 'morning'; // 08:30-12:00
-                } else if ((h === 12 && m > 0) || (h === 13) || (h === 14 && m === 0) || (h === 14 && m === 30)) {
-                    period = 'noon'; // 12:30-14:30
-                } else if ((h === 14 && m >= 30) || (h >= 15)) {
-                    period = 'afternoon'; // 14:30-22:00
-                }
-
-                // 特殊处理交叉时间点
-                if (timeStr === '12:00') {
-                    // 12:00既属于上午也属于中午，我们将其归为上午时段的结束
-                    period = 'morning';
-                    // 同时为中午时段创建一个副本
-                    timeSlots.push({
-                        time: timeStr,
-                        status: 'available',
-                        isSelected: false,
-                        index: index++,
-                        period: 'noon'
-                    });
-                } else if (timeStr === '14:30') {
-                    // 14:30既属于中午也属于下午，我们将其归为中午时段的结束
-                    period = 'noon';
-                    // 同时为下午时段创建一个副本
-                    timeSlots.push({
-                        time: timeStr,
-                        status: 'available',
-                        isSelected: false,
-                        index: index++,
-                        period: 'afternoon'
-                    });
-                }
-
-                if (period) {
-                    timeSlots.push({
-                        time: timeStr,
-                        status: 'available',
-                        isSelected: false,
-                        index: index++,
-                        period: period
-                    });
-                }
-            }
-        }
-
-        // 按时间排序，确保时间槽顺序正确
-        timeSlots.sort((a, b) => {
-            const [aHour, aMin] = a.time.split(':').map(Number);
-            const [bHour, bMin] = b.time.split(':').map(Number);
-            const aTotal = aHour * 60 + aMin;
-            const bTotal = bHour * 60 + bMin;
-            return aTotal - bTotal;
-        });
-
-        // 重新分配index以保持连续性
-        timeSlots.forEach((slot, idx) => {
-            slot.index = idx;
-        });
-
-        console.log('🕐 生成的时间槽:', timeSlots.map(s => `${s.time}(${s.period})`));
-
-        return timeSlots;
-    },
 
     /**
      * 生成时段分组数组（上午、中午、下午）
@@ -454,6 +377,8 @@ Page({
      * 更新时段分组的可用性状态
      */
     updatePeriodAvailability(timePeriods, timeSlots) {
+        let isFullDayUnavailable = false;
+
         timePeriods.forEach(period => {
             let periodSlots = [];
             if (period.id === 'fullday') {
@@ -477,6 +402,16 @@ Page({
             // 添加是否可以整体预约的标识
             // 只有当所有时间槽都是available状态时，才允许预约整个时段
             period.canBookWhole = availableCount > 0 && availableCount === totalCount;
+
+            // 检查全天是否约满
+            if (period.id === 'fullday' && period.status === 'unavailable') {
+                isFullDayUnavailable = true;
+            }
+        });
+
+        // 更新全天约满状态
+        this.setData({
+            isFullDayUnavailable
         });
     },
 
@@ -608,6 +543,11 @@ Page({
             endTime = '22:00';
         }
 
+        // 如果是全天预约，需要更新其他时段的可用性显示
+        if (periodId === 'fullday') {
+            this.updatePeriodsForFullDayBooking();
+        }
+
         this.setData({
             wholePeriodBooking: { periodId, startTime, endTime, periodName: selectedPeriod.name },
             selectedStartIndex: -2,
@@ -618,12 +558,75 @@ Page({
     },
 
     /**
+     * 更新时段显示 - 全天预约时其他时段应显示为不可用
+     */
+    updatePeriodsForFullDayBooking() {
+        const timePeriods = [...this.data.timePeriods];
+
+        // 保存原始状态，用于后续恢复
+        if (!this.originalPeriodStates) {
+            this.originalPeriodStates = timePeriods.map(period => ({
+                id: period.id,
+                availableCount: period.availableCount,
+                status: period.status,
+                canBookWhole: period.canBookWhole
+            }));
+        }
+
+        timePeriods.forEach(period => {
+            if (period.id !== 'fullday') {
+                // 全天预约时，其他时段应显示为完全不可用
+                period.availableCount = 0;
+                period.status = 'unavailable';
+                period.canBookWhole = false;
+            }
+        });
+
+        this.setData({
+            timePeriods,
+            isFullDayUnavailable: true // 选择全天预约时，其他时段应该隐藏
+        });
+    },
+
+    /**
+     * 恢复时段可用性 - 取消全天预约时恢复正常显示
+     */
+    restorePeriodsAvailability() {
+        if (this.originalPeriodStates) {
+            const timePeriods = [...this.data.timePeriods];
+
+            // 恢复原始状态
+            timePeriods.forEach(period => {
+                const originalState = this.originalPeriodStates.find(state => state.id === period.id);
+                if (originalState && period.id !== 'fullday') {
+                    period.availableCount = originalState.availableCount;
+                    period.status = originalState.status;
+                    period.canBookWhole = originalState.canBookWhole;
+                }
+            });
+
+            this.setData({
+                timePeriods,
+                isFullDayUnavailable: false // 恢复其他时段显示
+            });
+
+            // 清除保存的原始状态
+            this.originalPeriodStates = null;
+        }
+    },
+
+    /**
      * 设置开始时间
      */
     setStartTime(startIndex) {
         const timeSlots = [...this.data.timeSlots];
         timeSlots.forEach(slot => slot.isSelected = false);
         timeSlots[startIndex].isSelected = true;
+
+        // 如果之前有全天预约，现在选择具体时间段，需要恢复时段可用性
+        if (this.data.wholePeriodBooking && this.data.wholePeriodBooking.periodId === 'fullday') {
+            this.restorePeriodsAvailability();
+        }
 
         this.setData({
             timeSlots,
@@ -939,7 +942,22 @@ Page({
             this.saveFormCache();
         }
 
-        this.setData({ showBookingModal: false });
+        // 如果有全天预约，关闭弹窗时恢复其他时段的可用性
+        if (this.data.wholePeriodBooking && this.data.wholePeriodBooking.periodId === 'fullday') {
+            this.restorePeriodsAvailability();
+        }
+
+        this.setData({
+            showBookingModal: false,
+            wholePeriodBooking: null,
+            selectedStartIndex: -1,
+            selectedEndIndex: -1
+        });
+
+        // 清除时间段选择状态
+        const timeSlots = [...this.data.timeSlots];
+        timeSlots.forEach(slot => slot.isSelected = false);
+        this.setData({ timeSlots });
     },
 
     /**
@@ -1025,13 +1043,22 @@ Page({
                 this.clearFormCache();
 
                 wx.showToast({ title: '预约成功', icon: 'success' });
-                this.hideBookingModal();
+
+                // 预约成功后，重置所有状态并刷新可用性
                 this.setData({
                     selectedStartIndex: -1,
                     selectedEndIndex: -1,
                     wholePeriodBooking: null,
+                    showBookingModal: false,
                     bookingForm: { topic: '', contactName: '', contactPhone: '', attendeesCount: 1 }
                 });
+
+                // 清除时间段选择状态
+                const timeSlots = [...this.data.timeSlots];
+                timeSlots.forEach(slot => slot.isSelected = false);
+                this.setData({ timeSlots });
+
+                // 重新获取房间可用性
                 this.fetchRoomAvailability(this.data.selectedDate);
             } else {
                 throw new Error(result.message || '预约失败');

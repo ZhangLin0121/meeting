@@ -341,7 +341,9 @@ page {
     font-size: 13px;
     color: #666666;
     line-height: 1.5;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
+    white-space: pre-line;
+    display: block;
 }
 
 
@@ -350,7 +352,7 @@ page {
 .period-cards-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 
@@ -358,61 +360,48 @@ page {
 
 .period-card {
     background-color: #ffffff;
+    border: 1px solid #e5e5e7;
     border-radius: 12px;
-    border: 2px solid #e8e8e8;
-    transition: all 0.3s ease;
-    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .period-card.available {
-    border-color: #c3f0d0;
-    background-color: #fafffe;
+    border-color: #d1d1d6;
 }
 
 .period-card.partial {
-    border-color: #ffd6a6;
-    background-color: #fffbf5;
+    border-color: #8e8e93;
+    background-color: rgba(142, 142, 147, 0.05);
 }
 
 .period-card.unavailable {
-    border-color: #f0b3b3;
-    background-color: #fefafa;
+    border-color: #d1d1d6;
+    background-color: #f2f2f7;
     opacity: 0.7;
 }
 
 .period-card.expanded {
     border-color: #007aff;
-    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
+    box-shadow: 0 2px 12px rgba(0, 122, 255, 0.08);
 }
 
 .period-card.fullday-card {
-    border: 3px solid #ff6b35;
-    background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+    border: 1px solid #007aff;
+    background-color: rgba(0, 122, 255, 0.02);
     position: relative;
     overflow: visible;
 }
 
-.period-card.fullday-card::before {
-    content: '🔥 热门';
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-    color: white;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
-}
-
 .period-card.fullday-card.available {
-    border-color: #ff6b35;
-    background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+    border-color: #007aff;
+    background-color: rgba(0, 122, 255, 0.02);
 }
 
 .period-card:active {
-    transform: scale(0.99);
+    transform: scale(0.995);
+    transition: transform 0.1s ease;
 }
 
 
@@ -429,13 +418,12 @@ page {
 .period-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0;
     flex: 1;
 }
 
 .period-icon {
-    font-size: 24px;
-    line-height: 1;
+    display: none;
 }
 
 .period-details {
@@ -462,7 +450,7 @@ page {
 }
 
 
-/* 可用性指示器 */
+/* 可用性指示器 - Apple简约风格 */
 
 .availability-indicator {
     text-align: right;
@@ -471,67 +459,65 @@ page {
 .availability-text {
     font-size: 12px;
     font-weight: 500;
-    color: #38a169;
+    color: #34c759;
+    letter-spacing: -0.1px;
 }
 
 .availability-text.partial {
-    color: #d69e2e;
+    color: #8e8e93;
 }
 
 .availability-text.unavailable {
-    color: #e53e3e;
+    color: #ff3b30;
 }
 
 
 /* 快速预约按钮 */
 
 .quick-book-btn {
-    background: linear-gradient(135deg, #38a169 0%, #2d8659 100%);
+    background-color: #007aff;
     color: #ffffff;
     border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
     font-weight: 500;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(56, 161, 105, 0.25);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border: none;
+    letter-spacing: -0.2px;
 }
 
 .quick-book-btn:active {
-    transform: scale(0.95);
-    box-shadow: 0 1px 4px rgba(56, 161, 105, 0.4);
+    background-color: #0056d3;
+    transform: scale(0.96);
 }
 
 .quick-book-btn.disabled {
-    background: #cccccc;
-    color: #666666;
-    box-shadow: none;
+    background-color: #f2f2f7;
+    color: #8e8e93;
     pointer-events: none;
 }
 
 .quick-book-btn.disabled:active {
     transform: none;
-    box-shadow: none;
 }
 
 .quick-book-text {
-    font-size: 12px;
-    color: #ffffff;
+    font-size: 13px;
     font-weight: 500;
 }
 
 .quick-book-btn.disabled .quick-book-text {
-    color: #666666;
+    color: #8e8e93;
 }
 
 .quick-book-btn.fullday-btn {
-    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
-    font-weight: 600;
+    background-color: #007aff;
+    font-weight: 500;
     padding: 8px 16px;
 }
 
 .quick-book-btn.fullday-btn:active {
-    box-shadow: 0 1px 4px rgba(255, 107, 53, 0.5);
+    background-color: #0056d3;
 }
 
 
@@ -619,61 +605,63 @@ page {
     padding: 12px 8px;
     border-radius: 8px;
     text-align: center;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border: 1px solid #e5e5e7;
     cursor: pointer;
+    background-color: #ffffff;
 }
 
 .time-slot-text {
     font-size: 12px;
     font-weight: 500;
     line-height: 1.2;
+    color: #1c1c1e;
 }
 
 
 /* 时间段状态样式 */
 
 .time-slot.available {
-    background-color: #e6f7ed;
-    border-color: #c3f0d0;
+    background-color: #ffffff;
+    border-color: #34c759;
 }
 
 .time-slot.available .time-slot-text {
-    color: #38a169;
+    color: #34c759;
 }
 
 .time-slot.available:active {
-    background-color: #d0f0dd;
-    transform: scale(0.98);
+    background-color: rgba(52, 199, 89, 0.05);
+    transform: scale(0.97);
 }
 
 .time-slot.booked {
-    background-color: #f0f0f0;
-    border-color: #e0e0e0;
+    background-color: #f2f2f7;
+    border-color: #d1d1d6;
     cursor: not-allowed;
 }
 
 .time-slot.booked .time-slot-text {
-    color: #888888;
+    color: #8e8e93;
 }
 
 .time-slot.closed {
-    background-color: #ffdede;
-    border-color: #f0b3b3;
+    background-color: #f2f2f7;
+    border-color: #ff3b30;
     cursor: not-allowed;
 }
 
 .time-slot.closed .time-slot-text {
-    color: #d93026;
+    color: #ff3b30;
 }
 
 .time-slot.selected {
-    background-color: #e0efff;
+    background-color: #007aff;
     border-color: #007aff;
 }
 
 .time-slot.selected .time-slot-text {
-    color: #007aff;
+    color: #ffffff;
     font-weight: 600;
 }
 
@@ -683,6 +671,7 @@ page {
 .time-slots-legend {
     display: flex;
     gap: 16px;
+    margin-top: 12px;
 }
 
 .legend-item {
@@ -692,26 +681,27 @@ page {
 }
 
 .legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
 }
 
 .legend-color.available {
-    background-color: #38a169;
+    background-color: #34c759;
 }
 
 .legend-color.booked {
-    background-color: #888888;
+    background-color: #8e8e93;
 }
 
 .legend-color.closed {
-    background-color: #d93026;
+    background-color: #ff3b30;
 }
 
 .legend-text {
-    font-size: 12px;
-    color: #666666;
+    font-size: 11px;
+    color: #8e8e93;
+    font-weight: 500;
 }
 
 
@@ -790,17 +780,19 @@ page {
 
 .submit-button {
     width: 100%;
-    background: linear-gradient(135deg, #38a169 0%, #2d8659 100%);
+    background-color: #007aff;
     border-radius: 12px;
     padding: 16px;
     text-align: center;
-    box-shadow: 0 4px 16px rgba(56, 161, 105, 0.3);
-    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.12);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border: none;
 }
 
 .submit-button:active {
     transform: scale(0.98);
-    box-shadow: 0 2px 12px rgba(56, 161, 105, 0.4);
+    background-color: #0056d3;
+    box-shadow: 0 1px 4px rgba(0, 122, 255, 0.2);
 }
 
 .submit-button.disabled {
