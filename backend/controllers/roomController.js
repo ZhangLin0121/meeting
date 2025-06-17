@@ -20,7 +20,7 @@ class RoomController {
                 search = '',
                     capacityMin,
                     capacityMax,
-                    equipment = [],
+                    equipment,
                     page = 1,
                     limit = 10
             } = req.query;
@@ -41,7 +41,7 @@ class RoomController {
             }
 
             // 设备筛选
-            if (equipment) {
+            if (equipment && equipment.length > 0) {
                 const equipmentArray = Array.isArray(equipment) ? equipment : [equipment];
 
                 // 验证设备类型是否有效
