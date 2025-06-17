@@ -96,11 +96,6 @@
                 <image class="placeholder-icon" src="/images/icons/image-placeholder.png" mode="aspectFit"></image>
               </view>
               
-              <!-- 状态指示器 -->
-              <view class="availability-indicator {{item.status === 'available' ? 'available' : 'occupied'}}">
-                <text class="indicator-dot"></text>
-              </view>
-              
               <!-- 状态标签 -->
               <view class="status-chip image-status-chip {{item.status === 'available' ? 'available' : 'occupied'}}">
                 <text class="status-text">{{item.status === 'available' ? '可预约' : '已占用'}}</text>

@@ -105,6 +105,31 @@ class TimeHelper {
     }
 
     /**
+     * 检查是否为全天预约（08:30-22:00）
+     * @param {string} startTime 开始时间
+     * @param {string} endTime 结束时间
+     * @returns {boolean} 是否为全天预约
+     */
+    static isFullDayBooking(startTime, endTime) {
+        return startTime === '08:30' && endTime === '22:00';
+    }
+
+    /**
+     * 检查时间段是否跨越午休时间（全天预约除外）
+     * @param {string} startTime 开始时间
+     * @param {string} endTime 结束时间
+     * @returns {boolean} 是否跨越午休时间且不是全天预约
+     */
+    static isInvalidLunchBreakCrossing(startTime, endTime) {
+        // 全天预约允许跨越午休时间
+        if (this.isFullDayBooking(startTime, endTime)) {
+            return false;
+        }
+        // 其他预约不允许跨越午休时间
+        return this.isAcrossLunchBreak(startTime, endTime);
+    }
+
+    /**
      * 检查日期是否在允许的预约范围内
      * @param {Date|string} date 要检查的日期
      * @returns {boolean} 是否在允许的预约范围内

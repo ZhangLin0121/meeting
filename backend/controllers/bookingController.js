@@ -52,8 +52,8 @@ class BookingController {
                 return ResponseHelper.error(res, '预约时间必须在办公时间内');
             }
 
-            // 验证是否跨越午休时间
-            if (TimeHelper.isAcrossLunchBreak(startTime, endTime)) {
+            // 验证是否跨越午休时间（全天预约除外）
+            if (TimeHelper.isInvalidLunchBreakCrossing(startTime, endTime)) {
                 return ResponseHelper.error(res, '预约时间不能跨越午休时间');
             }
 
@@ -422,7 +422,8 @@ class BookingController {
                 return ResponseHelper.error(res, '预约时间必须在办公时间内');
             }
 
-            if (TimeHelper.isAcrossLunchBreak(startTime, endTime)) {
+            // 验证是否跨越午休时间（全天预约除外）
+            if (TimeHelper.isInvalidLunchBreakCrossing(startTime, endTime)) {
                 return ResponseHelper.error(res, '预约时间不能跨越午休时间');
             }
 
