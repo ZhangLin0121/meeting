@@ -197,6 +197,10 @@
                   <text class="legend-text">已预约</text>
                 </view>
                 <view class="legend-item">
+                  <view class="legend-color past"></view>
+                  <text class="legend-text">已过期</text>
+                </view>
+                <view class="legend-item">
                   <view class="legend-color closed"></view>
                   <text class="legend-text">临时关闭</text>
                 </view>

@@ -193,6 +193,20 @@ class TimeHelper {
     }
 
     /**
+     * 检查预约时间是否在过去
+     * @param {Date|string} bookingDate 预约日期
+     * @param {string} startTime 开始时间 (HH:MM)
+     * @returns {boolean} 是否为过去的时间
+     */
+    static isPastTime(bookingDate, startTime) {
+        const bookingDateTime = this.combineDateAndTime(bookingDate, startTime);
+        const now = this.now();
+
+        // 如果预约时间在当前时间之前，则为过去时间
+        return bookingDateTime.isBefore(now);
+    }
+
+    /**
      * 格式化日期为YYYY-MM-DD (周几) 格式
      * @param {Date|string} date 日期对象或日期字符串
      * @returns {string} 格式化后的日期字符串

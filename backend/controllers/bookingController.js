@@ -42,6 +42,11 @@ class BookingController {
                 return ResponseHelper.error(res, `只能预约未来${config.booking.maxAdvanceDays}天内的会议室`);
             }
 
+            // 验证预约时间是否在过去
+            if (TimeHelper.isPastTime(bookingDate, startTime)) {
+                return ResponseHelper.error(res, '不能预约过去的时间');
+            }
+
             // 验证是否为工作日 - 现已开放周末预约
             // if (!TimeHelper.isWorkday(bookingDate)) {
             //     return ResponseHelper.error(res, '只能预约工作日的会议室');

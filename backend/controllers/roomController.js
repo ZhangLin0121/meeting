@@ -163,7 +163,7 @@ class RoomController {
             });
 
             // 生成时间段信息
-            const timeSlots = RoomController.generateTimeSlots(bookings, closures);
+            const timeSlots = RoomController.generateTimeSlots(bookings, closures, queryDate);
 
             // 为图片URL添加时间戳，防止缓存问题
             const timestamp = Date.now();
@@ -256,7 +256,7 @@ class RoomController {
             });
 
             // 生成时间段信息
-            const timeSlots = RoomController.generateTimeSlots(bookings, closures);
+            const timeSlots = RoomController.generateTimeSlots(bookings, closures, queryDate);
 
             return ResponseHelper.success(res, {
                 date: TimeHelper.formatDate(queryDate),
@@ -438,9 +438,10 @@ class RoomController {
      * 生成时间段信息
      * @param {Array} bookings 预约记录
      * @param {Array} closures 临时关闭记录
+     * @param {Date} queryDate 查询日期，用于检查过去时间
      * @returns {Array} 时间段数组
      */
-    static generateTimeSlots(bookings, closures) {
+    static generateTimeSlots(bookings, closures, queryDate) {
         console.log('🔍 生成时间段信息，预约记录:', bookings.map(b => ({
             startTime: b.startTime,
             endTime: b.endTime,
@@ -493,10 +494,22 @@ class RoomController {
                     return minutes >= closureStart && minutes < closureEnd;
                 });
 
+                // 检查是否为过去的时间（只有查询今天时才需要检查）
+                const isPastTime = queryDate && TimeHelper.isPastTime(queryDate, startTime);
+
+                let status = 'available';
+                if (isClosed) {
+                    status = 'closed';
+                } else if (isBooked) {
+                    status = 'booked';
+                } else if (isPastTime) {
+                    status = 'past'; // 过去的时间段标记为不可用
+                }
+
                 slots.push({
                     startTime,
                     endTime,
-                    status: isClosed ? 'closed' : (isBooked ? 'booked' : 'available'),
+                    status,
                     period: period.name
                 });
             }
@@ -546,7 +559,7 @@ class RoomController {
             });
 
             // 检查是否完全被预约或关闭
-            const timeSlots = this.generateTimeSlots(bookings, partialClosures);
+            const timeSlots = this.generateTimeSlots(bookings, partialClosures, date);
             const availableSlots = timeSlots.filter(slot => slot.status === 'available');
 
             return {

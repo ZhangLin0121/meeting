@@ -514,7 +514,7 @@ Page({
 
         if (periodSlots.length === 0) return false;
 
-        // 检查是否有任何时间槽不是可用状态
+        // 检查是否有任何时间槽不是可用状态（包括已预约、已过期、临时关闭）
         const hasBookedSlots = periodSlots.some(slot => slot.status !== 'available');
         // 检查是否所有时间槽都不可用（如果全部不可用，说明整个时段都不可用，用户也不会看到预约按钮）
         const allSlotsUnavailable = periodSlots.every(slot => slot.status !== 'available');
