@@ -215,10 +215,10 @@
 }
 
 .section-title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: #8e8e93;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
 }
 
