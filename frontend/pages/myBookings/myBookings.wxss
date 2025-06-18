@@ -210,15 +210,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
-    padding: 0 4px;
+    margin-bottom: 8px;
+    padding: 0 2px;
 }
 
 .section-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #1c1c1e;
-    letter-spacing: -0.6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8e8e93;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .section-badge {
