@@ -82,6 +82,12 @@
     overflow: hidden;
     position: relative;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.user-avatar:active {
+    transform: scale(0.95);
 }
 
 .avatar-image {
@@ -122,6 +128,28 @@
 .camera-icon {
     width: 14px;
     height: 14px;
+}
+
+.upload-spinner {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    border-top: 1.5px solid #ffffff;
+    border-radius: 50%;
+    animation: avatarSpinning 0.8s linear infinite;
+}
+
+.edit-avatar-overlay.uploading {
+    background: #ff9500;
+}
+
+@keyframes avatarSpinning {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .user-info {

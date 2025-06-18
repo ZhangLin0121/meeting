@@ -13,7 +13,8 @@ Page({
             contactName: '',
             contactPhone: ''
         },
-        statusBarHeight: 0 // 状态栏高度
+        statusBarHeight: 0, // 状态栏高度
+        uploadingAvatar: false // 头像上传状态
     },
 
     onLoad() {
@@ -124,7 +125,101 @@ Page({
         }
     },
 
+    /**
+     * 选择并上传头像
+     */
+    async chooseAndUploadAvatar() {
+        try {
+            // 显示选择图片
+            const chooseResult = await new Promise((resolve, reject) => {
+                wx.chooseImage({
+                    count: 1,
+                    sizeType: ['compressed'], // 压缩图片
+                    sourceType: ['album', 'camera'], // 支持相册和拍照
+                    success: resolve,
+                    fail: reject
+                });
+            });
 
+            if (!chooseResult.tempFilePaths || chooseResult.tempFilePaths.length === 0) {
+                return;
+            }
+
+            const tempFilePath = chooseResult.tempFilePaths[0];
+
+            // 显示上传状态
+            this.setData({ uploadingAvatar: true });
+
+            wx.showLoading({
+                title: '上传头像中...',
+                mask: true
+            });
+
+            // 获取用户openid用于认证
+            const userInfo = wx.getStorageSync('userInfo');
+            if (!userInfo || !userInfo.openid) {
+                throw new Error('用户未登录，请先登录');
+            }
+
+            // 上传到服务器
+            const uploadResult = await new Promise((resolve, reject) => {
+                wx.uploadFile({
+                    url: `${app.globalData.apiBaseUrl}/api/upload/avatar`,
+                    filePath: tempFilePath,
+                    name: 'avatar',
+                    header: {
+                        'x-user-openid': userInfo.openid
+                    },
+                    success: (res) => {
+                        try {
+                            const data = JSON.parse(res.data);
+                            if (data.success) {
+                                resolve(data);
+                            } else {
+                                reject(new Error(data.message || '上传失败'));
+                            }
+                        } catch (parseError) {
+                            reject(new Error('服务器响应格式错误'));
+                        }
+                    },
+                    fail: reject
+                });
+            });
+
+            // 更新本地用户信息
+            const updatedUserInfo = {
+                ...this.data.userInfo,
+                avatarUrl: `${app.globalData.apiBaseUrl}${uploadResult.data.avatarUrl}`
+            };
+
+            this.setData({
+                userInfo: updatedUserInfo
+            });
+
+            // 更新全局数据和本地存储
+            if (app && app.globalData) {
+                app.globalData.userInfo = updatedUserInfo;
+            }
+            wx.setStorageSync('userInfo', updatedUserInfo);
+
+            wx.showToast({
+                title: '头像更新成功',
+                icon: 'success'
+            });
+
+            console.log('✅ 头像上传成功:', uploadResult.data.avatarUrl);
+
+        } catch (error) {
+            console.error('❌ 头像上传失败:', error);
+            wx.showToast({
+                title: error.message || '头像上传失败',
+                icon: 'none'
+            });
+        } finally {
+            this.setData({ uploadingAvatar: false });
+            wx.hideLoading();
+        }
+    },
 
     /**
      * 跳转到我的预约页面

@@ -6,13 +6,14 @@
     <!-- 用户信息卡片 - 可编辑设计 -->
     <view class="user-profile-card" bindtap="editProfile">
       <view class="profile-header">
-        <view class="user-avatar">
+        <view class="user-avatar" catchtap="chooseAndUploadAvatar">
           <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" class="avatar-image"></image>
           <view wx:else class="default-avatar">
             <text class="avatar-initial">{{userInfo.nickname ? userInfo.nickname.charAt(0) : '用'}}</text>
           </view>
-          <view class="edit-avatar-overlay">
-            <image class="camera-icon" src="/images/icons/camera.png" mode="aspectFit"></image>
+          <view class="edit-avatar-overlay {{uploadingAvatar ? 'uploading' : ''}}">
+            <image wx:if="{{!uploadingAvatar}}" class="camera-icon" src="/images/icons/camera.png" mode="aspectFit"></image>
+            <view wx:else class="upload-spinner"></view>
           </view>
         </view>
         <view class="user-info">
