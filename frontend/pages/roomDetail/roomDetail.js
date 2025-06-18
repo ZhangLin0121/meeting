@@ -278,7 +278,7 @@ Page({
     initializeDates() {
         const today = new Date();
         const maxDate = new Date();
-        maxDate.setDate(today.getDate() + 30);
+        maxDate.setDate(today.getDate() + 30); // 1个月（30天）
 
         this.setData({
             selectedDate: this.formatDate(today),

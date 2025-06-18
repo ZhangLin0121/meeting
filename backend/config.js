@@ -33,7 +33,7 @@ module.exports = {
 
     // 预约时间限制
     booking: {
-        maxAdvanceDays: parseInt(process.env.MAX_ADVANCE_DAYS) || 3,
+        maxAdvanceDays: parseInt(process.env.MAX_ADVANCE_DAYS) || 30,
         cancelTimeLimitMinutes: parseInt(process.env.CANCEL_TIME_LIMIT_MINUTES) || 30,
         adminCancelTimeLimitMinutes: parseInt(process.env.ADMIN_CANCEL_TIME_LIMIT_MINUTES) || 5
     }
