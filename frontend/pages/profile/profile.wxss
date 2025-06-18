@@ -126,6 +126,8 @@
 
 .user-info {
     flex: 1;
+    min-width: 0;
+    /* 允许内容收缩 */
 }
 
 .user-name-section {
@@ -133,12 +135,19 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 8px;
+    min-width: 0;
+    /* 允许内容收缩 */
 }
 
 .user-name {
     font-size: 20px;
     font-weight: 600;
     color: #1c1c1e;
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    letter-spacing: -0.5px;
 }
 
 .edit-indicator {
@@ -183,6 +192,10 @@
     font-size: 15px;
     color: #8E8E93;
     line-height: 1.4;
+    max-width: 220px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 
