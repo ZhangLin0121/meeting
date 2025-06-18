@@ -18,7 +18,7 @@
   </view>
 
   <!-- 主要内容区域 -->
-  <view class="main-content" style="padding-top: {{statusBarHeight + 44}}px;">
+  <view class="main-content" style="padding-top: {{statusBarHeight + 44 + 16}}px;">
     
     <!-- 加载状态 - iOS风格 -->
     <view wx:if="{{loading}}" class="loading-state">
