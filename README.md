@@ -166,10 +166,11 @@ git push origin main
 ssh root@47.122.68.192
 
 # 进入项目目录并更新代码
-cd /root/meeting-backend
+cd /root/meeting
 git pull origin main
 
-# 安装新依赖（如果有package.json变化）
+# 进入后端目录并安装新依赖（如果有package.json变化）
+cd backend
 npm install
 
 # 重启服务
