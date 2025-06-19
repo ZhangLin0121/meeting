@@ -4,16 +4,16 @@
 /* 基础页面样式 - 按照roomList的正确方式 */
 
 page {
-    background-color: #F2F2F7;
-    /* 自定义导航栏模式，不在page层处理安全区域 */
+    background-color: #f2f2f7;
+    /* Apple Design - 使用系统级浅灰背景 */
 }
 
 .container {
     min-height: 100vh;
-    background: linear-gradient(180deg, #F2F2F7 0%, #E5E5EA 100%);
+    background: #f2f2f7;
     padding-bottom: 40rpx;
     box-sizing: border-box;
-    /* 移除padding-top，让导航栏自己处理 */
+    /* Apple Design - 纯净的背景，不使用渐变 */
 }
 
 
@@ -148,9 +148,9 @@ page {
 /* 内容区域 - 最简单版本 */
 
 .tab-content {
-    padding: 20rpx;
-    background: linear-gradient(180deg, #FAFAFA 0%, #F5F5F7 100%);
-    /* 不设置固定高度，让内容自然展开 */
+    padding: 24rpx;
+    background: #f2f2f7;
+    /* Apple Design - 简洁统一的背景 */
     min-height: 400rpx;
 }
 
@@ -480,21 +480,29 @@ page {
 }
 
 
-/* 预约记录列表 */
+/* 预约记录列表 - Apple Design 优化 */
 
 .booking-card {
     background-color: #ffffff;
-    border-radius: 16rpx;
-    margin-bottom: 20rpx;
-    padding: 30rpx;
-    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+    border-radius: 20rpx;
+    margin-bottom: 24rpx;
+    padding: 32rpx;
+    box-shadow: 0 1rpx 8rpx rgba(0, 0, 0, 0.04), 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+    border: 1rpx solid rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.booking-card:active {
+    transform: translateY(1rpx);
+    box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04), 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
 .booking-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20rpx;
+    margin-bottom: 24rpx;
+    padding-bottom: 4rpx;
 }
 
 .booking-room-info {
@@ -502,50 +510,58 @@ page {
 }
 
 .booking-room-name {
-    font-size: 32rpx;
+    font-size: 34rpx;
     font-weight: 600;
-    color: #333333;
-    margin-bottom: 8rpx;
+    color: #1d1d1f;
+    margin-bottom: 6rpx;
     display: block;
+    letter-spacing: -0.2rpx;
 }
 
 .booking-date-time {
-    font-size: 26rpx;
-    color: #666666;
+    font-size: 28rpx;
+    color: #86868b;
+    font-weight: 400;
+    letter-spacing: -0.1rpx;
 }
 
 .booking-status {
-    padding: 6rpx 12rpx;
-    border-radius: 8rpx;
+    padding: 8rpx 14rpx;
+    border-radius: 12rpx;
     font-size: 24rpx;
     white-space: nowrap;
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
-    height: 32rpx;
+    line-height: 1.2;
+    height: 36rpx;
+    font-weight: 500;
+    letter-spacing: 0.1rpx;
 }
 
 .booking-status.booked {
-    background-color: #e8f5e8;
-    color: #2d7d32;
+    background-color: rgba(52, 199, 89, 0.12);
+    color: #30d158;
+    border: 1rpx solid rgba(52, 199, 89, 0.2);
 }
 
 .booking-status.completed {
-    background-color: #e3f2fd;
-    color: #1976d2;
+    background-color: rgba(0, 122, 255, 0.12);
+    color: #007aff;
+    border: 1rpx solid rgba(0, 122, 255, 0.2);
 }
 
 .booking-status.cancelled {
-    background-color: #ffeaea;
-    color: #d32f2f;
+    background-color: rgba(255, 69, 58, 0.12);
+    color: #ff453a;
+    border: 1rpx solid rgba(255, 69, 58, 0.2);
 }
 
 .booking-details {
-    border-top: 1rpx solid #f0f0f0;
-    padding-top: 20rpx;
-    margin-bottom: 20rpx;
+    border-top: 1rpx solid rgba(0, 0, 0, 0.08);
+    padding-top: 24rpx;
+    margin-bottom: 24rpx;
 }
 
 .booking-topic,
@@ -566,18 +582,20 @@ page {
 .contact-label,
 .attendees-label {
     font-size: 28rpx;
-    color: #666666;
+    color: #86868b;
     width: 140rpx;
     flex-shrink: 0;
+    font-weight: 400;
 }
 
 .topic-text,
 .contact-text,
 .attendees-text {
     font-size: 28rpx;
-    color: #333333;
+    color: #1d1d1f;
     flex: 1;
-    line-height: 1.5;
+    line-height: 1.4;
+    font-weight: 400;
 }
 
 .booking-actions {
@@ -586,17 +604,21 @@ page {
 }
 
 .cancel-booking-button {
-    background-color: #ff3b30;
+    background-color: #ff453a;
     color: #ffffff;
-    padding: 16rpx 32rpx;
-    border-radius: 12rpx;
+    padding: 16rpx 28rpx;
+    border-radius: 14rpx;
     font-size: 26rpx;
-    transition: all 0.3s ease;
+    font-weight: 500;
+    letter-spacing: -0.1rpx;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 2rpx 8rpx rgba(255, 69, 58, 0.25);
 }
 
 .cancel-booking-button:active {
-    transform: scale(0.95);
-    background-color: #e6342a;
+    transform: scale(0.96) translateY(1rpx);
+    background-color: #d70015;
+    box-shadow: 0 1rpx 4rpx rgba(255, 69, 58, 0.3);
 }
 
 
@@ -1100,35 +1122,37 @@ page {
 
 .floating-add-button {
     position: fixed;
-    bottom: 60rpx;
-    right: 40rpx;
-    width: 96rpx;
-    height: 96rpx;
-    border-radius: 48rpx;
-    background: linear-gradient(135deg, #0066CC 0%, #004499 100%);
+    bottom: 80rpx;
+    right: 32rpx;
+    width: 112rpx;
+    height: 112rpx;
+    border-radius: 56rpx;
+    background: #007aff;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8rpx 24rpx rgba(0, 102, 204, 0.3), 0 2rpx 8rpx rgba(0, 102, 204, 0.15);
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 8rpx 32rpx rgba(0, 122, 255, 0.35), 0 4rpx 12rpx rgba(0, 122, 255, 0.2);
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index: 999;
-    animation: floatIn 0.5s ease-out;
+    animation: floatIn 0.4s ease-out;
+    backdrop-filter: blur(20rpx);
+    -webkit-backdrop-filter: blur(20rpx);
 }
 
 .floating-add-button:active {
-    transform: scale(0.95);
-    box-shadow: 0 6rpx 20rpx rgba(0, 102, 204, 0.25), 0 1rpx 6rpx rgba(0, 102, 204, 0.1);
+    transform: scale(0.94);
+    box-shadow: 0 6rpx 24rpx rgba(0, 122, 255, 0.3), 0 2rpx 8rpx rgba(0, 122, 255, 0.15);
 }
 
 .floating-add-icon {
-    width: 36rpx;
-    height: 36rpx;
+    width: 40rpx;
+    height: 40rpx;
     filter: brightness(0) invert(1);
-    transition: transform 0.25s ease;
+    transition: transform 0.2s ease;
 }
 
 .floating-add-button:active .floating-add-icon {
-    transform: rotate(90deg);
+    transform: rotate(45deg) scale(0.9);
 }
 
 
