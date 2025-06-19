@@ -411,26 +411,8 @@ Page({
 
             wx.hideLoading();
 
-            // 直接更新头像显示（不上传到服务器）
-            const updatedUserInfo = {
-                ...this.data.userInfo,
-                avatarUrl: result.avatarUrl
-            };
-
-            this.setData({
-                userInfo: updatedUserInfo
-            });
-
-            // 更新全局数据和本地存储
-            if (app && app.globalData) {
-                app.globalData.userInfo = updatedUserInfo;
-            }
-            wx.setStorageSync('userInfo', updatedUserInfo);
-
-            wx.showToast({
-                title: '头像更新成功',
-                icon: 'success'
-            });
+            // 保存头像到数据库
+            await this.saveAvatarToServer(result.avatarUrl);
 
         } catch (error) {
             console.error('❌ 获取微信头像失败:', error);
@@ -486,32 +468,15 @@ Page({
             console.log('✅ 获取微信用户信息成功:', result.userInfo);
             wx.hideLoading();
 
-            // 直接更新用户信息（不上传头像文件）
-            const updatedUserInfo = {
-                ...this.data.userInfo,
-                nickname: result.userInfo.nickName,
-                avatarUrl: result.userInfo.avatarUrl
-            };
-
-            this.setData({
-                userInfo: updatedUserInfo
-            });
-
-            // 更新全局数据和本地存储
-            if (app && app.globalData) {
-                app.globalData.userInfo = updatedUserInfo;
+            // 保存头像到数据库
+            if (result.userInfo.avatarUrl) {
+                await this.saveAvatarToServer(result.userInfo.avatarUrl);
             }
-            wx.setStorageSync('userInfo', updatedUserInfo);
 
-            // 同步更新到服务器（只更新昵称）
+            // 同步更新昵称到服务器（如果有变化）
             if (result.userInfo.nickName && result.userInfo.nickName !== this.data.userInfo.nickname) {
                 await this.updateUserNickname(result.userInfo.nickName);
             }
-
-            wx.showToast({
-                title: '用户信息更新成功',
-                icon: 'success'
-            });
 
         } catch (error) {
             console.error('❌ 获取微信用户信息失败:', error);
@@ -550,6 +515,72 @@ Page({
                     icon: 'none'
                 });
             }
+        }
+    },
+
+    /**
+     * 保存头像到服务器数据库
+     */
+    async saveAvatarToServer(avatarUrl) {
+        try {
+            console.log('💾 开始保存头像到数据库:', avatarUrl);
+
+            // 调用后端API保存头像
+            const result = await request.put('/api/user/avatar', {
+                avatarUrl: avatarUrl
+            });
+
+            if (result.success) {
+                // 更新本地用户信息
+                const updatedUserInfo = {
+                    ...this.data.userInfo,
+                    avatarUrl: avatarUrl
+                };
+
+                this.setData({
+                    userInfo: updatedUserInfo
+                });
+
+                // 更新全局数据和本地存储
+                if (app && app.globalData) {
+                    app.globalData.userInfo = updatedUserInfo;
+                }
+                wx.setStorageSync('userInfo', updatedUserInfo);
+
+                wx.showToast({
+                    title: '头像更新成功',
+                    icon: 'success'
+                });
+
+                console.log('✅ 头像保存到数据库成功');
+            } else {
+                throw new Error(result.message || '保存头像失败');
+            }
+
+        } catch (error) {
+            console.error('❌ 保存头像到数据库失败:', error);
+
+            // 即使保存到数据库失败，也要更新本地显示
+            const updatedUserInfo = {
+                ...this.data.userInfo,
+                avatarUrl: avatarUrl
+            };
+
+            this.setData({
+                userInfo: updatedUserInfo
+            });
+
+            // 更新全局数据和本地存储
+            if (app && app.globalData) {
+                app.globalData.userInfo = updatedUserInfo;
+            }
+            wx.setStorageSync('userInfo', updatedUserInfo);
+
+            wx.showToast({
+                title: '头像已更新，但未同步到服务器',
+                icon: 'none',
+                duration: 3000
+            });
         }
     },
 

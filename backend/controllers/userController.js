@@ -154,6 +154,37 @@ class UserController {
     }
 
     /**
+     * 更新用户头像
+     * PUT /api/user/avatar
+     */
+    static async updateAvatar(req, res) {
+        try {
+            const { avatarUrl } = req.body;
+            const user = req.user;
+
+            if (!avatarUrl) {
+                return ResponseHelper.error(res, '缺少头像URL参数', 400);
+            }
+
+            console.log(`🖼️ 用户 ${user.openid} 更新头像:`, avatarUrl);
+
+            // 更新用户头像
+            user.avatarUrl = avatarUrl;
+            await user.save();
+
+            return ResponseHelper.success(res, {
+                id: user._id,
+                avatarUrl: user.avatarUrl,
+                updatedAt: user.updatedAt
+            }, '头像更新成功');
+
+        } catch (error) {
+            console.error('更新用户头像失败:', error);
+            return ResponseHelper.serverError(res, '更新头像失败', error.message);
+        }
+    }
+
+    /**
      * 用户登录/注册（通过微信openid）
      * POST /api/user/login
      */

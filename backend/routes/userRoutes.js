@@ -34,6 +34,9 @@ router.put('/contact',
     UserController.updateContact
 );
 
+// 更新用户头像
+router.put('/avatar', UserController.updateAvatar);
+
 // 获取用户自己的预约记录
 router.get('/bookings', UserController.getUserBookings);
 
