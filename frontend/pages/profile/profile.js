@@ -391,24 +391,11 @@ Page({
 
             // 检查API兼容性
             if (!wx.chooseAvatar) {
-                console.log('⚠️ 当前版本不支持 wx.chooseAvatar，使用降级方案');
+                console.log('⚠️ 当前版本不支持 wx.chooseAvatar，使用getUserProfile方案');
                 wx.hideLoading();
 
-                // 提示用户使用其他方式
-                const result = await new Promise((resolve) => {
-                    wx.showModal({
-                        title: '获取微信头像',
-                        content: '当前微信版本不支持直接获取头像，请选择其他方式获取头像',
-                        showCancel: true,
-                        cancelText: '取消',
-                        confirmText: '从相册选择',
-                        success: resolve
-                    });
-                });
-
-                if (result.confirm) {
-                    this.chooseAndUploadAvatar('album');
-                }
+                // 直接调用获取用户信息方法
+                this.getWechatUserProfile();
                 return;
             }
 
