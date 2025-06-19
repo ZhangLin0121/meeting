@@ -1,37 +1,158 @@
 <!--pages/test/test.wxml-->
 <view class="container">
-  <view class="header">
-    <text class="title">🧪 网络连接测试</text>
-    <text class="subtitle">诊断小程序网络连接问题</text>
-  </view>
-
-  <view class="actions">
-    <button class="btn-primary" bindtap="onRetryTests" disabled="{{testing}}">
-      {{testing ? '测试中...' : '重新测试'}}
-    </button>
-    <button class="btn-secondary" bindtap="onViewLogs">查看日志</button>
-    <button class="btn-secondary" bindtap="onClearCache">清除缓存</button>
-  </view>
-
-  <view class="test-results">
-    <view class="result-item" wx:for="{{testResults}}" wx:key="name">
-      <view class="result-header">
-        <text class="result-icon">{{item.success ? '✅' : '❌'}}</text>
-        <text class="result-name">{{item.name}}</text>
-        <text class="result-time">{{item.timestamp}}</text>
-      </view>
-      <view class="result-message {{item.success ? 'success' : 'error'}}">
-        {{item.message}}
-      </view>
+    <!-- 页面标题 -->
+    <view class="page-title">
+        <text class="title-text">🧪 系统功能测试</text>
+        <text class="subtitle-text">测试微信授权和API连接</text>
     </view>
-  </view>
 
-  <view class="loading" wx:if="{{testing}}">
-    <view class="loading-spinner"></view>
-    <text>正在运行测试...</text>
-  </view>
+    <!-- 微信授权规范提示 -->
+    <view class="notice-card">
+        <view class="notice-title">⚠️ 微信授权规范更新</view>
+        <view class="notice-content">
+            • wx.getUserProfile 在基础库2.27.1+已收回<br/>
+            • desc参数必须≤30字符<br/>
+            • 推荐使用wx.chooseAvatar获取头像
+        </view>
+    </view>
 
-  <view class="empty" wx:if="{{!testing && testResults.length === 0}}">
-    <text>暂无测试结果</text>
-  </view>
+    <!-- 测试状态卡片 -->
+    <view class="status-cards">
+        <view class="status-card">
+            <view class="status-label">登录状态</view>
+            <view class="status-value {{loginStatus === '已登录' ? 'success' : 'warning'}}">
+                {{loginStatus}}
+            </view>
+        </view>
+        <view class="status-card">
+            <view class="status-label">API连接</view>
+            <view class="status-value {{apiConnected ? 'success' : 'error'}}">
+                {{apiConnected ? '正常' : '异常'}}
+            </view>
+        </view>
+    </view>
+
+    <!-- 用户信息展示 -->
+    <view class="user-info-card" wx:if="{{userInfo}}">
+        <view class="card-title">👤 当前用户信息</view>
+        <view class="user-detail">
+            <text class="label">OpenID:</text>
+            <text class="value">{{userInfo.openid}}</text>
+        </view>
+        <view class="user-detail">
+            <text class="label">昵称:</text>
+            <text class="value">{{userInfo.nickname || '未设置'}}</text>
+        </view>
+        <view class="user-detail">
+            <text class="label">角色:</text>
+            <text class="value">{{userInfo.isAdmin ? '管理员' : '普通用户'}}</text>
+        </view>
+    </view>
+
+    <!-- 微信授权测试区域 -->
+    <view class="test-section">
+        <view class="section-title">🔐 微信授权测试</view>
+        
+        <!-- 获取微信头像测试 -->
+        <view class="test-item">
+            <view class="test-info">
+                <view class="test-name">获取微信头像</view>
+                <view class="test-desc">使用wx.chooseAvatar API</view>
+            </view>
+            <button class="test-btn" bindtap="testGetWechatAvatar" disabled="{{loading}}">
+                {{loading ? '测试中...' : '测试'}}
+            </button>
+        </view>
+
+        <!-- 显示获取到的头像 -->
+        <view class="avatar-preview" wx:if="{{avatarUrl}}">
+            <image src="{{avatarUrl}}" class="avatar-image" mode="aspectFill"></image>
+            <text class="avatar-desc">获取到的微信头像</text>
+        </view>
+
+        <!-- 获取用户信息测试 -->
+        <view class="test-item">
+            <view class="test-info">
+                <view class="test-name">获取用户信息</view>
+                <view class="test-desc">使用wx.getUserProfile API</view>
+            </view>
+            <button class="test-btn" bindtap="testGetWechatUserInfo" disabled="{{loading}}">
+                {{loading ? '测试中...' : '测试'}}
+            </button>
+        </view>
+
+        <!-- 显示获取到的用户信息 -->
+        <view class="userinfo-preview" wx:if="{{wechatUserInfo.nickName}}">
+            <view class="userinfo-item">
+                <text class="info-label">昵称:</text>
+                <text class="info-value">{{wechatUserInfo.nickName}}</text>
+            </view>
+            <view class="userinfo-item" wx:if="{{wechatUserInfo.avatarUrl}}">
+                <text class="info-label">头像:</text>
+                <image src="{{wechatUserInfo.avatarUrl}}" class="info-avatar" mode="aspectFill"></image>
+            </view>
+        </view>
+
+        <!-- 登录+获取信息测试 -->
+        <view class="test-item">
+            <view class="test-info">
+                <view class="test-name">登录并获取信息</view>
+                <view class="test-desc">完整的登录授权流程</view>
+            </view>
+            <button class="test-btn" bindtap="testLoginWithUserInfo" disabled="{{loading}}">
+                {{loading ? '测试中...' : '测试'}}
+            </button>
+        </view>
+
+        <!-- API兼容性检查 -->
+        <view class="test-item">
+            <view class="test-info">
+                <view class="test-name">API兼容性检查</view>
+                <view class="test-desc">检查当前环境支持的API</view>
+            </view>
+            <button class="test-btn" bindtap="checkApiCompatibility">检查</button>
+        </view>
+    </view>
+
+    <!-- 基础功能测试 -->
+    <view class="test-section">
+        <view class="section-title">🔧 基础功能测试</view>
+        
+        <view class="test-buttons">
+            <button class="action-btn primary" bindtap="testLogin">快速登录测试</button>
+            <button class="action-btn" bindtap="rerunTests">重新运行测试</button>
+            <button class="action-btn" bindtap="goToRoomList">进入会议室列表</button>
+        </view>
+    </view>
+
+    <!-- 测试结果区域 -->
+    <view class="results-section" wx:if="{{testResults.length > 0}}">
+        <view class="section-title">📊 测试结果</view>
+        <view class="results-list">
+            <view class="result-item {{item.success ? 'success' : item.success === false ? 'error' : 'info'}}" 
+                  wx:for="{{testResults}}" wx:key="index">
+                <view class="result-status">
+                    {{item.success ? '✅' : item.success === false ? '❌' : 'ℹ️'}}
+                </view>
+                <view class="result-content">
+                    <view class="result-name">{{item.name}}</view>
+                    <view class="result-message">{{item.message}}</view>
+                    <view class="result-time">{{item.timestamp}}</view>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 日志区域 -->
+    <view class="logs-section" wx:if="{{logs.length > 0}}">
+        <view class="section-header">
+            <view class="section-title">📝 详细日志</view>
+            <button class="clear-btn" bindtap="clearLogs">清空</button>
+        </view>
+        <view class="logs-container">
+            <view class="log-item" wx:for="{{logs}}" wx:key="index">
+                <text class="log-text">{{item}}</text>
+            </view>
+        </view>
+    </view>
 </view> 

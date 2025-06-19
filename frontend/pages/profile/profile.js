@@ -2,19 +2,21 @@ const app = getApp();
 const request = require('../../utils/request.js'); // 导入网络请求工具
 
 Page({
+    /**
+     * 页面的初始数据
+     */
     data: {
-        userInfo: {}, // 用户信息
-        upcomingCount: 0, // 即将开始的预约数量
-        totalBookings: 0, // 总预约数量
-        loading: false, // 加载状态
-        showProfileEdit: false, // 是否显示个人信息编辑弹窗
-        profileForm: { // 个人信息表单
+        userInfo: {},
+        upcomingCount: 0,
+        totalBookings: 0,
+        statusBarHeight: 0,
+        showProfileEdit: false,
+        profileForm: {
             nickname: '',
             contactName: '',
             contactPhone: ''
         },
-        statusBarHeight: 0, // 状态栏高度
-        uploadingAvatar: false // 头像上传状态
+        loading: false
     },
 
     onLoad() {
@@ -398,23 +400,19 @@ Page({
                         title: '获取微信头像',
                         content: '当前微信版本不支持直接获取头像，请选择其他方式获取头像',
                         showCancel: true,
-                        confirmText: '获取用户信息',
-                        cancelText: '从相册选择',
+                        cancelText: '取消',
+                        confirmText: '从相册选择',
                         success: resolve
                     });
                 });
 
                 if (result.confirm) {
-                    // 用户选择获取用户信息（包含头像）
-                    await this.getWechatUserProfile();
-                } else {
-                    // 用户选择从相册选择
-                    await this.chooseAndUploadAvatar();
+                    this.chooseAndUploadAvatar('album');
                 }
                 return;
             }
 
-            // 使用微信新的头像选择器
+            // 使用新的微信头像选择器
             const result = await new Promise((resolve, reject) => {
                 wx.chooseAvatar({
                     success: resolve,
@@ -422,28 +420,53 @@ Page({
                 });
             });
 
-            console.log('✅ 获取微信头像成功:', result.avatarUrl);
+            console.log('✅ 微信头像获取成功:', result.avatarUrl);
 
-            // 设置上传状态
-            this.setData({ uploadingAvatar: true });
+            wx.hideLoading();
 
-            // 上传头像到服务器
-            await this.uploadAvatarToServer(result.avatarUrl);
+            // 直接更新头像显示（不上传到服务器）
+            const updatedUserInfo = {
+                ...this.data.userInfo,
+                avatarUrl: result.avatarUrl
+            };
+
+            this.setData({
+                userInfo: updatedUserInfo
+            });
+
+            // 更新全局数据和本地存储
+            if (app && app.globalData) {
+                app.globalData.userInfo = updatedUserInfo;
+            }
+            wx.setStorageSync('userInfo', updatedUserInfo);
+
+            wx.showToast({
+                title: '头像更新成功',
+                icon: 'success'
+            });
 
         } catch (error) {
             console.error('❌ 获取微信头像失败:', error);
+            wx.hideLoading();
+
+            let errorMessage = '获取头像失败';
+            if (error.errMsg) {
+                if (error.errMsg.includes('cancel')) {
+                    errorMessage = '已取消选择头像';
+                } else if (error.errMsg.includes('fail')) {
+                    errorMessage = '获取头像失败，请重试';
+                }
+            }
+
             wx.showToast({
-                title: error.message || '获取头像失败',
+                title: errorMessage,
                 icon: 'none'
             });
-        } finally {
-            wx.hideLoading();
-            this.setData({ uploadingAvatar: false });
         }
     },
 
     /**
-     * 获取微信用户信息（包含头像）
+     * 获取微信用户信息（包含头像和昵称）
      */
     async getWechatUserProfile() {
         try {
@@ -455,8 +478,9 @@ Page({
             // 检查getUserProfile API的可用性
             if (typeof wx.getUserProfile !== 'function') {
                 console.warn('⚠️ getUserProfile API不可用，使用备用方案');
+                wx.hideLoading();
                 wx.showToast({
-                    title: '该功能需要更新微信版本',
+                    title: '当前版本不支持获取用户信息',
                     icon: 'none'
                 });
                 return;
@@ -465,7 +489,7 @@ Page({
             // 获取用户授权信息
             const result = await new Promise((resolve, reject) => {
                 wx.getUserProfile({
-                    desc: '用于完善会议室预约功能，获取您的头像和昵称信息，提供更好的服务体验',
+                    desc: '用于获取您的头像和昵称',
                     lang: 'zh_CN',
                     success: resolve,
                     fail: reject
@@ -473,20 +497,38 @@ Page({
             });
 
             console.log('✅ 获取微信用户信息成功:', result.userInfo);
+            wx.hideLoading();
 
-            // 如果用户信息包含头像，直接上传
-            if (result.userInfo && result.userInfo.avatarUrl) {
-                this.setData({ uploadingAvatar: true });
-                await this.uploadAvatarToServer(result.userInfo.avatarUrl);
+            // 直接更新用户信息（不上传头像文件）
+            const updatedUserInfo = {
+                ...this.data.userInfo,
+                nickname: result.userInfo.nickName,
+                avatarUrl: result.userInfo.avatarUrl
+            };
+
+            this.setData({
+                userInfo: updatedUserInfo
+            });
+
+            // 更新全局数据和本地存储
+            if (app && app.globalData) {
+                app.globalData.userInfo = updatedUserInfo;
             }
+            wx.setStorageSync('userInfo', updatedUserInfo);
 
-            // 更新用户昵称（如果需要）
-            if (result.userInfo && result.userInfo.nickName && result.userInfo.nickName !== this.data.userInfo.nickname) {
+            // 同步更新到服务器（只更新昵称）
+            if (result.userInfo.nickName && result.userInfo.nickName !== this.data.userInfo.nickname) {
                 await this.updateUserNickname(result.userInfo.nickName);
             }
 
+            wx.showToast({
+                title: '用户信息更新成功',
+                icon: 'success'
+            });
+
         } catch (error) {
             console.error('❌ 获取微信用户信息失败:', error);
+            wx.hideLoading();
 
             // 详细错误处理
             if (error.errMsg) {
@@ -521,75 +563,6 @@ Page({
                     icon: 'none'
                 });
             }
-        } finally {
-            wx.hideLoading();
-            this.setData({ uploadingAvatar: false });
-        }
-    },
-
-    /**
-     * 上传头像到服务器（提取的公共方法）
-     */
-    async uploadAvatarToServer(avatarUrl) {
-        try {
-            // 获取用户openid用于认证
-            const userInfo = wx.getStorageSync('userInfo');
-            if (!userInfo || !userInfo.openid) {
-                throw new Error('用户未登录，请先登录');
-            }
-
-            // 上传到服务器
-            const uploadResult = await new Promise((resolve, reject) => {
-                wx.uploadFile({
-                    url: `${app.globalData.apiBaseUrl}/api/upload/avatar`,
-                    filePath: avatarUrl,
-                    name: 'avatar',
-                    header: {
-                        'x-user-openid': userInfo.openid
-                    },
-                    success: (res) => {
-                        try {
-                            const data = JSON.parse(res.data);
-                            if (data.success) {
-                                resolve(data);
-                            } else {
-                                reject(new Error(data.message || '上传失败'));
-                            }
-                        } catch (parseError) {
-                            reject(new Error('服务器响应格式错误'));
-                        }
-                    },
-                    fail: reject
-                });
-            });
-
-            // 更新本地用户信息
-            const updatedUserInfo = {
-                ...this.data.userInfo,
-                avatarUrl: `${app.globalData.apiBaseUrl}${uploadResult.data.avatarUrl}`
-            };
-
-            this.setData({
-                userInfo: updatedUserInfo
-            });
-
-            // 更新全局数据和本地存储
-            if (app && app.globalData) {
-                app.globalData.userInfo = updatedUserInfo;
-            }
-            wx.setStorageSync('userInfo', updatedUserInfo);
-
-            wx.showToast({
-                title: '头像更新成功',
-                icon: 'success'
-            });
-
-            console.log('✅ 头像上传成功:', uploadResult.data.avatarUrl);
-            return uploadResult;
-
-        } catch (error) {
-            console.error('❌ 头像上传失败:', error);
-            throw error;
         }
     },
 

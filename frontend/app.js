@@ -239,7 +239,7 @@ App({
     getUserProfileWithAuth() {
         return new Promise((resolve, reject) => {
             wx.getUserProfile({
-                desc: '用于完善会议室预约功能',
+                desc: '用于完善预约服务',
                 success: (res) => {
                     console.log('✅ 获取用户信息成功:', res.userInfo);
                     resolve(res.userInfo);

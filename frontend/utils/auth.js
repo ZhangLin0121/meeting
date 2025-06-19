@@ -157,7 +157,7 @@ class WechatAuth {
     static async getUserProfile() {
         return new Promise((resolve, reject) => {
             wx.getUserProfile({
-                desc: '用于完善会议室预约功能，提升服务体验',
+                desc: '用于完善会议室预约服务',
                 success: (res) => {
                     resolve(res.userInfo);
                 },
@@ -268,6 +268,110 @@ class WechatAuth {
             console.log('✅ 用户已注销登录');
         } catch (error) {
             console.error('❌ 注销失败:', error);
+        }
+    }
+
+    /**
+     * 获取微信头像（便捷方法）
+     */
+    static async getWechatAvatar() {
+        try {
+            console.log('🖼️ 开始获取微信头像...');
+
+            // 检查API兼容性
+            if (!wx.chooseAvatar) {
+                console.log('⚠️ 当前版本不支持 wx.chooseAvatar API');
+                throw new Error('当前微信版本不支持直接获取头像功能，请升级微信到最新版本或使用其他方式');
+            }
+
+            // 使用新的微信头像选择器
+            const result = await new Promise((resolve, reject) => {
+                wx.chooseAvatar({
+                    success: resolve,
+                    fail: reject
+                });
+            });
+
+            console.log('✅ 微信头像获取成功:', result.avatarUrl);
+            return result.avatarUrl;
+
+        } catch (error) {
+            console.error('❌ 获取微信头像失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 获取微信用户信息（包含头像和昵称）
+     */
+    static async getWechatUserInfo() {
+        try {
+            console.log('👤 开始获取微信用户信息...');
+
+            const result = await new Promise((resolve, reject) => {
+                wx.getUserProfile({
+                    desc: '用于显示您的头像和昵称',
+                    success: resolve,
+                    fail: reject
+                });
+            });
+
+            console.log('✅ 微信用户信息获取成功:', {
+                nickName: result.userInfo.nickName,
+                avatarUrl: result.userInfo.avatarUrl ? '已获取' : '未获取'
+            });
+
+            return result.userInfo;
+
+        } catch (error) {
+            console.error('❌ 获取微信用户信息失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 直接登录并获取用户信息（包含头像）
+     */
+    static async loginWithUserInfo() {
+        try {
+            console.log('🔐 开始登录并获取用户信息...');
+
+            // 1. 获取微信登录码
+            const loginResult = await new Promise((resolve, reject) => {
+                wx.login({
+                    success: resolve,
+                    fail: reject,
+                    timeout: 15000
+                });
+            });
+
+            if (!loginResult.code) {
+                throw new Error('获取微信登录码失败');
+            }
+
+            // 2. 获取用户授权信息
+            let userProfile = null;
+            try {
+                userProfile = await this.getWechatUserInfo();
+                console.log('✅ 用户授权信息获取成功');
+            } catch (authError) {
+                console.warn('⚠️ 用户拒绝授权，使用基础登录方式');
+            }
+
+            // 3. 发送到服务器登录
+            const userInfo = await loginToServer(loginResult.code, userProfile);
+
+            if (userInfo && userInfo.openid) {
+                await saveUserInfoSafely(userInfo);
+                console.log('✅ 登录并获取用户信息完成:', userInfo.openid);
+                return userInfo;
+            } else {
+                throw new Error('服务器登录失败：返回数据无效');
+            }
+
+        } catch (error) {
+            console.error('❌ 登录并获取用户信息失败:', error);
+            throw error;
         }
     }
 }

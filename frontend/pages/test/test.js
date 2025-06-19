@@ -1,5 +1,7 @@
 // pages/test/test.js
 const request = require('../../utils/request.js');
+const app = getApp();
+const WechatAuth = require('../../utils/auth.js');
 
 Page({
     /**
@@ -10,7 +12,10 @@ Page({
         testResults: [],
         userInfo: null,
         loginStatus: '未登录',
-        apiConnected: false
+        apiConnected: false,
+        loading: false,
+        avatarUrl: '', // 测试获取的头像URL
+        wechatUserInfo: {} // 测试获取的微信用户信息
     },
 
     /**
@@ -291,5 +296,243 @@ Page({
      */
     onShareAppMessage() {
 
-    }
+    },
+
+    /**
+     * 测试直接获取微信头像
+     */
+    async testGetWechatAvatar() {
+        this.setData({ loading: true });
+        this.addTestResult('开始测试获取微信头像...', null);
+
+        // 先检查API兼容性
+        if (!wx.chooseAvatar) {
+            this.addTestResult(`当前微信基础库版本不支持 wx.chooseAvatar API (需要 2.21.0+)`, false);
+            this.addTestResult(`当前版本: ${wx.getSystemInfoSync().SDKVersion}`, false);
+            this.setData({ loading: false });
+
+            wx.showModal({
+                title: 'API不支持',
+                content: '当前微信版本不支持 wx.chooseAvatar API，请升级微信到最新版本或使用"获取用户信息"功能',
+                showCancel: false
+            });
+            return;
+        }
+
+        try {
+            const avatarUrl = await WechatAuth.getWechatAvatar();
+
+            this.setData({
+                avatarUrl: avatarUrl
+            });
+
+            this.addTestResult(`微信头像获取成功: ${avatarUrl}`, true);
+
+            wx.showToast({
+                title: '头像获取成功',
+                icon: 'success'
+            });
+
+        } catch (error) {
+            console.error('❌ 测试获取微信头像失败:', error);
+            this.addTestResult(`微信头像获取失败: ${error.message}`, false);
+
+            wx.showToast({
+                title: '头像获取失败',
+                icon: 'none'
+            });
+        } finally {
+            this.setData({ loading: false });
+        }
+    },
+
+    /**
+     * 测试获取微信用户信息
+     */
+    async testGetWechatUserInfo() {
+        this.setData({ loading: true });
+        this.addTestResult('开始测试获取微信用户信息...', null);
+
+        try {
+            const userInfo = await WechatAuth.getWechatUserInfo();
+
+            this.setData({
+                wechatUserInfo: userInfo
+            });
+
+            this.addTestResult(`用户信息获取成功: ${userInfo.nickName}`, true);
+            this.addTestResult(`头像URL: ${userInfo.avatarUrl}`, true);
+
+            wx.showToast({
+                title: '用户信息获取成功',
+                icon: 'success'
+            });
+
+        } catch (error) {
+            console.error('❌ 测试获取用户信息失败:', error);
+            this.addTestResult(`用户信息获取失败: ${error.message}`, false);
+
+            wx.showToast({
+                title: '用户信息获取失败',
+                icon: 'none'
+            });
+        } finally {
+            this.setData({ loading: false });
+        }
+    },
+
+    /**
+     * 测试登录并获取用户信息
+     */
+    async testLoginWithUserInfo() {
+        this.setData({ loading: true });
+        this.addTestResult('开始测试登录并获取用户信息...', null);
+
+        try {
+            const result = await WechatAuth.loginWithUserInfo();
+
+            this.setData({
+                wechatUserInfo: result
+            });
+
+            this.addTestResult(`登录成功，用户openid: ${result.openid}`, true);
+            this.addTestResult(`用户昵称: ${result.nickname}`, true);
+            this.addTestResult(`头像URL: ${result.avatarUrl}`, true);
+
+            wx.showToast({
+                title: '登录并获取信息成功',
+                icon: 'success'
+            });
+
+        } catch (error) {
+            console.error('❌ 测试登录并获取用户信息失败:', error);
+            this.addTestResult(`登录失败: ${error.message}`, false);
+
+            wx.showToast({
+                title: '登录失败',
+                icon: 'none'
+            });
+        } finally {
+            this.setData({ loading: false });
+        }
+    },
+
+    /**
+     * 测试头像上传到服务器
+     */
+    async testUploadAvatar() {
+        if (!this.data.avatarUrl) {
+            wx.showToast({
+                title: '请先获取头像',
+                icon: 'none'
+            });
+            return;
+        }
+
+        this.setData({ loading: true });
+        this.addTestResult('开始测试头像上传...', null);
+
+        try {
+            const userInfo = wx.getStorageSync('userInfo');
+            if (!userInfo || !userInfo.openid) {
+                throw new Error('用户未登录，请先登录');
+            }
+
+            const uploadResult = await new Promise((resolve, reject) => {
+                wx.uploadFile({
+                    url: `${app.globalData.apiBaseUrl}/api/upload/avatar`,
+                    filePath: this.data.avatarUrl,
+                    name: 'avatar',
+                    header: {
+                        'x-user-openid': userInfo.openid
+                    },
+                    success: (res) => {
+                        try {
+                            const data = JSON.parse(res.data);
+                            if (data.success) {
+                                resolve(data);
+                            } else {
+                                reject(new Error(data.message || '上传失败'));
+                            }
+                        } catch (parseError) {
+                            reject(new Error('服务器响应格式错误'));
+                        }
+                    },
+                    fail: reject
+                });
+            });
+
+            this.addTestResult(`头像上传成功: ${uploadResult.data.avatarUrl}`, true);
+
+            wx.showToast({
+                title: '头像上传成功',
+                icon: 'success'
+            });
+
+        } catch (error) {
+            console.error('❌ 测试头像上传失败:', error);
+            this.addTestResult(`头像上传失败: ${error.message}`, false);
+
+            wx.showToast({
+                title: '头像上传失败',
+                icon: 'none'
+            });
+        } finally {
+            this.setData({ loading: false });
+        }
+    },
+
+    /**
+     * 检查微信API兼容性
+     */
+    checkApiCompatibility() {
+        this.addTestResult('开始检查API兼容性...', null);
+
+        const systemInfo = wx.getSystemInfoSync();
+        const sdkVersion = systemInfo.SDKVersion;
+
+        this.addTestResult(`当前微信基础库版本: ${sdkVersion}`, true);
+        this.addTestResult(`系统版本: ${systemInfo.system}`, true);
+
+        // 检查 wx.chooseAvatar API
+        const hasChooseAvatar = typeof wx.chooseAvatar === 'function';
+        this.addTestResult(`wx.chooseAvatar API: ${hasChooseAvatar ? '✅ 支持' : '❌ 不支持 (需要 2.21.0+)'}`, hasChooseAvatar);
+
+        // 检查 wx.getUserProfile API
+        const hasGetUserProfile = typeof wx.getUserProfile === 'function';
+        this.addTestResult(`wx.getUserProfile API: ${hasGetUserProfile ? '✅ 支持' : '❌ 不支持'}`, hasGetUserProfile);
+
+        // 检查 wx.chooseImage API
+        const hasChooseImage = typeof wx.chooseImage === 'function';
+        this.addTestResult(`wx.chooseImage API: ${hasChooseImage ? '✅ 支持' : '❌ 不支持'}`, hasChooseImage);
+
+        // 版本比较函数
+        function compareVersion(v1, v2) {
+            const arr1 = v1.split('.');
+            const arr2 = v2.split('.');
+            const maxLength = Math.max(arr1.length, arr2.length);
+
+            for (let i = 0; i < maxLength; i++) {
+                const num1 = parseInt(arr1[i] || '0');
+                const num2 = parseInt(arr2[i] || '0');
+
+                if (num1 > num2) return 1;
+                if (num1 < num2) return -1;
+            }
+            return 0;
+        }
+
+        // 检查版本是否满足要求
+        const isVersionSupported = compareVersion(sdkVersion, '2.21.0') >= 0;
+        this.addTestResult(`版本兼容性: ${isVersionSupported ? '✅ 满足最新功能要求' : '⚠️ 建议升级微信'}`, isVersionSupported);
+
+        if (!isVersionSupported) {
+            this.addTestResult('建议：升级微信到最新版本以获得最佳体验', null);
+        }
+
+        wx.showToast({
+            title: '兼容性检查完成',
+            icon: 'success'
+        });
+    },
 });
