@@ -635,8 +635,8 @@ class BookingController {
                     fs.mkdirSync(tempDir, { recursive: true });
                 }
 
-                // 清理过期文件
-                BookingController.cleanupExpiredFiles();
+                // 在导出新文件前清理旧文件（超过1小时的文件）
+                BookingController.cleanupOldFiles();
 
                 const filePath = path.join(tempDir, filename);
                 const XLSX = require('xlsx');
@@ -661,9 +661,9 @@ class BookingController {
     }
 
     /**
-     * 清理过期的临时文件
+     * 清理旧的临时文件（在导出新文件时调用）
      */
-    static cleanupExpiredFiles() {
+    static cleanupOldFiles() {
         try {
             const fs = require('fs');
             const path = require('path');
@@ -675,22 +675,29 @@ class BookingController {
 
             const files = fs.readdirSync(tempDir);
             const now = Date.now();
-            const maxAge = 5 * 60 * 1000; // 5分钟
+            const maxAge = 60 * 60 * 1000; // 1小时
 
+            let cleanedCount = 0;
             files.forEach(file => {
-                const filePath = path.join(tempDir, file);
-                const stats = fs.statSync(filePath);
+                // 只清理xlsx文件
+                if (!file.endsWith('.xlsx')) return;
 
-                if (now - stats.mtime.getTime() > maxAge) {
-                    fs.unlink(filePath, (err) => {
-                        if (err) {
-                            console.error('清理过期文件失败:', err);
-                        } else {
-                            console.log('🧹 清理过期文件:', file);
-                        }
-                    });
+                const filePath = path.join(tempDir, file);
+                try {
+                    const stats = fs.statSync(filePath);
+                    if (now - stats.mtime.getTime() > maxAge) {
+                        fs.unlinkSync(filePath); // 使用同步删除，确保删除完成
+                        cleanedCount++;
+                        console.log('🧹 清理旧导出文件:', file);
+                    }
+                } catch (err) {
+                    console.error('清理文件失败:', file, err.message);
                 }
             });
+
+            if (cleanedCount > 0) {
+                console.log(`✅ 共清理了 ${cleanedCount} 个旧导出文件`);
+            }
         } catch (error) {
             console.error('清理临时文件时出错:', error);
         }
@@ -706,7 +713,11 @@ class BookingController {
             const fs = require('fs');
             const path = require('path');
 
-            const filePath = path.join(__dirname, '../temp', filename);
+            // 确保使用与生成文件时相同的路径
+            const tempDir = path.join(__dirname, '../temp');
+            const filePath = path.join(tempDir, filename);
+
+            console.log('🔍 查找下载文件:', { filename, tempDir, filePath, exists: fs.existsSync(filePath) });
 
             // 检查文件是否存在
             if (!fs.existsSync(filePath)) {
@@ -735,16 +746,8 @@ class BookingController {
                     }
                 } else {
                     console.log('✅ 文件下载完成:', filename);
-                    // 延长文件保留时间，防止下载过程中被删除
-                    setTimeout(() => {
-                        fs.unlink(filePath, (unlinkErr) => {
-                            if (unlinkErr) {
-                                console.error('删除临时文件失败:', unlinkErr);
-                            } else {
-                                console.log('🗑️ 临时文件已删除:', filename);
-                            }
-                        });
-                    }, 30000); // 30秒后删除，给足够的下载时间
+                    // 不立即删除文件，让文件保留更长时间，在下次导出时统一清理旧文件
+                    console.log('📁 文件将保留1小时，下次导出时自动清理');
                 }
             });
 
