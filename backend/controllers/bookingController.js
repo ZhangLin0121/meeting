@@ -714,11 +714,17 @@ class BookingController {
             }
 
             // 安全处理文件名，移除可能导致问题的字符
-            const safeFilename = filename.replace(/[^\w\-_.]/g, '_');
+            const safeFilename = filename
+                .replace(/[^\w\-_.]/g, '_') // 移除非字母数字字符
+                .replace(/_{2,}/g, '_') // 合并多个连续下划线
+                .replace(/^_+|_+$/g, ''); // 移除开头和结尾的下划线
 
-            // 设置响应头
+            // 使用更安全的方式设置响应头
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+
+            // 使用encodeURIComponent编码文件名，确保HTTP头部安全
+            const encodedFilename = encodeURIComponent(safeFilename);
+            res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodedFilename}`);
 
             // 发送文件
             res.sendFile(filePath, (err) => {
