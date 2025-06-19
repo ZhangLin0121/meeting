@@ -43,4 +43,15 @@ router.post('/manual',
     BookingController.createManualBooking
 );
 
+// 导出预约记录（管理员）
+router.get('/export',
+    validate(schemas.booking.export, 'query'),
+    BookingController.exportBookings
+);
+
+// 下载导出文件（管理员）
+router.get('/download/:filename',
+    BookingController.downloadExportFile
+);
+
 module.exports = router;

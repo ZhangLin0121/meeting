@@ -973,6 +973,129 @@ Page({
     },
 
     /**
+     * 导出预约记录
+     */
+    async exportBookings() {
+        try {
+            wx.showLoading({ title: '准备导出数据...', mask: true });
+
+            // 构建导出请求的URL，使用当前筛选条件
+            let exportUrl = '/api/bookings/export?format=excel';
+
+            if (this.data.filterDate) {
+                exportUrl += `&date=${this.data.filterDate}`;
+            }
+
+            if (this.data.statusOptions[this.data.filterStatusIndex].value) {
+                exportUrl += `&status=${this.data.statusOptions[this.data.filterStatusIndex].value}`;
+            }
+
+            console.log('📤 开始导出预约记录...', {
+                filterDate: this.data.filterDate,
+                filterStatus: this.data.statusOptions[this.data.filterStatusIndex].value,
+                exportUrl: exportUrl
+            });
+
+            // 调用后端导出API
+            const result = await this.requestAPI('GET', exportUrl);
+
+            if (result.success && result.data && result.data.downloadUrl) {
+                wx.hideLoading();
+
+                // 提示用户即将下载
+                wx.showModal({
+                    title: '导出成功',
+                    content: '数据已准备完成，点击确定下载文件',
+                    confirmText: '下载',
+                    cancelText: '取消',
+                    success: (res) => {
+                        if (res.confirm) {
+                            this.downloadExportFile(result.data.downloadUrl, result.data.filename);
+                        }
+                    }
+                });
+            } else {
+                throw new Error(result.message || '导出失败');
+            }
+        } catch (error) {
+            console.error('❌ 导出失败:', error);
+            wx.hideLoading();
+
+            wx.showModal({
+                title: '导出失败',
+                content: error.message || '导出过程中发生错误，请稍后重试',
+                showCancel: false,
+                confirmText: '确定'
+            });
+        }
+    },
+
+    /**
+     * 下载导出文件
+     */
+    downloadExportFile(downloadUrl, filename) {
+        wx.showLoading({ title: '下载中...', mask: true });
+
+        // 下载文件
+        wx.downloadFile({
+            url: downloadUrl,
+            success: (res) => {
+                wx.hideLoading();
+
+                if (res.statusCode === 200) {
+                    // 保存文件到相册或文件管理器
+                    wx.saveFile({
+                        tempFilePath: res.tempFilePath,
+                        success: (saveRes) => {
+                            console.log('✅ 文件保存成功:', saveRes.savedFilePath);
+
+                            wx.showModal({
+                                title: '下载完成',
+                                content: `文件已保存，文件名：${filename}`,
+                                showCancel: false,
+                                confirmText: '确定'
+                            });
+                        },
+                        fail: (error) => {
+                            console.error('❌ 文件保存失败:', error);
+
+                            // 尝试打开文档
+                            wx.openDocument({
+                                filePath: res.tempFilePath,
+                                showMenu: true,
+                                success: () => {
+                                    console.log('✅ 文档打开成功');
+                                },
+                                fail: (docError) => {
+                                    console.error('❌ 文档打开失败:', docError);
+                                    wx.showToast({
+                                        title: '文件下载完成，请在文件管理器中查看',
+                                        icon: 'none',
+                                        duration: 3000
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    throw new Error('下载失败');
+                }
+            },
+            fail: (error) => {
+                wx.hideLoading();
+                console.error('❌ 文件下载失败:', error);
+
+                wx.showModal({
+                    title: '下载失败',
+                    content: '网络连接异常，请检查网络后重试',
+                    showCancel: false,
+                    confirmText: '确定'
+                });
+            }
+        });
+    },
+
+    /**
      * 通用API请求方法
      */
     async requestAPI(method, url, data = {}) {

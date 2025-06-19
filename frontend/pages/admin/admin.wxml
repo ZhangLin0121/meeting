@@ -1,4 +1,4 @@
-<!--管理员后台页面 - Apple Design风格 (简化版自定义导航栏)-->
+<!--管理员后台页面 - Apple Design风格 (优化版)-->
 <view class="container fade-in">
   <!-- 自定义导航栏 - 正确处理安全区域 -->
   <view class="page-header">
@@ -130,34 +130,47 @@
 
   <!-- 预约记录页面 -->
   <view wx:if="{{currentTab === 1}}" class="tab-content">
-    <!-- 筛选器 -->
+    <!-- 筛选器和导出功能 -->
     <view class="booking-filter">
-      <picker 
-        mode="date" 
-        value="{{filterDate}}" 
-        bindchange="onFilterDateChange"
-        class="date-filter"
-      >
-        <view class="filter-item">
-          <text class="filter-label">日期:</text>
-          <text class="filter-value">{{filterDate || '全部'}}</text>
-          <image class="filter-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
-        </view>
-      </picker>
+      <view class="filter-row">
+        <picker 
+          mode="date" 
+          value="{{filterDate}}" 
+          bindchange="onFilterDateChange"
+          class="date-filter"
+        >
+          <view class="filter-item">
+            <text class="filter-label">日期:</text>
+            <text class="filter-value">{{filterDate || '全部'}}</text>
+            <image class="filter-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
+          </view>
+        </picker>
+        
+        <picker 
+          range="{{statusOptions}}" 
+          range-key="text"
+          value="{{filterStatusIndex}}" 
+          bindchange="onFilterStatusChange"
+          class="status-filter"
+        >
+          <view class="filter-item">
+            <text class="filter-label">状态:</text>
+            <text class="filter-value">{{statusOptions[filterStatusIndex].text}}</text>
+            <image class="filter-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
+          </view>
+        </picker>
+      </view>
       
-      <picker 
-        range="{{statusOptions}}" 
-        range-key="text"
-        value="{{filterStatusIndex}}" 
-        bindchange="onFilterStatusChange"
-        class="status-filter"
-      >
-        <view class="filter-item">
-          <text class="filter-label">状态:</text>
-          <text class="filter-value">{{statusOptions[filterStatusIndex].text}}</text>
-          <image class="filter-arrow" src="/images/icons/arrow-down.png" mode="aspectFit"></image>
+      <!-- 导出功能区域 -->
+      <view class="export-section">
+        <view class="export-info">
+          <text class="export-text">共 {{totalBookingsCount || bookings.length}} 条记录</text>
         </view>
-      </picker>
+        <view class="export-button" bindtap="exportBookings">
+          <image class="export-icon" src="/images/icons/export.png" mode="aspectFit"></image>
+          <text class="export-text">导出数据</text>
+        </view>
+      </view>
     </view>
 
     <!-- 预约记录列表 -->

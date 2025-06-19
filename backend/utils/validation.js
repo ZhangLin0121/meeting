@@ -134,6 +134,15 @@ const validationSchemas = {
             status: Joi.string().valid('booked', 'cancelled').optional(),
             page: Joi.number().integer().min(1).default(1),
             limit: Joi.number().integer().min(1).max(100).default(10)
+        }),
+
+        // 导出预约记录
+        export: Joi.object({
+            format: Joi.string().valid('excel', 'csv').default('excel'),
+            date: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional(),
+            status: Joi.string().valid('booked', 'completed', 'cancelled').optional(),
+            startDate: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional(),
+            endDate: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional()
         })
     },
 
