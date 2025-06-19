@@ -606,15 +606,15 @@ class BookingController {
                 联系电话: booking.userPhone,
                 参会人数: booking.attendeesCount || '',
                 用户昵称: booking.userId ? booking.userId.nickname : '',
-                预约状态: this.getStatusText(booking.status),
+                预约状态: BookingController.getStatusText(booking.status),
                 预约方式: booking.isManualBooking ? '管理员代预约' : '用户自助预约',
                 创建时间: TimeHelper.formatDateTime(booking.createdAt)
             }));
 
             if (format === 'csv') {
                 // 生成CSV
-                const csv = this.generateCSV(exportData);
-                const filename = this.generateFilename('csv', { date, status, startDate, endDate });
+                const csv = BookingController.generateCSV(exportData);
+                const filename = BookingController.generateFilename('csv', { date, status, startDate, endDate });
 
                 res.setHeader('Content-Type', 'text/csv; charset=utf-8');
                 res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
@@ -622,8 +622,8 @@ class BookingController {
                 return res.send('\uFEFF' + csv); // 添加BOM以支持中文
             } else {
                 // 生成Excel
-                const workbook = this.generateExcel(exportData);
-                const filename = this.generateFilename('xlsx', { date, status, startDate, endDate });
+                const workbook = BookingController.generateExcel(exportData);
+                const filename = BookingController.generateFilename('xlsx', { date, status, startDate, endDate });
 
                 // 将Excel文件保存到临时目录
                 const fs = require('fs');
