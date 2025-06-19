@@ -640,7 +640,7 @@ class BookingController {
                 XLSX.writeFile(workbook, filePath);
 
                 // 生成下载URL
-                const downloadUrl = `${req.protocol}://${req.get('host')}/api/bookings/download/${filename}`;
+                const downloadUrl = `https://${req.get('host')}/meeting/api/bookings/download/${filename}`;
 
                 console.log('✅ Excel文件生成成功:', { filename, filePath, downloadUrl });
 
