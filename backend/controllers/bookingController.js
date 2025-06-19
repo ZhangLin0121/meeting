@@ -668,7 +668,7 @@ class BookingController {
             const path = require('path');
 
             // 安全检查：只允许下载导出文件格式的文件名
-            if (!filename.match(/^会议室预约记录_\d{8}_\d{6}\.(xlsx|csv)$/)) {
+            if (!filename.includes('会议室预约记录') || !filename.match(/\.(xlsx|csv)$/)) {
                 return ResponseHelper.error(res, '无效的文件名', 400);
             }
 
