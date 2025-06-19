@@ -23,7 +23,11 @@ class UserController {
                 return ResponseHelper.error(res, '缺少微信登录code', 400);
             }
 
-            console.log('🔐 微信登录请求:', { code: code.substring(0, 10) + '...', nickname });
+            console.log('🔐 微信登录请求:', {
+                code: code.substring(0, 10) + '...',
+                nickname: nickname || '未提供',
+                avatarUrl: avatarUrl ? '已提供' : '未提供'
+            });
 
             // 使用code换取openid和session_key
             const wxResponse = await axios.get('https://api.weixin.qq.com/sns/jscode2session', {

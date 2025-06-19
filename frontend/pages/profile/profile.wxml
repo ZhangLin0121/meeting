@@ -104,7 +104,7 @@
               class="form-input" 
               value="{{profileForm.nickname}}" 
               bindinput="onNicknameInput" 
-              placeholder="请输入公司名"
+              placeholder="请输入公司名称"
               placeholder-class="input-placeholder"
             />
           </view>

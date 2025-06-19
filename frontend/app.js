@@ -193,9 +193,8 @@ App({
                 code: code
             };
 
-            // 如果有用户授权信息，一并发送
-            if (userProfile) {
-                loginData.nickname = userProfile.nickName;
+            // 如果有用户头像信息，一并发送
+            if (userProfile && userProfile.avatarUrl) {
                 loginData.avatarUrl = userProfile.avatarUrl;
             }
 
@@ -234,18 +233,19 @@ App({
     },
 
     /**
-     * 获取用户信息（需要用户授权）
+     * 获取用户头像（需要用户授权）
      */
     getUserProfileWithAuth() {
         return new Promise((resolve, reject) => {
             wx.getUserProfile({
-                desc: '用于完善预约服务',
+                desc: '用于显示您的头像',
                 success: (res) => {
-                    console.log('✅ 获取用户信息成功:', res.userInfo);
-                    resolve(res.userInfo);
+                    console.log('✅ 获取用户头像成功:', res.userInfo.avatarUrl ? '已获取' : '未获取');
+                    // 只返回头像信息
+                    resolve({ avatarUrl: res.userInfo.avatarUrl });
                 },
                 fail: (error) => {
-                    console.log('ℹ️ 用户拒绝授权获取信息');
+                    console.log('ℹ️ 用户拒绝授权获取头像');
                     reject(error);
                 }
             });
@@ -267,12 +267,12 @@ App({
 
             console.log('🔄 重新登录，code:', loginRes.code);
 
-            // 尝试获取用户授权信息
+            // 尝试获取用户头像信息
             let userProfile = null;
             try {
                 userProfile = await this.getUserProfileWithAuth();
             } catch (error) {
-                console.log('ℹ️ 未获取到用户授权信息，使用默认配置');
+                console.log('ℹ️ 未获取到用户头像信息，使用默认配置');
             }
 
             // 登录到服务器

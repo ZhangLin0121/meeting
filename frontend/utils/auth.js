@@ -28,9 +28,8 @@ async function loginToServer(code, userProfile = null) {
             code: code
         };
 
-        // 如果有用户授权信息，一并发送
-        if (userProfile) {
-            loginData.nickname = userProfile.nickName;
+        // 如果有用户头像信息，一并发送
+        if (userProfile && userProfile.avatarUrl) {
             loginData.avatarUrl = userProfile.avatarUrl;
         }
 
@@ -152,20 +151,50 @@ class WechatAuth {
     }
 
     /**
-     * 获取用户资料（需要用户授权）
+     * 获取用户头像（需要用户授权）
      */
     static async getUserProfile() {
-        return new Promise((resolve, reject) => {
-            wx.getUserProfile({
-                desc: '用于完善会议室预约服务',
-                success: (res) => {
-                    resolve(res.userInfo);
-                },
-                fail: (error) => {
-                    reject(error);
-                }
+        try {
+            console.log('🖼️ 开始获取用户头像...');
+
+            // 检查API兼容性
+            if (!wx.chooseAvatar) {
+                console.log('⚠️ 当前版本不支持 wx.chooseAvatar API，尝试使用 getUserProfile');
+                return new Promise((resolve, reject) => {
+                    wx.getUserProfile({
+                        desc: '用于显示您的头像',
+                        success: (res) => {
+                            console.log('✅ 通过getUserProfile获取头像成功');
+                            resolve({ avatarUrl: res.userInfo.avatarUrl });
+                        },
+                        fail: (error) => {
+                            console.error('❌ getUserProfile获取头像失败:', error);
+                            reject(error);
+                        }
+                    });
+                });
+            }
+
+            // 使用新的微信头像选择器
+            const result = await new Promise((resolve, reject) => {
+                wx.chooseAvatar({
+                    success: (res) => {
+                        console.log('✅ 微信头像获取成功:', res.avatarUrl);
+                        resolve({ avatarUrl: res.avatarUrl });
+                    },
+                    fail: (error) => {
+                        console.error('❌ 获取微信头像失败:', error);
+                        reject(error);
+                    }
+                });
             });
-        });
+
+            return result;
+
+        } catch (error) {
+            console.error('❌ 获取用户头像失败:', error);
+            throw error;
+        }
     }
 
     /**
@@ -302,39 +331,40 @@ class WechatAuth {
     }
 
     /**
-     * 获取微信用户信息（包含头像和昵称）
+     * 获取微信用户头像
      */
     static async getWechatUserInfo() {
         try {
-            console.log('👤 开始获取微信用户信息...');
+            console.log('🖼️ 开始获取微信用户头像...');
 
+            // 使用 getUserProfile 方法，只获取头像
             const result = await new Promise((resolve, reject) => {
                 wx.getUserProfile({
-                    desc: '用于显示您的头像和昵称',
+                    desc: '用于显示您的头像',
                     success: resolve,
                     fail: reject
                 });
             });
 
-            console.log('✅ 微信用户信息获取成功:', {
-                nickName: result.userInfo.nickName,
+            console.log('✅ 微信用户头像获取成功:', {
                 avatarUrl: result.userInfo.avatarUrl ? '已获取' : '未获取'
             });
 
-            return result.userInfo;
+            // 只返回头像信息
+            return { avatarUrl: result.userInfo.avatarUrl };
 
         } catch (error) {
-            console.error('❌ 获取微信用户信息失败:', error);
+            console.error('❌ 获取微信用户头像失败:', error);
             throw error;
         }
     }
 
     /**
-     * 直接登录并获取用户信息（包含头像）
+     * 直接登录并获取用户头像
      */
     static async loginWithUserInfo() {
         try {
-            console.log('🔐 开始登录并获取用户信息...');
+            console.log('🔐 开始登录并获取用户头像...');
 
             // 1. 获取微信登录码
             const loginResult = await new Promise((resolve, reject) => {
@@ -349,13 +379,13 @@ class WechatAuth {
                 throw new Error('获取微信登录码失败');
             }
 
-            // 2. 获取用户授权信息
+            // 2. 获取用户头像
             let userProfile = null;
             try {
                 userProfile = await this.getWechatUserInfo();
-                console.log('✅ 用户授权信息获取成功');
+                console.log('✅ 用户头像获取成功');
             } catch (authError) {
-                console.warn('⚠️ 用户拒绝授权，使用基础登录方式');
+                console.warn('⚠️ 用户拒绝授权头像，使用基础登录方式');
             }
 
             // 3. 发送到服务器登录
@@ -363,14 +393,14 @@ class WechatAuth {
 
             if (userInfo && userInfo.openid) {
                 await saveUserInfoSafely(userInfo);
-                console.log('✅ 登录并获取用户信息完成:', userInfo.openid);
+                console.log('✅ 登录并获取用户头像完成:', userInfo.openid);
                 return userInfo;
             } else {
                 throw new Error('服务器登录失败：返回数据无效');
             }
 
         } catch (error) {
-            console.error('❌ 登录并获取用户信息失败:', error);
+            console.error('❌ 登录并获取用户头像失败:', error);
             throw error;
         }
     }

@@ -435,12 +435,12 @@ Page({
     },
 
     /**
-     * 获取微信用户信息（包含头像和昵称）
+     * 获取微信用户头像
      */
     async getWechatUserProfile() {
         try {
             wx.showLoading({
-                title: '获取用户信息中...',
+                title: '获取头像中...',
                 mask: true
             });
 
@@ -449,37 +449,37 @@ Page({
                 console.warn('⚠️ getUserProfile API不可用，使用备用方案');
                 wx.hideLoading();
                 wx.showToast({
-                    title: '当前版本不支持获取用户信息',
+                    title: '当前版本不支持获取头像',
                     icon: 'none'
                 });
                 return;
             }
 
-            // 获取用户授权信息
+            // 获取用户头像授权信息
             const result = await new Promise((resolve, reject) => {
                 wx.getUserProfile({
-                    desc: '用于获取您的头像和昵称',
+                    desc: '用于显示您的头像',
                     lang: 'zh_CN',
                     success: resolve,
                     fail: reject
                 });
             });
 
-            console.log('✅ 获取微信用户信息成功:', result.userInfo);
+            console.log('✅ 获取微信用户头像成功:', result.userInfo.avatarUrl ? '已获取' : '未获取');
             wx.hideLoading();
 
             // 保存头像到数据库
             if (result.userInfo.avatarUrl) {
                 await this.saveAvatarToServer(result.userInfo.avatarUrl);
-            }
-
-            // 同步更新昵称到服务器（如果有变化）
-            if (result.userInfo.nickName && result.userInfo.nickName !== this.data.userInfo.nickname) {
-                await this.updateUserNickname(result.userInfo.nickName);
+            } else {
+                wx.showToast({
+                    title: '未获取到头像信息',
+                    icon: 'none'
+                });
             }
 
         } catch (error) {
-            console.error('❌ 获取微信用户信息失败:', error);
+            console.error('❌ 获取微信用户头像失败:', error);
             wx.hideLoading();
 
             // 详细错误处理
@@ -505,13 +505,13 @@ Page({
                     });
                 } else {
                     wx.showToast({
-                        title: '获取用户信息失败，请重试',
+                        title: '获取头像失败，请重试',
                         icon: 'none'
                     });
                 }
             } else {
                 wx.showToast({
-                    title: error.message || '获取用户信息失败',
+                    title: error.message || '获取头像失败',
                     icon: 'none'
                 });
             }
