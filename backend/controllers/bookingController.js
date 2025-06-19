@@ -769,27 +769,22 @@ class BookingController {
         const moment = require('moment-timezone');
         const now = moment().tz('Asia/Shanghai').format('YYYYMMDD_HHmmss');
 
-        let filenameParts = ['会议室预约记录'];
+        let filenameParts = ['meeting_bookings_export'];
 
         if (filters.date) {
-            filenameParts.push(filters.date);
+            filenameParts.push(filters.date.replace(/-/g, ''));
         } else if (filters.startDate || filters.endDate) {
             if (filters.startDate && filters.endDate) {
-                filenameParts.push(`${filters.startDate}至${filters.endDate}`);
+                filenameParts.push(`${filters.startDate.replace(/-/g, '')}_${filters.endDate.replace(/-/g, '')}`);
             } else if (filters.startDate) {
-                filenameParts.push(`${filters.startDate}起`);
+                filenameParts.push(`from_${filters.startDate.replace(/-/g, '')}`);
             } else if (filters.endDate) {
-                filenameParts.push(`至${filters.endDate}`);
+                filenameParts.push(`until_${filters.endDate.replace(/-/g, '')}`);
             }
         }
 
         if (filters.status) {
-            const statusMap = {
-                'booked': '已预约',
-                'completed': '已完成',
-                'cancelled': '已取消'
-            };
-            filenameParts.push(statusMap[filters.status] || filters.status);
+            filenameParts.push(filters.status);
         }
 
         filenameParts.push(now);
