@@ -1043,33 +1043,39 @@ Page({
                 wx.hideLoading();
 
                 if (res.statusCode === 200) {
-                    // 保存文件到相册或文件管理器
-                    wx.saveFile({
-                        tempFilePath: res.tempFilePath,
-                        success: (saveRes) => {
-                            console.log('✅ 文件保存成功:', saveRes.savedFilePath);
+                    console.log('✅ 文件下载成功:', res.tempFilePath);
 
-                            wx.showModal({
-                                title: '下载完成',
-                                content: `文件已保存，文件名：${filename}`,
-                                showCancel: false,
-                                confirmText: '确定'
+                    // 直接打开文档，不保存到永久存储
+                    wx.openDocument({
+                        filePath: res.tempFilePath,
+                        showMenu: true,
+                        success: () => {
+                            console.log('✅ 文档打开成功');
+                            wx.showToast({
+                                title: '文件已打开',
+                                icon: 'success',
+                                duration: 2000
                             });
                         },
-                        fail: (error) => {
-                            console.error('❌ 文件保存失败:', error);
+                        fail: (docError) => {
+                            console.error('❌ 文档打开失败:', docError);
 
-                            // 尝试打开文档
-                            wx.openDocument({
-                                filePath: res.tempFilePath,
-                                showMenu: true,
-                                success: () => {
-                                    console.log('✅ 文档打开成功');
+                            // 如果打开失败，尝试保存文件
+                            wx.saveFile({
+                                tempFilePath: res.tempFilePath,
+                                success: (saveRes) => {
+                                    console.log('✅ 文件保存成功:', saveRes.savedFilePath);
+                                    wx.showModal({
+                                        title: '下载完成',
+                                        content: `文件已保存到手机，可在文件管理器中查看`,
+                                        showCancel: false,
+                                        confirmText: '确定'
+                                    });
                                 },
-                                fail: (docError) => {
-                                    console.error('❌ 文档打开失败:', docError);
+                                fail: (saveError) => {
+                                    console.error('❌ 文件保存也失败:', saveError);
                                     wx.showToast({
-                                        title: '文件下载完成，请在文件管理器中查看',
+                                        title: '下载完成，但无法打开文件',
                                         icon: 'none',
                                         duration: 3000
                                     });
