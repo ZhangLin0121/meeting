@@ -635,6 +635,9 @@ class BookingController {
                     fs.mkdirSync(tempDir, { recursive: true });
                 }
 
+                // 清理过期文件
+                BookingController.cleanupExpiredFiles();
+
                 const filePath = path.join(tempDir, filename);
                 const XLSX = require('xlsx');
                 XLSX.writeFile(workbook, filePath);
@@ -658,6 +661,42 @@ class BookingController {
     }
 
     /**
+     * 清理过期的临时文件
+     */
+    static cleanupExpiredFiles() {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const tempDir = path.join(__dirname, '../temp');
+
+            if (!fs.existsSync(tempDir)) {
+                return;
+            }
+
+            const files = fs.readdirSync(tempDir);
+            const now = Date.now();
+            const maxAge = 5 * 60 * 1000; // 5分钟
+
+            files.forEach(file => {
+                const filePath = path.join(tempDir, file);
+                const stats = fs.statSync(filePath);
+
+                if (now - stats.mtime.getTime() > maxAge) {
+                    fs.unlink(filePath, (err) => {
+                        if (err) {
+                            console.error('清理过期文件失败:', err);
+                        } else {
+                            console.log('🧹 清理过期文件:', file);
+                        }
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('清理临时文件时出错:', error);
+        }
+    }
+
+    /**
      * 下载导出文件
      * GET /api/bookings/download/:filename
      */
@@ -674,9 +713,12 @@ class BookingController {
                 return ResponseHelper.notFound(res, '文件不存在或已过期');
             }
 
+            // 安全处理文件名，移除可能导致问题的字符
+            const safeFilename = filename.replace(/[^\w\-_.]/g, '_');
+
             // 设置响应头
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
 
             // 发送文件
             res.sendFile(filePath, (err) => {
@@ -687,7 +729,7 @@ class BookingController {
                     }
                 } else {
                     console.log('✅ 文件下载完成:', filename);
-                    // 下载完成后删除临时文件
+                    // 延长文件保留时间，防止下载过程中被删除
                     setTimeout(() => {
                         fs.unlink(filePath, (unlinkErr) => {
                             if (unlinkErr) {
@@ -696,7 +738,7 @@ class BookingController {
                                 console.log('🗑️ 临时文件已删除:', filename);
                             }
                         });
-                    }, 5000); // 5秒后删除
+                    }, 30000); // 30秒后删除，给足够的下载时间
                 }
             });
 
