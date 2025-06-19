@@ -407,12 +407,21 @@ Page({
                 });
             });
 
-            console.log('✅ 微信头像获取成功:', result.avatarUrl);
-
             wx.hideLoading();
 
+            // 验证获取到的头像URL
+            if (!result.avatarUrl) {
+                throw new Error('未获取到有效的头像URL');
+            }
+
+            console.log('✅ 微信头像获取成功:', result.avatarUrl);
+
             // 保存头像到数据库
-            await this.saveAvatarToServer(result.avatarUrl);
+            const saveSuccess = await this.saveAvatarToServer(result.avatarUrl);
+            
+            if (!saveSuccess) {
+                console.warn('⚠️ 头像保存失败，但已获取到头像URL');
+            }
 
         } catch (error) {
             console.error('❌ 获取微信头像失败:', error);
@@ -425,11 +434,14 @@ Page({
                 } else if (error.errMsg.includes('fail')) {
                     errorMessage = '获取头像失败，请重试';
                 }
+            } else if (error.message) {
+                errorMessage = error.message;
             }
 
             wx.showToast({
                 title: errorMessage,
-                icon: 'none'
+                icon: 'none',
+                duration: 2000
             });
         }
     },
@@ -470,11 +482,16 @@ Page({
 
             // 保存头像到数据库
             if (result.userInfo.avatarUrl) {
-                await this.saveAvatarToServer(result.userInfo.avatarUrl);
+                const saveSuccess = await this.saveAvatarToServer(result.userInfo.avatarUrl);
+                
+                if (!saveSuccess) {
+                    console.warn('⚠️ 头像保存失败，但已获取到头像URL');
+                }
             } else {
                 wx.showToast({
                     title: '未获取到头像信息',
-                    icon: 'none'
+                    icon: 'none',
+                    duration: 2000
                 });
             }
 
@@ -525,10 +542,23 @@ Page({
         try {
             console.log('💾 开始保存头像到数据库:', avatarUrl);
 
+            // 验证头像URL是否有效
+            if (!avatarUrl || !avatarUrl.trim()) {
+                throw new Error('头像URL无效');
+            }
+
+            // 显示保存中状态
+            wx.showLoading({
+                title: '保存头像中...',
+                mask: true
+            });
+
             // 调用后端API保存头像
             const result = await request.put('/api/user/avatar', {
                 avatarUrl: avatarUrl
             });
+
+            wx.hideLoading();
 
             if (result.success) {
                 // 更新本地用户信息
@@ -553,34 +583,33 @@ Page({
                 });
 
                 console.log('✅ 头像保存到数据库成功');
+                return true;
             } else {
                 throw new Error(result.message || '保存头像失败');
             }
 
         } catch (error) {
             console.error('❌ 保存头像到数据库失败:', error);
+            wx.hideLoading();
 
-            // 即使保存到数据库失败，也要更新本地显示
-            const updatedUserInfo = {
-                ...this.data.userInfo,
-                avatarUrl: avatarUrl
-            };
-
-            this.setData({
-                userInfo: updatedUserInfo
-            });
-
-            // 更新全局数据和本地存储
-            if (app && app.globalData) {
-                app.globalData.userInfo = updatedUserInfo;
+            // 根据错误类型显示不同的提示
+            let errorMessage = '头像更新失败';
+            
+            if (error.message.includes('网络')) {
+                errorMessage = '网络连接失败，请检查网络后重试';
+            } else if (error.message.includes('URL无效')) {
+                errorMessage = '头像获取失败，请重新选择';
+            } else if (error.message.includes('登录')) {
+                errorMessage = '登录状态异常，请重新登录';
             }
-            wx.setStorageSync('userInfo', updatedUserInfo);
 
             wx.showToast({
-                title: '头像已更新，但未同步到服务器',
+                title: errorMessage,
                 icon: 'none',
                 duration: 3000
             });
+
+            return false;
         }
     },
 

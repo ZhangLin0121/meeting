@@ -6,7 +6,7 @@
     <!-- 用户信息卡片 - 可编辑设计 -->
     <view class="user-profile-card" bindtap="editProfile">
       <view class="profile-header">
-        <view class="user-avatar" catchtap="getWechatAvatar">
+        <view class="user-avatar" catchtap="chooseAvatarMethod">
           <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" class="avatar-image"></image>
           <view wx:else class="default-avatar">
             <text class="avatar-initial">{{userInfo.nickname ? userInfo.nickname.charAt(0) : '用'}}</text>

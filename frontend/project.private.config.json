@@ -1,5 +1,24 @@
 {
   "setting": {
-    "compileHotReLoad": true
-  }
+    "compileHotReLoad": true,
+    "urlCheck": false,
+    "coverView": true,
+    "lazyloadPlaceholderEnable": false,
+    "skylineRenderEnable": false,
+    "preloadBackgroundData": false,
+    "autoAudits": false,
+    "useApiHook": true,
+    "useApiHostProcess": true,
+    "showShadowRootInWxmlPanel": true,
+    "useStaticServer": false,
+    "useLanDebug": false,
+    "showES6CompileOption": false,
+    "checkInvalidKey": true,
+    "ignoreDevUnusedFiles": true,
+    "bigPackageSizeSupport": false,
+    "useIsolateContext": true
+  },
+  "libVersion": "3.8.9",
+  "projectname": "meeting-room-booking",
+  "condition": {}
 }
