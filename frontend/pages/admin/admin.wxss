@@ -515,14 +515,17 @@ page {
 }
 
 .booking-status {
-    padding: 4rpx 12rpx;
+    padding: 6rpx 12rpx;
     border-radius: 8rpx;
     font-size: 24rpx;
     white-space: nowrap;
     flex-shrink: 0;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
     vertical-align: middle;
+    height: 32rpx;
 }
 
 .booking-status.booked {
@@ -545,7 +548,6 @@ page {
     font-weight: 500;
     line-height: 1;
     white-space: nowrap;
-    vertical-align: baseline;
 }
 
 .booking-details {
