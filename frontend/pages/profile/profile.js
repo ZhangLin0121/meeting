@@ -128,14 +128,14 @@ Page({
     /**
      * 选择并上传头像
      */
-    async chooseAndUploadAvatar() {
+    async chooseAndUploadAvatar(sourceType) {
         try {
             // 显示选择图片
             const chooseResult = await new Promise((resolve, reject) => {
                 wx.chooseImage({
                     count: 1,
                     sizeType: ['compressed'], // 压缩图片
-                    sourceType: ['album', 'camera'], // 支持相册和拍照
+                    sourceType: sourceType ? [sourceType] : ['album', 'camera'], // 支持相册和拍照
                     success: resolve,
                     fail: reject
                 });
@@ -375,5 +375,306 @@ Page({
         } finally {
             this.setData({ loading: false });
         }
+    },
+
+    /**
+     * 直接获取微信头像（推荐方式）
+     */
+    async getWechatAvatar() {
+        try {
+            wx.showLoading({
+                title: '获取头像中...',
+                mask: true
+            });
+
+            // 检查API兼容性
+            if (!wx.chooseAvatar) {
+                console.log('⚠️ 当前版本不支持 wx.chooseAvatar，使用降级方案');
+                wx.hideLoading();
+
+                // 提示用户使用其他方式
+                const result = await new Promise((resolve) => {
+                    wx.showModal({
+                        title: '获取微信头像',
+                        content: '当前微信版本不支持直接获取头像，请选择其他方式获取头像',
+                        showCancel: true,
+                        confirmText: '获取用户信息',
+                        cancelText: '从相册选择',
+                        success: resolve
+                    });
+                });
+
+                if (result.confirm) {
+                    // 用户选择获取用户信息（包含头像）
+                    await this.getWechatUserProfile();
+                } else {
+                    // 用户选择从相册选择
+                    await this.chooseAndUploadAvatar();
+                }
+                return;
+            }
+
+            // 使用微信新的头像选择器
+            const result = await new Promise((resolve, reject) => {
+                wx.chooseAvatar({
+                    success: resolve,
+                    fail: reject
+                });
+            });
+
+            console.log('✅ 获取微信头像成功:', result.avatarUrl);
+
+            // 设置上传状态
+            this.setData({ uploadingAvatar: true });
+
+            // 上传头像到服务器
+            await this.uploadAvatarToServer(result.avatarUrl);
+
+        } catch (error) {
+            console.error('❌ 获取微信头像失败:', error);
+            wx.showToast({
+                title: error.message || '获取头像失败',
+                icon: 'none'
+            });
+        } finally {
+            wx.hideLoading();
+            this.setData({ uploadingAvatar: false });
+        }
+    },
+
+    /**
+     * 获取微信用户信息（包含头像）
+     */
+    async getWechatUserProfile() {
+        try {
+            wx.showLoading({
+                title: '获取用户信息中...',
+                mask: true
+            });
+
+            // 检查getUserProfile API的可用性
+            if (typeof wx.getUserProfile !== 'function') {
+                console.warn('⚠️ getUserProfile API不可用，使用备用方案');
+                wx.showToast({
+                    title: '该功能需要更新微信版本',
+                    icon: 'none'
+                });
+                return;
+            }
+
+            // 获取用户授权信息
+            const result = await new Promise((resolve, reject) => {
+                wx.getUserProfile({
+                    desc: '用于完善会议室预约功能，获取您的头像和昵称信息，提供更好的服务体验',
+                    lang: 'zh_CN',
+                    success: resolve,
+                    fail: reject
+                });
+            });
+
+            console.log('✅ 获取微信用户信息成功:', result.userInfo);
+
+            // 如果用户信息包含头像，直接上传
+            if (result.userInfo && result.userInfo.avatarUrl) {
+                this.setData({ uploadingAvatar: true });
+                await this.uploadAvatarToServer(result.userInfo.avatarUrl);
+            }
+
+            // 更新用户昵称（如果需要）
+            if (result.userInfo && result.userInfo.nickName && result.userInfo.nickName !== this.data.userInfo.nickname) {
+                await this.updateUserNickname(result.userInfo.nickName);
+            }
+
+        } catch (error) {
+            console.error('❌ 获取微信用户信息失败:', error);
+
+            // 详细错误处理
+            if (error.errMsg) {
+                if (error.errMsg.includes('auth deny')) {
+                    wx.showModal({
+                        title: '授权提示',
+                        content: '需要您的授权才能获取头像信息，这样可以让您的个人信息更完整',
+                        showCancel: true,
+                        confirmText: '重新授权',
+                        success: (res) => {
+                            if (res.confirm) {
+                                // 用户点击重新授权，再次尝试
+                                this.getWechatUserProfile();
+                            }
+                        }
+                    });
+                } else if (error.errMsg.includes('desc length does not meet')) {
+                    console.error('❌ desc参数长度不符合要求:', error.errMsg);
+                    wx.showToast({
+                        title: '系统参数错误，请联系管理员',
+                        icon: 'none'
+                    });
+                } else {
+                    wx.showToast({
+                        title: '获取用户信息失败，请重试',
+                        icon: 'none'
+                    });
+                }
+            } else {
+                wx.showToast({
+                    title: error.message || '获取用户信息失败',
+                    icon: 'none'
+                });
+            }
+        } finally {
+            wx.hideLoading();
+            this.setData({ uploadingAvatar: false });
+        }
+    },
+
+    /**
+     * 上传头像到服务器（提取的公共方法）
+     */
+    async uploadAvatarToServer(avatarUrl) {
+        try {
+            // 获取用户openid用于认证
+            const userInfo = wx.getStorageSync('userInfo');
+            if (!userInfo || !userInfo.openid) {
+                throw new Error('用户未登录，请先登录');
+            }
+
+            // 上传到服务器
+            const uploadResult = await new Promise((resolve, reject) => {
+                wx.uploadFile({
+                    url: `${app.globalData.apiBaseUrl}/api/upload/avatar`,
+                    filePath: avatarUrl,
+                    name: 'avatar',
+                    header: {
+                        'x-user-openid': userInfo.openid
+                    },
+                    success: (res) => {
+                        try {
+                            const data = JSON.parse(res.data);
+                            if (data.success) {
+                                resolve(data);
+                            } else {
+                                reject(new Error(data.message || '上传失败'));
+                            }
+                        } catch (parseError) {
+                            reject(new Error('服务器响应格式错误'));
+                        }
+                    },
+                    fail: reject
+                });
+            });
+
+            // 更新本地用户信息
+            const updatedUserInfo = {
+                ...this.data.userInfo,
+                avatarUrl: `${app.globalData.apiBaseUrl}${uploadResult.data.avatarUrl}`
+            };
+
+            this.setData({
+                userInfo: updatedUserInfo
+            });
+
+            // 更新全局数据和本地存储
+            if (app && app.globalData) {
+                app.globalData.userInfo = updatedUserInfo;
+            }
+            wx.setStorageSync('userInfo', updatedUserInfo);
+
+            wx.showToast({
+                title: '头像更新成功',
+                icon: 'success'
+            });
+
+            console.log('✅ 头像上传成功:', uploadResult.data.avatarUrl);
+            return uploadResult;
+
+        } catch (error) {
+            console.error('❌ 头像上传失败:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * 更新用户昵称
+     */
+    async updateUserNickname(nickname) {
+        try {
+            const userInfo = wx.getStorageSync('userInfo');
+            const result = await request.put('/api/user/contact', {
+                nickname: nickname
+            });
+
+            if (result.success) {
+                // 更新本地数据
+                const updatedUserInfo = {
+                    ...this.data.userInfo,
+                    nickname: nickname
+                };
+
+                this.setData({
+                    userInfo: updatedUserInfo
+                });
+
+                // 更新全局数据和本地存储
+                if (app && app.globalData) {
+                    app.globalData.userInfo = updatedUserInfo;
+                }
+                wx.setStorageSync('userInfo', updatedUserInfo);
+
+                console.log('✅ 昵称更新成功:', nickname);
+            }
+        } catch (error) {
+            console.error('❌ 昵称更新失败:', error);
+        }
+    },
+
+    /**
+     * 选择头像获取方式
+     */
+    chooseAvatarMethod() {
+        // 检查API兼容性，决定显示的选项
+        const hasChooseAvatar = typeof wx.chooseAvatar === 'function';
+
+        const itemList = hasChooseAvatar ? ['使用微信头像', '获取用户信息', '从相册选择', '拍照'] : ['获取用户信息', '从相册选择', '拍照'];
+
+        wx.showActionSheet({
+            itemList: itemList,
+            success: (res) => {
+                if (hasChooseAvatar) {
+                    switch (res.tapIndex) {
+                        case 0:
+                            // 使用微信头像
+                            this.getWechatAvatar();
+                            break;
+                        case 1:
+                            // 获取用户信息
+                            this.getWechatUserProfile();
+                            break;
+                        case 2:
+                            // 从相册选择
+                            this.chooseAndUploadAvatar('album');
+                            break;
+                        case 3:
+                            // 拍照
+                            this.chooseAndUploadAvatar('camera');
+                            break;
+                    }
+                } else {
+                    switch (res.tapIndex) {
+                        case 0:
+                            // 获取用户信息
+                            this.getWechatUserProfile();
+                            break;
+                        case 1:
+                            // 从相册选择
+                            this.chooseAndUploadAvatar('album');
+                            break;
+                        case 2:
+                            // 拍照
+                            this.chooseAndUploadAvatar('camera');
+                            break;
+                    }
+                }
+            }
+        });
     }
 });
