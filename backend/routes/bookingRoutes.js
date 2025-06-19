@@ -8,6 +8,11 @@ const { validate, schemas } = require('../utils/validation');
  * 预约相关路由
  */
 
+// 下载导出文件（不需要认证，因为微信小程序downloadFile无法传递headers）
+router.get('/download/:filename',
+    BookingController.downloadExportFile
+);
+
 // 以下路由需要身份验证
 router.use(authenticate);
 
@@ -47,11 +52,6 @@ router.post('/manual',
 router.get('/export',
     validate(schemas.booking.export, 'query'),
     BookingController.exportBookings
-);
-
-// 下载导出文件（管理员）
-router.get('/download/:filename',
-    BookingController.downloadExportFile
 );
 
 module.exports = router;

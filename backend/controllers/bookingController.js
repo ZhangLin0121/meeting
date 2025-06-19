@@ -667,7 +667,18 @@ class BookingController {
             const fs = require('fs');
             const path = require('path');
 
+            // 安全检查：只允许下载导出文件格式的文件名
+            if (!filename.match(/^会议室预约记录_\d{8}_\d{6}\.(xlsx|csv)$/)) {
+                return ResponseHelper.error(res, '无效的文件名', 400);
+            }
+
             const filePath = path.join(__dirname, '../temp', filename);
+
+            // 确保文件路径在temp目录内（防止路径遍历攻击）
+            const tempDir = path.join(__dirname, '../temp');
+            if (!filePath.startsWith(tempDir)) {
+                return ResponseHelper.error(res, '无效的文件路径', 400);
+            }
 
             // 检查文件是否存在
             if (!fs.existsSync(filePath)) {
