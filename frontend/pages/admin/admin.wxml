@@ -174,11 +174,9 @@
             <text class="booking-date-time">{{item.bookingDate}} {{item.startTime}}-{{item.endTime}}</text>
           </view>
           <view class="booking-status {{item.status}}">
-            <text class="status-text">
-              {{item.status === 'booked' ? '已预约' : 
-                item.status === 'completed' ? '已完成' : 
-                item.status === 'cancelled' ? '已取消' : '未知状态'}}
-            </text>
+            {{item.status === 'booked' ? '已预约' : 
+              item.status === 'completed' ? '已完成' : 
+              item.status === 'cancelled' ? '已取消' : '未知状态'}}
           </view>
         </view>
         

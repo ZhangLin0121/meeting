@@ -524,7 +524,6 @@ page {
     align-items: center;
     justify-content: center;
     line-height: 1;
-    vertical-align: middle;
     height: 32rpx;
 }
 
@@ -541,13 +540,6 @@ page {
 .booking-status.cancelled {
     background-color: #ffeaea;
     color: #d32f2f;
-}
-
-.booking-status .status-text {
-    font-size: 24rpx;
-    font-weight: 500;
-    line-height: 1;
-    white-space: nowrap;
 }
 
 .booking-details {
