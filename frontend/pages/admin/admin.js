@@ -1034,11 +1034,19 @@ Page({
      * 下载导出文件
      */
     downloadExportFile(downloadUrl, filename) {
+        console.log('🔗 准备下载文件:', { downloadUrl, filename });
         wx.showLoading({ title: '下载中...', mask: true });
+
+        // 尝试解决URL编码问题
+        const cleanUrl = downloadUrl.replace(/[^\x00-\x7F]/g, ""); // 移除非ASCII字符
+        console.log('🔗 清理后的URL:', cleanUrl);
 
         // 下载文件
         wx.downloadFile({
-            url: downloadUrl,
+            url: cleanUrl,
+            header: {
+                'User-Agent': 'wechat-miniprogram'
+            },
             success: (res) => {
                 wx.hideLoading();
 
@@ -1091,11 +1099,27 @@ Page({
                 wx.hideLoading();
                 console.error('❌ 文件下载失败:', error);
 
+                // 如果下载失败，尝试在浏览器中打开
                 wx.showModal({
                     title: '下载失败',
-                    content: '网络连接异常，请检查网络后重试',
-                    showCancel: false,
-                    confirmText: '确定'
+                    content: '文件下载失败，是否在浏览器中打开？',
+                    confirmText: '打开',
+                    cancelText: '取消',
+                    success: (res) => {
+                        if (res.confirm) {
+                            // 复制下载链接到剪贴板
+                            wx.setClipboardData({
+                                data: cleanUrl,
+                                success: () => {
+                                    wx.showToast({
+                                        title: '下载链接已复制到剪贴板',
+                                        icon: 'none',
+                                        duration: 3000
+                                    });
+                                }
+                            });
+                        }
+                    }
                 });
             }
         });
