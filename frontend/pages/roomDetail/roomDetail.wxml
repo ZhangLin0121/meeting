@@ -186,17 +186,21 @@
                 </view>
                 
                 <!-- 显示当前时段的所有时间点 -->
-                <view
+                <block
                   wx:for="{{timePoints}}"
                   wx:key="time"
                   wx:for-item="point"
-                  class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isSelected ? 'selected' : ''}}"
-                  data-time="{{point.time}}"
-                  catchtap="onTimePointTap"
                 >
-                  <text class="time-point-text">{{point.time}}</text>
-                  <text class="debug-text" style="font-size: 8px; color: #666;">[{{point.periods ? point.periods.join(',') : point.period}}]</text>
-                </view>
+                  <view
+                    wx:if="{{(point.periods && point.periods.indexOf(item.id) !== -1) || (!point.periods && point.period === item.id)}}"
+                    class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isSelected ? 'selected' : ''}}"
+                    data-time="{{point.time}}"
+                    catchtap="onTimePointTap"
+                  >
+                    <text class="time-point-text">{{point.time}}</text>
+                    <text class="debug-text" style="font-size: 8px; color: #666;">[{{point.periods ? point.periods.join(',') : point.period}}]</text>
+                  </view>
+                </block>
                 
                 <!-- 如果没有时间点显示调试信息 -->
                 <view wx:if="{{timePoints.length === 0}}" class="debug-no-data" style="background: #ffeeee; padding: 10px; color: #cc0000;">
