@@ -378,39 +378,47 @@ Page({
                     isAvailable: slot.status === 'available',
                     isStart: false,
                     isEnd: false,
-                    isSelected: false
+                    isSelected: false,
+                    periods: [slot.period] // 记录该时间点属于哪些period
                 });
             } else {
-                // 如果该时间点已存在，更新可用性（只要有一个槽可用就算可用）
+                // 如果该时间点已存在，更新可用性和period信息
                 const existing = timePointsMap.get(startTime);
                 existing.isAvailable = existing.isAvailable || slot.status === 'available';
+                // 添加period到列表中（避免重复）
+                if (!existing.periods.includes(slot.period)) {
+                    existing.periods.push(slot.period);
+                }
             }
 
             // 添加结束时间点 - 确保结束时间点的period正确
             if (!timePointsMap.has(endTime)) {
                 // 对于结束时间点，需要确定它属于哪个period
-                let endPeriod = slot.period;
+                let endPeriods = [slot.period];
 
-                // 特殊处理跨period的结束时间点
+                // 特殊处理跨period的结束时间点 - 边界时间点属于多个period
                 if (endTime === '12:00') {
-                    endPeriod = 'morning'; // 12:00作为上午的结束点
+                    endPeriods = ['morning', 'noon']; // 12:00既是上午结束也是中午开始
                 } else if (endTime === '14:30') {
-                    endPeriod = 'noon'; // 14:30作为中午的结束点
-                } else if (endTime === '22:00') {
-                    endPeriod = 'afternoon'; // 22:00作为下午的结束点
+                    endPeriods = ['noon', 'afternoon']; // 14:30既是中午结束也是下午开始
                 }
 
                 timePointsMap.set(endTime, {
                     time: endTime,
-                    period: endPeriod,
+                    period: endPeriods[0], // 主要period（向后兼容）
                     isAvailable: slot.status === 'available',
                     isStart: false,
                     isEnd: false,
-                    isSelected: false
+                    isSelected: false,
+                    periods: endPeriods // 记录该时间点属于哪些period
                 });
             } else {
                 const existing = timePointsMap.get(endTime);
                 existing.isAvailable = existing.isAvailable || slot.status === 'available';
+                // 添加period到列表中（避免重复）
+                if (!existing.periods.includes(slot.period)) {
+                    existing.periods.push(slot.period);
+                }
             }
         });
 

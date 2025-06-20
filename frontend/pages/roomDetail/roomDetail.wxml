@@ -178,11 +178,11 @@
               <!-- 时间点选择网格 -->
               <view class="time-points-grid">
                 <!-- 显示当前时段的所有时间点 -->
-                <view 
-                  wx:for="{{timePoints}}" 
+                                <view
+                  wx:for="{{timePoints}}"
                   wx:key="time"
                   wx:for-item="point"
-                  wx:if="{{point.period === item.id}}"
+                  wx:if="{{(point.periods && point.periods.includes(item.id)) || (!point.periods && point.period === item.id)}}"
                   class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isSelected ? 'selected' : ''}}"
                   data-time="{{point.time}}"
                   catchtap="onTimePointTap"
