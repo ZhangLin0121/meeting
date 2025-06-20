@@ -182,7 +182,7 @@
                   wx:for="{{timePoints}}"
                   wx:key="time"
                   wx:for-item="point"
-                  wx:if="{{(point.periods && point.periods.includes(item.id)) || (!point.periods && point.period === item.id)}}"
+                  wx:if="{{point.periods ? point.periods.includes(item.id) : point.period === item.id}}"
                   class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isSelected ? 'selected' : ''}}"
                   data-time="{{point.time}}"
                   catchtap="onTimePointTap"

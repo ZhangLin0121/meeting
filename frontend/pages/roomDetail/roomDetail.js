@@ -427,11 +427,18 @@ Page({
             return a.time.localeCompare(b.time);
         });
 
+        // 确保所有时间点都有 periods 字段
+        timePoints.forEach(tp => {
+            if (!tp.periods) {
+                tp.periods = [tp.period];
+            }
+        });
+
         console.log('🕐 生成的时间点列表:', timePoints);
         console.log('📊 各时段时间点统计:', {
-            morning: timePoints.filter(tp => tp.period === 'morning').length,
-            noon: timePoints.filter(tp => tp.period === 'noon').length,
-            afternoon: timePoints.filter(tp => tp.period === 'afternoon').length
+            morning: timePoints.filter(tp => tp.periods.includes('morning')).length,
+            noon: timePoints.filter(tp => tp.periods.includes('noon')).length,
+            afternoon: timePoints.filter(tp => tp.periods.includes('afternoon')).length
         });
 
         return timePoints;
