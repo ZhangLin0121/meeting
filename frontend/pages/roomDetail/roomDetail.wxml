@@ -183,13 +183,11 @@
                   wx:key="time"
                   wx:for-item="point"
                   wx:if="{{point.period === item.id}}"
-                  class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isStart ? 'start-selected' : ''}} {{point.isEnd ? 'end-selected' : ''}}"
+                  class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isSelected ? 'selected' : ''}}"
                   data-time="{{point.time}}"
                   catchtap="onTimePointTap"
                 >
                   <text class="time-point-text">{{point.time}}</text>
-                  <view wx:if="{{point.isStart}}" class="time-point-label start">开始</view>
-                  <view wx:if="{{point.isEnd}}" class="time-point-label end">结束</view>
                 </view>
               </view>
               
@@ -209,12 +207,8 @@
                   <text class="legend-text">不可选择</text>
                 </view>
                 <view class="legend-item">
-                  <view class="legend-color time-start"></view>
-                  <text class="legend-text">开始时间</text>
-                </view>
-                <view class="legend-item">
-                  <view class="legend-color time-end"></view>
-                  <text class="legend-text">结束时间</text>
+                  <view class="legend-color time-selected"></view>
+                  <text class="legend-text">已选择</text>
                 </view>
               </view>
             </view>

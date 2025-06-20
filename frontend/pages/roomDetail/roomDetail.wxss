@@ -768,22 +768,12 @@ page {
     color: #8e8e93;
 }
 
-.time-point.start-selected {
-    background-color: #34c759;
-    border-color: #34c759;
+.time-point.selected {
+    background-color: #007aff;
+    border-color: #007aff;
 }
 
-.time-point.start-selected .time-point-text {
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.time-point.end-selected {
-    background-color: #ff3b30;
-    border-color: #ff3b30;
-}
-
-.time-point.end-selected .time-point-text {
+.time-point.selected .time-point-text {
     color: #ffffff;
     font-weight: 600;
 }
@@ -818,12 +808,8 @@ page {
     opacity: 0.5;
 }
 
-.time-points-legend .legend-color.time-start {
-    background-color: #34c759;
-}
-
-.time-points-legend .legend-color.time-end {
-    background-color: #ff3b30;
+.time-points-legend .legend-color.time-selected {
+    background-color: #007aff;
 }
 
 

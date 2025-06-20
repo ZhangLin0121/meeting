@@ -377,7 +377,8 @@ Page({
                     period: slot.period,
                     isAvailable: slot.status === 'available',
                     isStart: false,
-                    isEnd: false
+                    isEnd: false,
+                    isSelected: false
                 });
             } else {
                 // 如果该时间点已存在，更新可用性（只要有一个槽可用就算可用）
@@ -385,14 +386,27 @@ Page({
                 existing.isAvailable = existing.isAvailable || slot.status === 'available';
             }
 
-            // 添加结束时间点
+            // 添加结束时间点 - 确保结束时间点的period正确
             if (!timePointsMap.has(endTime)) {
+                // 对于结束时间点，需要确定它属于哪个period
+                let endPeriod = slot.period;
+
+                // 特殊处理跨period的结束时间点
+                if (endTime === '12:00') {
+                    endPeriod = 'morning'; // 12:00作为上午的结束点
+                } else if (endTime === '14:30') {
+                    endPeriod = 'noon'; // 14:30作为中午的结束点
+                } else if (endTime === '22:00') {
+                    endPeriod = 'afternoon'; // 22:00作为下午的结束点
+                }
+
                 timePointsMap.set(endTime, {
                     time: endTime,
-                    period: slot.period,
+                    period: endPeriod,
                     isAvailable: slot.status === 'available',
                     isStart: false,
-                    isEnd: false
+                    isEnd: false,
+                    isSelected: false
                 });
             } else {
                 const existing = timePointsMap.get(endTime);
@@ -406,6 +420,12 @@ Page({
         });
 
         console.log('🕐 生成的时间点列表:', timePoints);
+        console.log('📊 各时段时间点统计:', {
+            morning: timePoints.filter(tp => tp.period === 'morning').length,
+            noon: timePoints.filter(tp => tp.period === 'noon').length,
+            afternoon: timePoints.filter(tp => tp.period === 'afternoon').length
+        });
+
         return timePoints;
     },
 
@@ -738,14 +758,18 @@ Page({
      */
     setStartTimePoint(startTime) {
         const timePoints = [...this.data.timePoints];
+
+        // 清除所有选择状态
         timePoints.forEach(tp => {
             tp.isStart = false;
             tp.isEnd = false;
+            tp.isSelected = false;
         });
 
         const startPoint = timePoints.find(tp => tp.time === startTime);
         if (startPoint) {
             startPoint.isStart = true;
+            startPoint.isSelected = true;
         }
 
         this.setData({
@@ -757,24 +781,42 @@ Page({
     },
 
     /**
-     * 设置结束时间点
+     * 设置结束时间点并高亮中间时间段
      */
     setEndTimePoint(endTime) {
-        const timePoints = [...this.data.timePoints];
-        const endPoint = timePoints.find(tp => tp.time === endTime);
-        if (endPoint) {
-            endPoint.isEnd = true;
+        // 验证选择的时间段是否可用
+        if (!this.validateTimeRange(this.data.selectedStartTime, endTime)) {
+            wx.showToast({ title: '选择的时间段包含不可用时间', icon: 'none' });
+            return;
         }
 
-        // 验证选择的时间段是否可用
-        if (this.validateTimeRange(this.data.selectedStartTime, endTime)) {
-            this.setData({
-                timePoints,
-                selectedEndTime: endTime
-            });
-        } else {
-            wx.showToast({ title: '选择的时间段包含不可用时间', icon: 'none' });
-        }
+        const timePoints = [...this.data.timePoints];
+        const startTime = this.data.selectedStartTime;
+
+        // 清除所有选择状态
+        timePoints.forEach(tp => {
+            tp.isStart = false;
+            tp.isEnd = false;
+            tp.isSelected = false;
+        });
+
+        // 高亮选择的时间范围内的所有时间点
+        timePoints.forEach(tp => {
+            if (tp.time >= startTime && tp.time <= endTime) {
+                tp.isSelected = true;
+                if (tp.time === startTime) {
+                    tp.isStart = true;
+                }
+                if (tp.time === endTime) {
+                    tp.isEnd = true;
+                }
+            }
+        });
+
+        this.setData({
+            timePoints,
+            selectedEndTime: endTime
+        });
     },
 
     /**
