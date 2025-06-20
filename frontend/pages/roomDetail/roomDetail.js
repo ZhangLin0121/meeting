@@ -479,6 +479,19 @@ Page({
 
         console.log('🕐 生成的分组时间点数据:', result);
         console.log('🔍 时间槽可用性映射:', timeSlotAvailabilityMap);
+
+        // 额外打印每个时段的可用性详情
+        ['morning', 'noon', 'afternoon'].forEach(period => {
+            const points = result[period];
+            const availablePoints = points.filter(p => p.isAvailable);
+            const unavailablePoints = points.filter(p => !p.isAvailable);
+
+            console.log(`📊 ${period}时段: 总计${points.length}个时间点, 可用${availablePoints.length}个, 不可用${unavailablePoints.length}个`);
+            if (unavailablePoints.length > 0) {
+                console.log(`🚫 ${period}时段不可用时间点:`, unavailablePoints.map(p => p.time));
+            }
+        });
+
         return result;
     },
 
@@ -501,6 +514,12 @@ Page({
         allTimePoints.forEach(time => {
             availabilityMap.set(time, true);
         });
+
+        console.log(`📋 处理${timeSlots.length}个时间槽数据:`, timeSlots.map(slot => ({
+            time: `${slot.startTime}-${slot.endTime}`,
+            status: slot.status,
+            period: slot.period
+        })));
 
         // 遍历所有时间槽，标记不可用的时间点
         timeSlots.forEach(slot => {
