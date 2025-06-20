@@ -58,6 +58,20 @@ Page({
         selectedTimeText: '',
         wholePeriodBooking: null, // 整时段预约信息
         isFullDayUnavailable: false, // 全天是否约满
+
+        // 日历相关
+        currentYear: 0,
+        currentMonth: 0,
+        calendarDays: [],
+        selectedDateDisplay: '',
+
+        // 预约相关
+        morningStatus: 'available',
+        noonStatus: 'available',
+        afternoonStatus: 'available',
+
+        // 数据缓存
+        monthlyAvailability: new Map() // 缓存每个月的可用性数据
     },
 
     /**
@@ -100,91 +114,34 @@ Page({
     },
 
     /**
-     * 预加载用户信息
+     * 预加载用户信息（优化加载体验）
      */
     async preloadUserInfo() {
         try {
-            // 优先从用户个人信息获取
-            const userProfile = await this.fetchUserProfile();
-
-            if (userProfile && userProfile.name && userProfile.phone) {
-                console.log('✅ 预加载用户个人信息:', userProfile);
-
-                this.setData({
-                    'bookingForm.contactName': userProfile.name,
-                    'bookingForm.contactPhone': userProfile.phone
-                });
-
-                // 同时更新本地缓存
-                this.saveUserBookingInfo(userProfile.name, userProfile.phone);
+            const app = getApp();
+            const userInfo = app.globalData && app.globalData.userInfo;
+            if (userInfo && userInfo.avatarUrl) {
+                console.log('✅ 使用缓存的用户信息');
                 return;
             }
+
+            // 如果没有缓存，尝试获取用户信息
+            await this.fetchUserProfile();
         } catch (error) {
-            console.log('⚠️ 预加载用户个人信息失败:', error);
-        }
-
-        // 备用方案：从本地存储获取用户信息
-        const savedUserInfo = wx.getStorageSync('userBookingInfo');
-
-        if (savedUserInfo && savedUserInfo.contactName && savedUserInfo.contactPhone) {
-            // 检查信息是否过期（30天）
-            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-            if (savedUserInfo.lastUpdated && savedUserInfo.lastUpdated > thirtyDaysAgo) {
-                console.log('✅ 预加载本地存储用户信息:', savedUserInfo);
-
-                this.setData({
-                    'bookingForm.contactName': savedUserInfo.contactName,
-                    'bookingForm.contactPhone': savedUserInfo.contactPhone
-                });
-            } else {
-                // 信息过期，清除本地存储
-                wx.removeStorageSync('userBookingInfo');
-                console.log('⚠️ 用户信息已过期，已清除');
-            }
+            console.warn('⚠️ 预加载用户信息失败，继续页面加载:', error);
         }
     },
 
     /**
-     * 安全获取App数据，避免getApp()返回undefined
+     * 安全获取app数据
      */
     safeGetAppData() {
         try {
             const app = getApp();
-
-            if (app && app.globalData) {
-                this.setData({
-                    apiBaseUrl: app.globalData.apiBaseUrl || 'https://www.cacophonyem.me/meeting'
-                });
-                console.log('✅ 成功获取App全局数据');
-
-                // 获取用户openid
-                this.getUserOpenId();
-
-                // 初始化页面数据
-                this.initializePage();
-            } else {
-                console.warn('⚠️ App实例未就绪，使用默认配置');
-                this.setData({
-                    apiBaseUrl: 'https://www.cacophonyem.me/meeting'
-                });
-
-                // 延迟重试获取用户数据
-                setTimeout(() => {
-                    this.safeGetAppData();
-                }, 500);
-            }
+            return app.globalData || {};
         } catch (error) {
-            console.error('❌ 获取App数据失败:', error);
-
-            // 使用默认配置
-            this.setData({
-                apiBaseUrl: 'https://www.cacophonyem.me/meeting'
-            });
-
-            // 延迟重试
-            setTimeout(() => {
-                this.safeGetAppData();
-            }, 1000);
+            console.warn('⚠️ 获取app数据失败:', error);
+            return {};
         }
     },
 

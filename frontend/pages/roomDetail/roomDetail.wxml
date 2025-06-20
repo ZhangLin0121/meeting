@@ -1,4 +1,4 @@
-<!--会议室详情页面 - Apple Design风格-->
+<!--会议室详情页面 - 日历预约风格-->
 <view class="container fade-in">
   <!-- 自定义导航栏 - 固定定位 -->
   <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
@@ -6,7 +6,7 @@
       <view class="navbar-left" bindtap="goBack">
         <image class="back-icon" src="/images/icons/back.png" mode="aspectFit"></image>
       </view>
-      <text class="navbar-title">会议室详情</text>
+      <text class="navbar-title">{{roomDetails.name || '会议室预约'}}</text>
       <view class="navbar-right"></view>
     </view>
   </view>
@@ -42,7 +42,6 @@
 
       <!-- 会议室基本信息 -->
       <view class="room-basic-info">
-        <text class="room-name">{{roomDetails.name}}</text>
         <view class="room-meta">
           <view class="meta-item">
             <text class="meta-label">容纳人数:</text>
@@ -63,245 +62,157 @@
             </view>
           </view>
         </view>
-        
-        <!-- 会议室描述 -->
-        <view class="description-section" wx:if="{{roomDetails.description}}">
-          <text class="description-title">会议室描述</text>
-          <text class="description-text">{{roomDetails.description}}</text>
+      </view>
+    </view>
+
+    <!-- 日历预约区域 -->
+    <view class="calendar-booking-section">
+      <view class="calendar-header">
+        <text class="calendar-title">选择预约日期</text>
+        <view class="calendar-nav">
+          <view class="nav-btn" bindtap="prevMonth">
+            <text class="nav-text">‹</text>
+          </view>
+          <text class="current-month">{{currentYear}}年{{currentMonth}}月</text>
+          <view class="nav-btn" bindtap="nextMonth">
+            <text class="nav-text">›</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 日历状态说明 -->
+      <view class="calendar-legend">
+        <view class="legend-item">
+          <view class="legend-dot available"></view>
+          <text class="legend-text">可预约</text>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot partial"></view>
+          <text class="legend-text">部分可约</text>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot unavailable"></view>
+          <text class="legend-text">已约满</text>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot past"></view>
+          <text class="legend-text">已过期</text>
+        </view>
+      </view>
+
+      <!-- 日历表格 -->
+      <view class="calendar-container">
+        <!-- 星期标题 -->
+        <view class="calendar-weekdays">
+          <text class="weekday">日</text>
+          <text class="weekday">一</text>
+          <text class="weekday">二</text>
+          <text class="weekday">三</text>
+          <text class="weekday">四</text>
+          <text class="weekday">五</text>
+          <text class="weekday">六</text>
+        </view>
+
+        <!-- 日历网格 -->
+        <view class="calendar-grid">
+          <view 
+            wx:for="{{calendarDays}}" 
+            wx:key="date"
+            class="calendar-day {{item.isCurrentMonth ? 'current-month' : 'other-month'}} {{item.isToday ? 'today' : ''}} {{item.isSelected ? 'selected' : ''}} {{item.status}}"
+            data-date="{{item.fullDate}}"
+            bindtap="onDateSelect"
+          >
+            <text class="day-number">{{item.day}}</text>
+            <view class="day-status-dot {{item.status}}" wx:if="{{item.isCurrentMonth && item.status}}"></view>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 预约功能区 -->
-    <view class="booking-section">      
-      <!-- 日期选择器 -->
-      <view class="date-picker-container">
-        <text class="picker-label">预约日期</text>
-        <picker
-          mode="date"
-          value="{{selectedDate}}"
-          start="{{minDate}}"
-          end="{{maxDate}}"
-          bindchange="bindDateChange"
-          class="date-picker"
-        >
-          <view class="picker-display">
-            <text class="picker-text">{{selectedDateWithWeekday}}</text>
-            <image class="picker-arrow" src="/images/icons/arrow.png" mode="aspectFit"></image>
-          </view>
-        </picker>
+    <!-- 时段选择区域 -->
+    <view class="period-selection-section" wx:if="{{selectedDate}}">
+      <view class="period-header">
+        <text class="period-title">选择预约时段</text>
+        <text class="period-date">{{selectedDateDisplay}}</text>
       </view>
 
-      <!-- 时间段选择 - 两层级设计 -->
-      <view class="time-slots-container">
-        <text class="time-slots-title">选择预约时段</text>
-        <text class="time-slots-subtitle">🎯 三种预约方式：
-1️⃣ 点击"预约全天"预约整个工作日
-2️⃣ 点击"预约整时段"预约单个时段  
-3️⃣ 点击时段卡片展开选择具体时间</text>
-        
-        <!-- 时段选择卡片 -->
-        <view class="period-cards-container">
-          <view 
-            wx:for="{{timePeriods}}" 
-            wx:key="id"
-            wx:if="{{item.isFullDay || !isFullDayUnavailable}}"
-            class="period-card {{item.status}} {{expandedPeriod === item.id ? 'expanded' : ''}} {{item.isFullDay ? 'fullday-card' : ''}}"
-          >
-            <!-- 时段卡片头部 -->
-            <view class="period-card-header">
-              <view class="period-info" bindtap="onPeriodTap" data-period="{{item.id}}">
-                <text class="period-icon">{{item.icon}}</text>
-                <view class="period-details">
-                  <text class="period-name">{{item.name}}</text>
-                  <text class="period-time">{{item.timeRange}}</text>
-                </view>
-              </view>
-              
-              <view class="period-actions">
-                <!-- 可用性指示 -->
-                <view class="availability-indicator">
-                  <text class="availability-text" wx:if="{{item.status === 'available'}}">
-                    {{item.availableCount}}/{{item.totalCount}} 可用
-                  </text>
-                  <text class="availability-text partial" wx:elif="{{item.status === 'partial'}}">
-                    {{item.availableCount}}/{{item.totalCount}} 可用
-                  </text>
-                  <text class="availability-text unavailable" wx:else>
-                    已约满
-                  </text>
-                </view>
-                
-                <!-- 快速预约按钮 -->
-                <!-- 完全可用时显示正常预约按钮 -->
-                <view 
-                  wx:if="{{item.canBookWhole}}"
-                  class="quick-book-btn {{item.isFullDay ? 'fullday-btn' : ''}}" 
-                  data-period="{{item.id}}"
-                  catchtap="onQuickBookPeriod"
-                >
-                  <text class="quick-book-text">{{item.isFullDay ? '预约全天' : '预约整时段'}}</text>
-                </view>
-                
-                <!-- 部分被占用时显示禁用按钮 -->
-                <view 
-                  wx:elif="{{item.status === 'partial'}}"
-                  class="quick-book-btn disabled" 
-                >
-                  <text class="quick-book-text">部分已占用</text>
-                </view>
-                
-                <!-- 已约满时显示禁用按钮 -->
-                <view 
-                  wx:elif="{{item.status === 'unavailable'}}"
-                  class="quick-book-btn disabled" 
-                >
-                  <text class="quick-book-text">已约满</text>
-                </view>
-                
-                <!-- 展开/收起图标（全天预约不显示展开图标，已约满的时段也不显示） -->
-                <view 
-                  wx:if="{{!item.isFullDay && item.status !== 'unavailable' && item.availableCount > 0}}"
-                  class="expand-icon {{expandedPeriod === item.id ? 'rotated' : ''}}" 
-                  catchtap="onPeriodTap" 
-                  data-period="{{item.id}}"
-                >
-                  <text class="expand-arrow-text">▼</text>
-                </view>
-              </view>
+      <view class="period-cards">
+        <!-- 上午时段 -->
+        <view 
+          class="period-card {{morningStatus}}" 
+          data-period="morning"
+          bindtap="onPeriodSelect"
+        >
+          <view class="period-info">
+            <text class="period-icon">🌅</text>
+            <view class="period-details">
+              <text class="period-name">上午时段</text>
+              <text class="period-time">08:30 - 12:00</text>
             </view>
-            
-            <!-- 时间点选择区域（展开时显示，全天预约不显示） -->
-            <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id && !item.isFullDay}}" catchtap="preventClose">
-              <view class="detail-slots-header">
-                <text class="detail-title">选择开始和结束时间</text>
-                <view wx:if="{{selectedStartTime && selectedEndTime}}" class="selected-time-display">
-                  <text class="selected-time-text">已选择: {{selectedStartTime}} - {{selectedEndTime}}</text>
-                </view>
-                <view wx:elif="{{selectedStartTime}}" class="selected-time-display">
-                  <text class="selected-time-text">开始时间: {{selectedStartTime}} | 请选择结束时间</text>
-                </view>
-              </view>
-              
-              <!-- 时间点选择 - 按时段分组展示 -->
-              <view class="time-points-container">
-                <!-- 上午时段时间点 -->
-                <view wx:if="{{item.id === 'morning' || item.id === 'fullday'}}" class="time-period-group">
-                  <view class="time-period-label">上午时段</view>
-                  <view class="time-points-grid">
-                    <view
-                      wx:for="{{morningTimePoints}}"
-                      wx:key="time"
-                      wx:for-item="timePoint"
-                      class="time-point {{timePoint.time === selectedStartTime ? 'selected start' : ''}} {{timePoint.time === selectedEndTime ? 'selected end' : ''}} {{timePoint.isAvailable ? 'available' : 'unavailable'}}"
-                      data-time="{{timePoint.time}}"
-                      catchtap="onTimePointTap"
-                    >
-                      <text class="time-point-text">{{timePoint.time}}</text>
-                    </view>
-                  </view>
-                </view>
+          </view>
+          <view class="period-status">
+            <text class="status-text" wx:if="{{morningStatus === 'available'}}">可预约</text>
+            <text class="status-text" wx:elif="{{morningStatus === 'partial'}}">部分可约</text>
+            <text class="status-text unavailable" wx:else>已约满</text>
+          </view>
+        </view>
 
-                <!-- 中午时段时间点 -->
-                <view wx:if="{{item.id === 'noon' || item.id === 'fullday'}}" class="time-period-group">
-                  <view class="time-period-label">中午时段</view>
-                  <view class="time-points-grid">
-                    <view
-                      wx:for="{{noonTimePoints}}"
-                      wx:key="time"
-                      wx:for-item="timePoint"
-                      class="time-point {{timePoint.time === selectedStartTime ? 'selected start' : ''}} {{timePoint.time === selectedEndTime ? 'selected end' : ''}} {{timePoint.isAvailable ? 'available' : 'unavailable'}}"
-                      data-time="{{timePoint.time}}"
-                      catchtap="onTimePointTap"
-                    >
-                      <text class="time-point-text">{{timePoint.time}}</text>
-                    </view>
-                  </view>
-                </view>
-
-                <!-- 下午时段时间点 -->
-                <view wx:if="{{item.id === 'afternoon' || item.id === 'fullday'}}" class="time-period-group">
-                  <view class="time-period-label">下午时段</view>
-                  <view class="time-points-grid">
-                    <view
-                      wx:for="{{afternoonTimePoints}}"
-                      wx:key="time"
-                      wx:for-item="timePoint"
-                      class="time-point {{timePoint.time === selectedStartTime ? 'selected start' : ''}} {{timePoint.time === selectedEndTime ? 'selected end' : ''}} {{timePoint.isAvailable ? 'available' : 'unavailable'}}"
-                      data-time="{{timePoint.time}}"
-                      catchtap="onTimePointTap"
-                    >
-                      <text class="time-point-text">{{timePoint.time}}</text>
-                    </view>
-                  </view>
-                </view>
-              </view>
-              
-              <!-- 使用说明 -->
-              <view class="time-selection-guide">
-                <text class="guide-text">🕐 先点击开始时间，再点击结束时间</text>
-              </view>
-              
-              <!-- 时间点状态说明 -->
-              <view class="time-points-legend">
-                <view class="legend-item">
-                  <view class="legend-color time-available"></view>
-                  <text class="legend-text">可选择</text>
-                </view>
-                <view class="legend-item">
-                  <view class="legend-color time-unavailable"></view>
-                  <text class="legend-text">不可选择</text>
-                </view>
-                <view class="legend-item">
-                  <view class="legend-color time-selected"></view>
-                  <text class="legend-text">已选择</text>
-                </view>
-              </view>
+        <!-- 中午时段 -->
+        <view 
+          class="period-card {{noonStatus}}" 
+          data-period="noon"
+          bindtap="onPeriodSelect"
+        >
+          <view class="period-info">
+            <text class="period-icon">☀️</text>
+            <view class="period-details">
+              <text class="period-name">中午时段</text>
+              <text class="period-time">12:00 - 14:30</text>
             </view>
+          </view>
+          <view class="period-status">
+            <text class="status-text" wx:if="{{noonStatus === 'available'}}">可预约</text>
+            <text class="status-text" wx:elif="{{noonStatus === 'partial'}}">部分可约</text>
+            <text class="status-text unavailable" wx:else>已约满</text>
+          </view>
+        </view>
+
+        <!-- 下午时段 -->
+        <view 
+          class="period-card {{afternoonStatus}}" 
+          data-period="afternoon"
+          bindtap="onPeriodSelect"
+        >
+          <view class="period-info">
+            <text class="period-icon">🌆</text>
+            <view class="period-details">
+              <text class="period-name">下午时段</text>
+              <text class="period-time">14:30 - 22:00</text>
+            </view>
+          </view>
+          <view class="period-status">
+            <text class="status-text" wx:if="{{afternoonStatus === 'available'}}">可预约</text>
+            <text class="status-text" wx:elif="{{afternoonStatus === 'partial'}}">部分可约</text>
+            <text class="status-text unavailable" wx:else>已约满</text>
           </view>
         </view>
       </view>
+    </view>
 
-      <!-- 移除页面内的预约表单，改用弹窗模式 -->
+    <!-- 预约提示 -->
+    <view class="booking-tips" wx:if="{{selectedDate && selectedPeriod}}">
+      <text class="tips-title">📝 即将预约</text>
+      <text class="tips-content">{{selectedDateDisplay}} {{selectedPeriodName}}</text>
     </view>
   </scroll-view>
 
-  <!-- 提交预约按钮和状态指示 -->
+  <!-- 预约按钮 -->
   <view 
-    class="submit-button-container" 
-    wx:if="{{!loading && roomDetails.id}}"
+    class="booking-button-container" 
+    wx:if="{{!loading && roomDetails.id && selectedDate && selectedPeriod}}"
   >
-    <!-- 已选择时间段时显示预约按钮（包括整时段预约、时间点选择和具体时间段预约） -->
-    <view 
-      wx:if="{{wholePeriodBooking || (selectedStartTime && selectedEndTime) || (selectedStartIndex >= 0 && selectedEndIndex >= 0)}}"
-      class="submit-button" 
-      bindtap="showBookingModal"
-    >
-      <text class="submit-text">提交预约</text>
-    </view>
-    
-    <!-- 选择了时段但未选择具体时间时的提示 -->
-    <view 
-      wx:elif="{{selectedPeriod && !expandedPeriod}}"
-      class="submit-button disabled"
-    >
-      <text class="submit-text">点击时段卡片可展开详细选择</text>
-    </view>
-    
-    <!-- 展开了时段但未选择具体时间的提示 -->
-    <view 
-      wx:elif="{{expandedPeriod}}"
-      class="submit-button disabled"
-    >
-      <text class="submit-text">请选择具体时间段</text>
-    </view>
-    
-    <!-- 默认状态 -->
-    <view 
-      wx:else
-      class="submit-button disabled"
-    >
-      <text class="submit-text">请选择预约时段</text>
+    <view class="booking-button" bindtap="showBookingModal">
+      <text class="booking-text">预约 {{selectedPeriodName}}</text>
     </view>
   </view>
 
@@ -337,7 +248,7 @@
         <!-- 预约时间提醒 -->
         <view class="booking-summary">
           <text class="summary-title">预约时间</text>
-          <text class="summary-time">{{selectedDate}} {{selectedTimeText}}</text>
+          <text class="summary-time">{{selectedDateDisplay}} {{selectedPeriodName}}</text>
         </view>
         
         <!-- 预约表单 -->
@@ -365,7 +276,6 @@
             value="{{bookingForm.contactName}}"
             maxlength="20"
           />
-          <text wx:if="{{bookingForm.contactName}}" class="auto-fill-hint">✅ 已自动填充个人信息</text>
         </view>
         
         <view class="form-group">
@@ -380,7 +290,6 @@
             type="number"
             maxlength="11"
           />
-          <text wx:if="{{bookingForm.contactPhone}}" class="auto-fill-hint">✅ 已自动填充个人信息</text>
         </view>
         
         <view class="form-group">
