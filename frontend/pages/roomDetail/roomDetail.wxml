@@ -190,12 +190,12 @@
                   wx:for="{{timePoints}}"
                   wx:key="time"
                   wx:for-item="point"
-                  wx:if="{{point.periods ? point.periods.includes(item.id) : point.period === item.id}}"
                   class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isSelected ? 'selected' : ''}}"
                   data-time="{{point.time}}"
                   catchtap="onTimePointTap"
                 >
                   <text class="time-point-text">{{point.time}}</text>
+                  <text class="debug-text" style="font-size: 8px; color: #666;">[{{point.periods ? point.periods.join(',') : point.period}}]</text>
                 </view>
                 
                 <!-- 如果没有时间点显示调试信息 -->
