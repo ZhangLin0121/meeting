@@ -1,11 +1,5 @@
 // pages/roomDetail/roomDetail.js
 const request = require('../../utils/request.js');
-const babelHelpers = require('../../utils/babel-helpers.js');
-
-// 添加全局辅助函数，解决 slicedToArray 错误
-if (typeof global !== 'undefined') {
-    global._slicedToArray = babelHelpers.slicedToArray;
-}
 
 Page({
 

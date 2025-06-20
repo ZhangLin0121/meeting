@@ -480,7 +480,8 @@ class RoomController {
         ];
 
         periods.forEach(period => {
-            for (let minutes = period.start; minutes < period.end; minutes += 30) {
+            // 修复：确保包含最后一个时间槽，例如上午最后一个槽是 11:30-12:00
+            for (let minutes = period.start; minutes + 30 <= period.end; minutes += 30) {
                 const startTime = TimeHelper.minutesToTime(minutes);
                 const endTime = TimeHelper.minutesToTime(minutes + 30);
 
