@@ -439,6 +439,8 @@ Page({
         // 根据实际时间槽数据计算时间范围
         const getPeriodTimeRange = (periodId) => {
             const periodSlots = timeSlots.filter(slot => slot.period === periodId);
+            console.log(`🔍 ${periodId} 时段的时间槽:`, periodSlots);
+
             if (periodSlots.length === 0) {
                 // 如果没有时间槽数据，使用默认值
                 const defaults = {
@@ -446,8 +448,12 @@ Page({
                     'noon': '12:00 - 14:30',
                     'afternoon': '14:30 - 22:00'
                 };
+                console.log(`⚠️ ${periodId} 时段没有时间槽数据，使用默认值:`, defaults[periodId]);
                 return defaults[periodId] || '08:30 - 22:00';
             }
+
+            // 按开始时间排序确保顺序正确
+            periodSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
             // 获取第一个和最后一个时间槽来确定时间范围
             const firstSlot = periodSlots[0];
@@ -457,7 +463,10 @@ Page({
             const startTime = firstSlot.startTime || firstSlot.time.split(' - ')[0];
             const endTime = lastSlot.endTime || lastSlot.time.split(' - ')[1];
 
-            return `${startTime} - ${endTime}`;
+            const timeRange = `${startTime} - ${endTime}`;
+            console.log(`📅 ${periodId} 时段计算的时间范围:`, timeRange);
+
+            return timeRange;
         };
 
         // 计算全天时间范围
