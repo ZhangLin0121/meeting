@@ -791,9 +791,14 @@ Page({
             // 整时段预约
             selectedTimeText = `${wholePeriodBooking.startTime} - ${wholePeriodBooking.endTime} (整${wholePeriodBooking.periodName})`;
         } else if (selectedStartIndex >= 0 && selectedEndIndex >= 0) {
-            // 具体时间段预约
-            const startTime = timeSlots[selectedStartIndex].time;
-            const endTime = timeSlots[selectedEndIndex].time;
+            // 具体时间段预约 - 显示开始时间到结束时间
+            const startSlot = timeSlots[selectedStartIndex];
+            const endSlot = timeSlots[selectedEndIndex];
+
+            // 提取开始时间和结束时间
+            const startTime = startSlot.startTime || startSlot.time.split(' - ')[0];
+            const endTime = endSlot.endTime || endSlot.time.split(' - ')[1];
+
             selectedTimeText = `${startTime} - ${endTime}`;
         }
 
