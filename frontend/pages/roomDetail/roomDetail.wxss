@@ -677,6 +677,156 @@ page {
 }
 
 
+/* 时间点选择相关样式 */
+
+.selected-time-display {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: rgba(0, 122, 255, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 122, 255, 0.3);
+}
+
+.selected-time-text {
+    font-size: 13px;
+    color: #007aff;
+    font-weight: 500;
+}
+
+.time-points-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.time-point {
+    position: relative;
+    padding: 12px 8px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border: 1px solid #e5e5e7;
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.time-point-text {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #1c1c1e;
+}
+
+.time-point-label {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.time-point-label.start {
+    background-color: #34c759;
+    color: #ffffff;
+}
+
+.time-point-label.end {
+    background-color: #ff3b30;
+    color: #ffffff;
+}
+
+
+/* 时间点状态样式 */
+
+.time-point.available {
+    background-color: #ffffff;
+    border-color: #d1d1d6;
+}
+
+.time-point.available .time-point-text {
+    color: #1c1c1e;
+}
+
+.time-point.available:active {
+    background-color: rgba(0, 122, 255, 0.05);
+    transform: scale(0.97);
+    border-color: #007aff;
+}
+
+.time-point.unavailable {
+    background-color: #f2f2f7;
+    border-color: #d1d1d6;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.time-point.unavailable .time-point-text {
+    color: #8e8e93;
+}
+
+.time-point.start-selected {
+    background-color: #34c759;
+    border-color: #34c759;
+}
+
+.time-point.start-selected .time-point-text {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.time-point.end-selected {
+    background-color: #ff3b30;
+    border-color: #ff3b30;
+}
+
+.time-point.end-selected .time-point-text {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.time-selection-guide {
+    margin-bottom: 12px;
+    padding: 8px;
+    background-color: rgba(0, 122, 255, 0.05);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.guide-text {
+    font-size: 12px;
+    color: #007aff;
+    font-weight: 500;
+}
+
+.time-points-legend {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.time-points-legend .legend-color.time-available {
+    background-color: #d1d1d6;
+}
+
+.time-points-legend .legend-color.time-unavailable {
+    background-color: #8e8e93;
+    opacity: 0.5;
+}
+
+.time-points-legend .legend-color.time-start {
+    background-color: #34c759;
+}
+
+.time-points-legend .legend-color.time-end {
+    background-color: #ff3b30;
+}
+
+
 /* 时间段图例 */
 
 .time-slots-legend {

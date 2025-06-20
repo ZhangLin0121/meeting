@@ -163,46 +163,58 @@
               </view>
             </view>
             
-            <!-- 详细时间段选择区域（展开时显示，全天预约不显示） -->
+            <!-- 时间点选择区域（展开时显示，全天预约不显示） -->
             <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id && !item.isFullDay}}" catchtap="preventClose">
               <view class="detail-slots-header">
-                <text class="detail-title">选择具体时间段（可选择多个连续时间段）</text>
+                <text class="detail-title">选择开始和结束时间</text>
+                <view wx:if="{{selectedStartTime && selectedEndTime}}" class="selected-time-display">
+                  <text class="selected-time-text">已选择: {{selectedStartTime}} - {{selectedEndTime}}</text>
+                </view>
+                <view wx:elif="{{selectedStartTime}}" class="selected-time-display">
+                  <text class="selected-time-text">开始时间: {{selectedStartTime}} | 请选择结束时间</text>
+                </view>
               </view>
               
-              <!-- 详细时间段网格 -->
-              <view class="time-slots-grid">
-                <!-- 显示当前时段的所有时间槽 -->
+              <!-- 时间点选择网格 -->
+              <view class="time-points-grid">
+                <!-- 显示当前时段的所有时间点 -->
                 <view 
-                  wx:for="{{timeSlots}}" 
-                  wx:key="index"
-                  wx:for-item="slot"
-                  wx:for-index="slotIndex"
-                  wx:if="{{slot.period === item.id}}"
-                  class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
-                  data-index="{{slot.index}}"
-                  catchtap="onTimeSlotTap"
+                  wx:for="{{timePoints}}" 
+                  wx:key="time"
+                  wx:for-item="point"
+                  wx:if="{{point.period === item.id}}"
+                  class="time-point {{point.isAvailable ? 'available' : 'unavailable'}} {{point.isStart ? 'start-selected' : ''}} {{point.isEnd ? 'end-selected' : ''}}"
+                  data-time="{{point.time}}"
+                  catchtap="onTimePointTap"
                 >
-                  <text class="time-slot-text">{{slot.time}}</text>
+                  <text class="time-point-text">{{point.time}}</text>
+                  <view wx:if="{{point.isStart}}" class="time-point-label start">开始</view>
+                  <view wx:if="{{point.isEnd}}" class="time-point-label end">结束</view>
                 </view>
               </view>
               
-              <!-- 时间段说明 -->
-              <view class="time-slots-legend">
+              <!-- 使用说明 -->
+              <view class="time-selection-guide">
+                <text class="guide-text">🕐 先点击开始时间，再点击结束时间</text>
+              </view>
+              
+              <!-- 时间点状态说明 -->
+              <view class="time-points-legend">
                 <view class="legend-item">
-                  <view class="legend-color available"></view>
-                  <text class="legend-text">可预约</text>
+                  <view class="legend-color time-available"></view>
+                  <text class="legend-text">可选择</text>
                 </view>
                 <view class="legend-item">
-                  <view class="legend-color booked"></view>
-                  <text class="legend-text">已预约</text>
+                  <view class="legend-color time-unavailable"></view>
+                  <text class="legend-text">不可选择</text>
                 </view>
                 <view class="legend-item">
-                  <view class="legend-color past"></view>
-                  <text class="legend-text">已过期</text>
+                  <view class="legend-color time-start"></view>
+                  <text class="legend-text">开始时间</text>
                 </view>
                 <view class="legend-item">
-                  <view class="legend-color closed"></view>
-                  <text class="legend-text">临时关闭</text>
+                  <view class="legend-color time-end"></view>
+                  <text class="legend-text">结束时间</text>
                 </view>
               </view>
             </view>
@@ -219,9 +231,9 @@
     class="submit-button-container" 
     wx:if="{{!loading && roomDetails.id}}"
   >
-    <!-- 已选择时间段时显示预约按钮（包括整时段预约和具体时间段预约） -->
+    <!-- 已选择时间段时显示预约按钮（包括整时段预约、时间点选择和具体时间段预约） -->
     <view 
-      wx:if="{{wholePeriodBooking || (selectedStartIndex >= 0 && selectedEndIndex >= 0)}}"
+      wx:if="{{wholePeriodBooking || (selectedStartTime && selectedEndTime) || (selectedStartIndex >= 0 && selectedEndIndex >= 0)}}"
       class="submit-button" 
       bindtap="showBookingModal"
     >
@@ -356,4 +368,5 @@
       </view>
     </view>
   </view>
+</view> 
 </view> 

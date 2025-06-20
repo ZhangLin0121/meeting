@@ -308,7 +308,8 @@ Page({
             if (result.success && result.data && result.data.timeSlots) {
                 console.log('🔍 后端返回的时间槽数据:', result.data.timeSlots);
 
-                // 直接使用后端返回的时间槽数据，转换为前端需要的格式
+                // 将后端时间槽转换为时间点选择模式
+                const timePoints = this.generateTimePointsFromSlots(result.data.timeSlots);
                 const timeSlots = result.data.timeSlots.map((backendSlot, index) => ({
                     time: `${backendSlot.startTime} - ${backendSlot.endTime}`,
                     startTime: backendSlot.startTime,
@@ -333,9 +334,12 @@ Page({
                 // 重置选择状态
                 this.setData({
                     timeSlots,
+                    timePoints,
                     timePeriods,
                     selectedStartIndex: -1,
                     selectedEndIndex: -1,
+                    selectedStartTime: null,
+                    selectedEndTime: null,
                     wholePeriodBooking: null,
                     expandedPeriod: null
                 });
@@ -352,6 +356,57 @@ Page({
             console.error('❌ 获取时间段失败:', error);
             wx.showToast({ title: '获取时间段失败', icon: 'none' });
         }
+    },
+
+    /**
+     * 从时间槽生成时间点选择列表
+     * 将时间槽转换为用户可选择的时间点
+     */
+    generateTimePointsFromSlots(timeSlots) {
+        const timePointsMap = new Map();
+
+        // 从所有时间槽中提取时间点
+        timeSlots.forEach(slot => {
+            const startTime = slot.startTime;
+            const endTime = slot.endTime;
+
+            // 添加开始时间点
+            if (!timePointsMap.has(startTime)) {
+                timePointsMap.set(startTime, {
+                    time: startTime,
+                    period: slot.period,
+                    isAvailable: slot.status === 'available',
+                    isStart: false,
+                    isEnd: false
+                });
+            } else {
+                // 如果该时间点已存在，更新可用性（只要有一个槽可用就算可用）
+                const existing = timePointsMap.get(startTime);
+                existing.isAvailable = existing.isAvailable || slot.status === 'available';
+            }
+
+            // 添加结束时间点
+            if (!timePointsMap.has(endTime)) {
+                timePointsMap.set(endTime, {
+                    time: endTime,
+                    period: slot.period,
+                    isAvailable: slot.status === 'available',
+                    isStart: false,
+                    isEnd: false
+                });
+            } else {
+                const existing = timePointsMap.get(endTime);
+                existing.isAvailable = existing.isAvailable || slot.status === 'available';
+            }
+        });
+
+        // 转换为数组并排序
+        const timePoints = Array.from(timePointsMap.values()).sort((a, b) => {
+            return a.time.localeCompare(b.time);
+        });
+
+        console.log('🕐 生成的时间点列表:', timePoints);
+        return timePoints;
     },
 
 
@@ -474,6 +529,36 @@ Page({
 
         const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
         this.setData({ expandedPeriod });
+    },
+
+    /**
+     * 时间点点击事件 - 用户选择开始或结束时间点
+     */
+    onTimePointTap(e) {
+        const timePoint = e.currentTarget.dataset.time;
+        const timePointData = this.data.timePoints.find(tp => tp.time === timePoint);
+
+        if (!timePointData || !timePointData.isAvailable) {
+            wx.showToast({ title: '该时间点不可选择', icon: 'none' });
+            return;
+        }
+
+        const { selectedStartTime, selectedEndTime } = this.data;
+
+        if (!selectedStartTime) {
+            // 选择开始时间
+            this.setStartTimePoint(timePoint);
+        } else if (!selectedEndTime) {
+            // 选择结束时间
+            if (timePoint <= selectedStartTime) {
+                wx.showToast({ title: '结束时间必须晚于开始时间', icon: 'none' });
+                return;
+            }
+            this.setEndTimePoint(timePoint);
+        } else {
+            // 重新选择开始时间
+            this.setStartTimePoint(timePoint);
+        }
     },
 
     /**
@@ -649,6 +734,61 @@ Page({
     },
 
     /**
+     * 设置开始时间点
+     */
+    setStartTimePoint(startTime) {
+        const timePoints = [...this.data.timePoints];
+        timePoints.forEach(tp => {
+            tp.isStart = false;
+            tp.isEnd = false;
+        });
+
+        const startPoint = timePoints.find(tp => tp.time === startTime);
+        if (startPoint) {
+            startPoint.isStart = true;
+        }
+
+        this.setData({
+            timePoints,
+            selectedStartTime: startTime,
+            selectedEndTime: null,
+            wholePeriodBooking: null
+        });
+    },
+
+    /**
+     * 设置结束时间点
+     */
+    setEndTimePoint(endTime) {
+        const timePoints = [...this.data.timePoints];
+        const endPoint = timePoints.find(tp => tp.time === endTime);
+        if (endPoint) {
+            endPoint.isEnd = true;
+        }
+
+        // 验证选择的时间段是否可用
+        if (this.validateTimeRange(this.data.selectedStartTime, endTime)) {
+            this.setData({
+                timePoints,
+                selectedEndTime: endTime
+            });
+        } else {
+            wx.showToast({ title: '选择的时间段包含不可用时间', icon: 'none' });
+        }
+    },
+
+    /**
+     * 验证时间范围内的所有时间槽是否都可用
+     */
+    validateTimeRange(startTime, endTime) {
+        const relevantSlots = this.data.timeSlots.filter(slot => {
+            return slot.startTime >= startTime && slot.endTime <= endTime;
+        });
+
+        return relevantSlots.every(slot => slot.status === 'available');
+    },
+
+    /**
      * 设置开始时间
      */
     setStartTime(startIndex) {
@@ -784,14 +924,17 @@ Page({
      * 显示预约弹窗
      */
     showBookingModal() {
-        const { wholePeriodBooking, selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
+        const { wholePeriodBooking, selectedStartTime, selectedEndTime, selectedStartIndex, selectedEndIndex, timeSlots } = this.data;
         let selectedTimeText = '';
 
         if (wholePeriodBooking) {
             // 整时段预约
             selectedTimeText = `${wholePeriodBooking.startTime} - ${wholePeriodBooking.endTime} (整${wholePeriodBooking.periodName})`;
+        } else if (selectedStartTime && selectedEndTime) {
+            // 时间点选择模式
+            selectedTimeText = `${selectedStartTime} - ${selectedEndTime}`;
         } else if (selectedStartIndex >= 0 && selectedEndIndex >= 0) {
-            // 具体时间段预约 - 显示开始时间到结束时间
+            // 具体时间段预约 - 显示开始时间到结束时间（旧模式兼容）
             const startSlot = timeSlots[selectedStartIndex];
             const endSlot = timeSlots[selectedEndIndex];
 
