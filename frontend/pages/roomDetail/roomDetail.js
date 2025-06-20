@@ -782,7 +782,6 @@ Page({
 
         const startPoint = timePoints.find(tp => tp.time === startTime);
         if (startPoint) {
-            startPoint.isStart = true;
             startPoint.isSelected = true;
         }
 
@@ -818,12 +817,6 @@ Page({
         timePoints.forEach(tp => {
             if (tp.time >= startTime && tp.time <= endTime) {
                 tp.isSelected = true;
-                if (tp.time === startTime) {
-                    tp.isStart = true;
-                }
-                if (tp.time === endTime) {
-                    tp.isEnd = true;
-                }
             }
         });
 
