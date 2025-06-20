@@ -693,6 +693,27 @@ page {
     font-weight: 500;
 }
 
+
+/* 时间点分组容器 */
+
+.time-points-container {
+    margin-top: 16px;
+}
+
+.time-period-group {
+    margin-bottom: 20px;
+}
+
+.time-period-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    background-color: #f2f2f7;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
 .time-points-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -768,15 +789,39 @@ page {
     color: #8e8e93;
 }
 
+
+/* 增强选中状态的视觉反馈 */
+
 .time-point.selected {
     background-color: #007aff;
     border-color: #007aff;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+    z-index: 1;
 }
 
 .time-point.selected .time-point-text {
     color: #ffffff;
     font-weight: 600;
 }
+
+
+/* 开始和结束时间点的不同样式 */
+
+.time-point.selected.start {
+    background-color: #34c759;
+    /* 绿色表示开始 */
+    border-color: #34c759;
+}
+
+.time-point.selected.end {
+    background-color: #ff9500;
+    /* 橙色表示结束 */
+    border-color: #ff9500;
+}
+
+
+/* 时间点选择说明和图例 */
 
 .time-selection-guide {
     margin-bottom: 12px;
