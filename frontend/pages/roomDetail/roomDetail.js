@@ -580,19 +580,113 @@ Page({
         const { selectedStartTime, selectedEndTime } = this.data;
 
         if (!selectedStartTime) {
-            // 选择开始时间
+            // 第一步：选择开始时间
             this.setStartTimePoint(timePoint);
+            wx.showToast({
+                title: '已选择开始时间，请选择结束时间',
+                icon: 'none',
+                duration: 1500
+            });
         } else if (!selectedEndTime) {
-            // 选择结束时间
-            if (timePoint <= selectedStartTime) {
-                wx.showToast({ title: '结束时间必须晚于开始时间', icon: 'none' });
+            // 第二步：选择结束时间，加入验证逻辑
+            const validation = this.validateTimeSelection(selectedStartTime, timePoint);
+            if (!validation.valid) {
+                wx.showToast({ title: validation.message, icon: 'none' });
                 return;
             }
-            this.setEndTimePoint(timePoint);
+
+            // 显示警告信息（如果有）
+            if (validation.warning) {
+                wx.showModal({
+                    title: '预约提醒',
+                    content: validation.warning,
+                    showCancel: true,
+                    confirmText: '继续预约',
+                    cancelText: '重新选择',
+                    success: (res) => {
+                        if (res.confirm) {
+                            this.setEndTimePoint(timePoint);
+                        }
+                    }
+                });
+            } else {
+                this.setEndTimePoint(timePoint);
+            }
         } else {
-            // 重新选择开始时间
+            // 第三步：重新选择（清空当前选择，重新开始）
+            this.clearTimeSelection();
             this.setStartTimePoint(timePoint);
+            wx.showToast({
+                title: '重新选择，请选择结束时间',
+                icon: 'none',
+                duration: 1500
+            });
         }
+    },
+
+    /**
+     * 验证时间选择的有效性
+     */
+    validateTimeSelection(startTime, endTime) {
+        const startMinutes = this.timeToMinutes(startTime);
+        const endMinutes = this.timeToMinutes(endTime);
+
+        // 检查结束时间是否晚于开始时间
+        if (endMinutes <= startMinutes) {
+            return { valid: false, message: '结束时间必须晚于开始时间' };
+        }
+
+        // 检查最小预约时长（至少30分钟）
+        const duration = endMinutes - startMinutes;
+        if (duration < 30) {
+            return { valid: false, message: '预约时长不能少于30分钟' };
+        }
+
+        // 检查是否跨越午休时间（12:00-14:30之间）
+        const lunchStart = this.timeToMinutes('12:00');
+        const lunchEnd = this.timeToMinutes('14:30');
+
+        // 检查是否跨越午休时间（不在同一时段内）
+        if (startMinutes < lunchStart && endMinutes > lunchEnd) {
+            return { valid: false, message: '不能跨越午休时间段预约，请选择单个时段内的时间' };
+        }
+
+        // 建议预约时长至少1小时
+        if (duration < 60) {
+            return {
+                valid: true,
+                warning: `当前预约时长为${duration}分钟，建议预约时长至少1小时以获得更好的会议体验。是否继续？`
+            };
+        }
+
+        return { valid: true };
+    },
+
+    /**
+     * 将时间字符串转换为分钟数
+     */
+    timeToMinutes(time) {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours * 60 + minutes;
+    },
+
+    /**
+     * 清空时间选择
+     */
+    clearTimeSelection() {
+        const timePoints = this.data.timePoints.map(tp => ({
+            ...tp,
+            isSelected: false,
+            isStart: false,
+            isEnd: false
+        }));
+
+        this.setData({
+            timePoints,
+            selectedStartTime: '',
+            selectedEndTime: '',
+            selectedTimeText: ''
+        });
     },
 
     /**

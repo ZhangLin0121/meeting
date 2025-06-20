@@ -462,8 +462,9 @@ class RoomController {
 
         // 定义时间段配置 - 修正为用户要求的时间点
         const timeSlotConfigs = [
-            // 上午时段：08:30 09:30 10:00 10:30 11:00 11:30 12:00
-            { startTime: '08:30', endTime: '09:30', period: 'morning' },
+            // 上午时段：08:30 09:00 09:30 10:00 10:30 11:00 11:30 12:00
+            { startTime: '08:30', endTime: '09:00', period: 'morning' },
+            { startTime: '09:00', endTime: '09:30', period: 'morning' },
             { startTime: '09:30', endTime: '10:00', period: 'morning' },
             { startTime: '10:00', endTime: '10:30', period: 'morning' },
             { startTime: '10:30', endTime: '11:00', period: 'morning' },
