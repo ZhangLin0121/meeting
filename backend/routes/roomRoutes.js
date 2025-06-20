@@ -27,6 +27,11 @@ router.get('/:id/availability',
     RoomController.getRoomAvailability
 );
 
+// 获取会议室月份可用性概览
+router.get('/:id/availability/month',
+    RoomController.getMonthAvailability
+);
+
 // 以下路由需要管理员权限
 router.use(requireAdmin);
 

@@ -542,6 +542,142 @@ class RoomController {
     }
 
     /**
+     * 获取会议室月份可用性概览
+     * GET /api/rooms/:id/availability/month
+     */
+    static async getMonthAvailability(req, res) {
+        try {
+            const { id } = req.params;
+            const { year, month } = req.query;
+
+            // 验证参数
+            if (!year || !month) {
+                return ResponseHelper.error(res, '请提供年份和月份参数', 400);
+            }
+
+            const queryYear = parseInt(year);
+            const queryMonth = parseInt(month);
+
+            if (queryYear < 2020 || queryYear > 2030 || queryMonth < 1 || queryMonth > 12) {
+                return ResponseHelper.error(res, '年份或月份参数无效', 400);
+            }
+
+            console.log('📅 获取月份可用性:', { roomId: id, year: queryYear, month: queryMonth });
+
+            // 检查会议室是否存在
+            const room = await ConferenceRoom.findById(id);
+            if (!room) {
+                return ResponseHelper.notFound(res, '会议室不存在');
+            }
+
+            // 获取该月的第一天和最后一天
+            const firstDay = new Date(queryYear, queryMonth - 1, 1);
+            const lastDay = new Date(queryYear, queryMonth, 0);
+
+            console.log('📅 查询日期范围:', {
+                firstDay: firstDay.toISOString(),
+                lastDay: lastDay.toISOString()
+            });
+
+            // 获取整个月的预约数据
+            const monthBookings = await Booking.find({
+                roomId: id,
+                bookingDate: {
+                    $gte: TimeHelper.getStartOfDay(firstDay),
+                    $lte: TimeHelper.getEndOfDay(lastDay)
+                },
+                status: 'booked'
+            }).sort({ bookingDate: 1, startTime: 1 });
+
+            // 获取整个月的临时关闭数据
+            const monthClosures = await TemporaryClosure.find({
+                roomId: id,
+                closureDate: {
+                    $gte: TimeHelper.getStartOfDay(firstDay),
+                    $lte: TimeHelper.getEndOfDay(lastDay)
+                }
+            });
+
+            // 为每一天计算可用性状态
+            const dailyAvailability = {};
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const currentDate = new Date(queryYear, queryMonth - 1, day);
+                const dateKey = `${queryYear}-${String(queryMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                // 检查是否为过去的日期
+                if (currentDate < today) {
+                    dailyAvailability[dateKey] = {
+                        morning: 'past',
+                        noon: 'past',
+                        afternoon: 'past'
+                    };
+                    continue;
+                }
+
+                // 获取当天的预约和关闭记录
+                const dayBookings = monthBookings.filter(booking => {
+                    const bookingDate = new Date(booking.bookingDate);
+                    return bookingDate.getDate() === day &&
+                        bookingDate.getMonth() === queryMonth - 1 &&
+                        bookingDate.getFullYear() === queryYear;
+                });
+
+                const dayClosures = monthClosures.filter(closure => {
+                    const closureDate = new Date(closure.closureDate);
+                    return closureDate.getDate() === day &&
+                        closureDate.getMonth() === queryMonth - 1 &&
+                        closureDate.getFullYear() === queryYear;
+                });
+
+                // 生成时间段并分析可用性
+                const timeSlots = this.generateTimeSlots(dayBookings, dayClosures, currentDate);
+
+                // 按时段分组分析
+                const periodStatus = {
+                    morning: this.analyzePeriodStatus(timeSlots, 'morning'),
+                    noon: this.analyzePeriodStatus(timeSlots, 'noon'),
+                    afternoon: this.analyzePeriodStatus(timeSlots, 'afternoon')
+                };
+
+                dailyAvailability[dateKey] = periodStatus;
+            }
+
+            console.log('📊 月份可用性计算完成:', Object.keys(dailyAvailability).length, '天');
+
+            return ResponseHelper.success(res, dailyAvailability, '获取月份可用性成功');
+
+        } catch (error) {
+            console.error('获取月份可用性失败:', error);
+            return ResponseHelper.serverError(res, '获取月份可用性失败', error.message);
+        }
+    }
+
+    /**
+     * 分析时段状态
+     */
+    static analyzePeriodStatus(timeSlots, period) {
+        const periodSlots = timeSlots.filter(slot => slot.period === period);
+
+        if (periodSlots.length === 0) {
+            return 'available';
+        }
+
+        const availableCount = periodSlots.filter(slot => slot.status === 'available').length;
+        const totalCount = periodSlots.length;
+
+        if (availableCount === 0) {
+            return 'unavailable';
+        } else if (availableCount === totalCount) {
+            return 'available';
+        } else {
+            return 'partial';
+        }
+    }
+
+    /**
      * 获取会议室在指定日期的可用性状态
      * @param {string} roomId 会议室ID
      * @param {Date} date 日期
