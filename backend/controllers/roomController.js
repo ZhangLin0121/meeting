@@ -460,70 +460,81 @@ class RoomController {
         const config = require('../config');
         const slots = [];
 
-        // 上午时间段 8:30-12:00
-        const morningStart = TimeHelper.timeToMinutes(config.office.startTime);
-        const morningEnd = TimeHelper.timeToMinutes(config.office.endTimeMorning);
+        // 定义时间段配置 - 修正为用户要求的时间点
+        const timeSlotConfigs = [
+            // 上午时段：08:30 09:30 10:00 10:30 11:00 11:30 12:00
+            { startTime: '08:30', endTime: '09:30', period: 'morning' },
+            { startTime: '09:30', endTime: '10:00', period: 'morning' },
+            { startTime: '10:00', endTime: '10:30', period: 'morning' },
+            { startTime: '10:30', endTime: '11:00', period: 'morning' },
+            { startTime: '11:00', endTime: '11:30', period: 'morning' },
+            { startTime: '11:30', endTime: '12:00', period: 'morning' },
 
-        // 中午时间段 12:00-14:30
-        const noonStart = TimeHelper.timeToMinutes(config.office.startTimeNoon);
-        const noonEnd = TimeHelper.timeToMinutes(config.office.endTimeNoon);
+            // 中午时段：12:00 12:30 13:00 13:30 14:00 14:30
+            { startTime: '12:00', endTime: '12:30', period: 'noon' },
+            { startTime: '12:30', endTime: '13:00', period: 'noon' },
+            { startTime: '13:00', endTime: '13:30', period: 'noon' },
+            { startTime: '13:30', endTime: '14:00', period: 'noon' },
+            { startTime: '14:00', endTime: '14:30', period: 'noon' },
 
-        // 下午时间段 14:30-22:00
-        const afternoonStart = TimeHelper.timeToMinutes(config.office.startTimeAfternoon);
-        const afternoonEnd = TimeHelper.timeToMinutes(config.office.endTime);
-
-        // 生成30分钟间隔的时间段 - 修复：添加中午时段
-        const periods = [
-            { start: morningStart, end: morningEnd, name: 'morning' },
-            { start: noonStart, end: noonEnd, name: 'noon' },
-            { start: afternoonStart, end: afternoonEnd, name: 'afternoon' }
+            // 下午时段：14:30 一直到 22:00 (30分钟间隔)
+            { startTime: '14:30', endTime: '15:00', period: 'afternoon' },
+            { startTime: '15:00', endTime: '15:30', period: 'afternoon' },
+            { startTime: '15:30', endTime: '16:00', period: 'afternoon' },
+            { startTime: '16:00', endTime: '16:30', period: 'afternoon' },
+            { startTime: '16:30', endTime: '17:00', period: 'afternoon' },
+            { startTime: '17:00', endTime: '17:30', period: 'afternoon' },
+            { startTime: '17:30', endTime: '18:00', period: 'afternoon' },
+            { startTime: '18:00', endTime: '18:30', period: 'afternoon' },
+            { startTime: '18:30', endTime: '19:00', period: 'afternoon' },
+            { startTime: '19:00', endTime: '19:30', period: 'afternoon' },
+            { startTime: '19:30', endTime: '20:00', period: 'afternoon' },
+            { startTime: '20:00', endTime: '20:30', period: 'afternoon' },
+            { startTime: '20:30', endTime: '21:00', period: 'afternoon' },
+            { startTime: '21:00', endTime: '21:30', period: 'afternoon' },
+            { startTime: '21:30', endTime: '22:00', period: 'afternoon' }
         ];
 
-        periods.forEach(period => {
-            // 修复：确保包含最后一个时间槽，例如上午最后一个槽是 11:30-12:00
-            for (let minutes = period.start; minutes + 30 <= period.end; minutes += 30) {
-                const startTime = TimeHelper.minutesToTime(minutes);
-                const endTime = TimeHelper.minutesToTime(minutes + 30);
+        // 为每个时间槽检查预约状态
+        timeSlotConfigs.forEach(slotConfig => {
+            const startMinutes = TimeHelper.timeToMinutes(slotConfig.startTime);
+            const endMinutes = TimeHelper.timeToMinutes(slotConfig.endTime);
 
-                // 检查是否被预约
-                const isBooked = bookings.some(booking => {
-                    const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
-                    const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
-                    // 一个时间槽被预约，如果它的开始时间在预约时间范围内
-                    const slotStart = minutes;
-                    const slotEnd = minutes + 30;
-                    // 检查时间槽是否与预约时间有重叠
-                    const hasOverlap = slotStart < bookingEnd && slotEnd > bookingStart;
-                    return hasOverlap;
-                });
+            // 检查是否被预约
+            const isBooked = bookings.some(booking => {
+                const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
+                const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
+                // 检查时间槽是否与预约时间有重叠
+                const hasOverlap = startMinutes < bookingEnd && endMinutes > bookingStart;
+                return hasOverlap;
+            });
 
-                // 检查是否临时关闭
-                const isClosed = closures.some(closure => {
-                    if (closure.isAllDay) return true;
-                    const closureStart = TimeHelper.timeToMinutes(closure.startTime);
-                    const closureEnd = TimeHelper.timeToMinutes(closure.endTime);
-                    return minutes >= closureStart && minutes < closureEnd;
-                });
+            // 检查是否临时关闭
+            const isClosed = closures.some(closure => {
+                if (closure.isAllDay) return true;
+                const closureStart = TimeHelper.timeToMinutes(closure.startTime);
+                const closureEnd = TimeHelper.timeToMinutes(closure.endTime);
+                return startMinutes >= closureStart && startMinutes < closureEnd;
+            });
 
-                // 检查是否为过去的时间（只有查询今天时才需要检查）
-                const isPastTime = queryDate && TimeHelper.isPastTime(queryDate, startTime);
+            // 检查是否为过去的时间（只有查询今天时才需要检查）
+            const isPastTime = queryDate && TimeHelper.isPastTime(queryDate, slotConfig.startTime);
 
-                let status = 'available';
-                if (isClosed) {
-                    status = 'closed';
-                } else if (isBooked) {
-                    status = 'booked';
-                } else if (isPastTime) {
-                    status = 'past'; // 过去的时间段标记为不可用
-                }
-
-                slots.push({
-                    startTime,
-                    endTime,
-                    status,
-                    period: period.name
-                });
+            let status = 'available';
+            if (isClosed) {
+                status = 'closed';
+            } else if (isBooked) {
+                status = 'booked';
+            } else if (isPastTime) {
+                status = 'past'; // 过去的时间段标记为不可用
             }
+
+            slots.push({
+                startTime: slotConfig.startTime,
+                endTime: slotConfig.endTime,
+                status,
+                period: slotConfig.period
+            });
         });
 
         return slots;
