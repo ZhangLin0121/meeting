@@ -151,9 +151,17 @@
                   <text class="quick-book-text">部分已占用</text>
                 </view>
                 
-                <!-- 展开/收起图标（全天预约不显示展开图标） -->
+                <!-- 已约满时显示禁用按钮 -->
                 <view 
-                  wx:if="{{!item.isFullDay}}"
+                  wx:elif="{{item.status === 'unavailable'}}"
+                  class="quick-book-btn disabled" 
+                >
+                  <text class="quick-book-text">已约满</text>
+                </view>
+                
+                <!-- 展开/收起图标（全天预约不显示展开图标，已约满的时段也不显示） -->
+                <view 
+                  wx:if="{{!item.isFullDay && item.status !== 'unavailable' && item.availableCount > 0}}"
                   class="expand-icon {{expandedPeriod === item.id ? 'rotated' : ''}}" 
                   catchtap="onPeriodTap" 
                   data-period="{{item.id}}"

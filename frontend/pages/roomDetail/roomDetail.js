@@ -637,6 +637,30 @@ Page({
             return;
         }
 
+        // 查找对应的时段数据
+        const timePeriods = this.data.timePeriods || [];
+        const periodData = timePeriods.find(p => p.id === periodId);
+
+        // 如果时段已约满或没有可用时间，不允许展开
+        if (periodData && periodData.status === 'unavailable') {
+            wx.showToast({
+                title: '该时段已约满，无法选择具体时间',
+                icon: 'none',
+                duration: 2000
+            });
+            return;
+        }
+
+        // 如果时段状态为partial但没有任何可用时间点，也不允许展开
+        if (periodData && periodData.availableCount === 0) {
+            wx.showToast({
+                title: '该时段所有时间点均不可用',
+                icon: 'none',
+                duration: 2000
+            });
+            return;
+        }
+
         const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
         this.setData({ expandedPeriod });
     },
