@@ -177,8 +177,16 @@
               
               <!-- 时间点选择网格 -->
               <view class="time-points-grid">
+                <!-- 调试信息 -->
+                <view class="debug-info" style="background: #f0f0f0; padding: 10px; margin-bottom: 10px; font-size: 12px;">
+                  <text>调试信息:</text>
+                  <text>\n当前时段: {{item.id}}</text>
+                  <text>\n时间点总数: {{timePoints.length}}</text>
+                  <text>\n筛选条件: periods包含"{{item.id}}"</text>
+                </view>
+                
                 <!-- 显示当前时段的所有时间点 -->
-                                <view
+                <view
                   wx:for="{{timePoints}}"
                   wx:key="time"
                   wx:for-item="point"
@@ -188,6 +196,11 @@
                   catchtap="onTimePointTap"
                 >
                   <text class="time-point-text">{{point.time}}</text>
+                </view>
+                
+                <!-- 如果没有时间点显示调试信息 -->
+                <view wx:if="{{timePoints.length === 0}}" class="debug-no-data" style="background: #ffeeee; padding: 10px; color: #cc0000;">
+                  <text>❌ 没有时间点数据</text>
                 </view>
               </view>
               
