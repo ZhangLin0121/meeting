@@ -434,12 +434,7 @@ Page({
             }
         });
 
-        console.log('🕐 生成的时间点列表:', timePoints);
-        console.log('📊 各时段时间点统计:', {
-            morning: timePoints.filter(tp => tp.periods.includes('morning')).length,
-            noon: timePoints.filter(tp => tp.periods.includes('noon')).length,
-            afternoon: timePoints.filter(tp => tp.periods.includes('afternoon')).length
-        });
+        console.log('🕐 生成的时间点列表:', timePoints.length, '个');
 
         return timePoints;
     },
@@ -454,7 +449,6 @@ Page({
         // 根据实际时间槽数据计算时间范围
         const getPeriodTimeRange = (periodId) => {
             const periodSlots = timeSlots.filter(slot => slot.period === periodId);
-            console.log(`🔍 ${periodId} 时段的时间槽:`, periodSlots);
 
             if (periodSlots.length === 0) {
                 // 如果没有时间槽数据，使用默认值
@@ -463,7 +457,6 @@ Page({
                     'noon': '12:00 - 14:30',
                     'afternoon': '14:30 - 22:00'
                 };
-                console.log(`⚠️ ${periodId} 时段没有时间槽数据，使用默认值:`, defaults[periodId]);
                 return defaults[periodId] || '08:30 - 22:00';
             }
 
@@ -478,10 +471,7 @@ Page({
             const startTime = firstSlot.startTime || firstSlot.time.split(' - ')[0];
             const endTime = lastSlot.endTime || lastSlot.time.split(' - ')[1];
 
-            const timeRange = `${startTime} - ${endTime}`;
-            console.log(`📅 ${periodId} 时段计算的时间范围:`, timeRange);
-
-            return timeRange;
+            return `${startTime} - ${endTime}`;
         };
 
         // 计算全天时间范围
