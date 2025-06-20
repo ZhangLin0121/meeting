@@ -310,7 +310,8 @@ Page({
 
                 // 直接使用后端返回的时间槽数据，转换为前端需要的格式
                 const timeSlots = result.data.timeSlots.map((backendSlot, index) => ({
-                    time: backendSlot.startTime,
+                    time: `${backendSlot.startTime} - ${backendSlot.endTime}`,
+                    startTime: backendSlot.startTime,
                     endTime: backendSlot.endTime,
                     status: backendSlot.status,
                     period: backendSlot.period,
@@ -320,8 +321,8 @@ Page({
 
                 console.log('🕐 转换后的前端时间槽:', timeSlots);
 
-                // 生成时段分组
-                const timePeriods = this.generateTimePeriodsArray();
+                // 生成时段分组（传入时间槽数据以动态计算时间范围）
+                const timePeriods = this.generateTimePeriodsArray(timeSlots);
 
                 // 更新时段可用性
                 this.updatePeriodAvailability(timePeriods, timeSlots);
@@ -357,13 +358,51 @@ Page({
 
     /**
      * 生成时段分组数组（上午、中午、下午）
+     * 现在根据实际时间槽数据动态生成时间范围
      */
-    generateTimePeriodsArray() {
+    generateTimePeriodsArray(timeSlots = []) {
+        // 根据实际时间槽数据计算时间范围
+        const getPeriodTimeRange = (periodId) => {
+            const periodSlots = timeSlots.filter(slot => slot.period === periodId);
+            if (periodSlots.length === 0) {
+                // 如果没有时间槽数据，使用默认值
+                const defaults = {
+                    'morning': '08:30 - 12:00',
+                    'noon': '12:00 - 14:30',
+                    'afternoon': '14:30 - 22:00'
+                };
+                return defaults[periodId] || '08:30 - 22:00';
+            }
+
+            // 获取第一个和最后一个时间槽来确定时间范围
+            const firstSlot = periodSlots[0];
+            const lastSlot = periodSlots[periodSlots.length - 1];
+
+            // 从slot.time中提取起始时间和结束时间
+            const startTime = firstSlot.startTime || firstSlot.time.split(' - ')[0];
+            const endTime = lastSlot.endTime || lastSlot.time.split(' - ')[1];
+
+            return `${startTime} - ${endTime}`;
+        };
+
+        // 计算全天时间范围
+        const getFullDayTimeRange = () => {
+            if (timeSlots.length === 0) return '08:30 - 22:00';
+
+            const firstSlot = timeSlots[0];
+            const lastSlot = timeSlots[timeSlots.length - 1];
+
+            const startTime = firstSlot.startTime || firstSlot.time.split(' - ')[0];
+            const endTime = lastSlot.endTime || lastSlot.time.split(' - ')[1];
+
+            return `${startTime} - ${endTime}`;
+        };
+
         return [
-            { id: 'fullday', name: '全天', timeRange: '08:30 - 22:00', icon: '🌍', status: 'available', availableCount: 0, totalCount: 0, isFullDay: true },
-            { id: 'morning', name: '上午时段', timeRange: '08:30 - 12:00', icon: '🌅', status: 'available', availableCount: 0, totalCount: 0 },
-            { id: 'noon', name: '中午时段', timeRange: '12:00 - 14:30', icon: '☀️', status: 'available', availableCount: 0, totalCount: 0 },
-            { id: 'afternoon', name: '下午时段', timeRange: '14:30 - 22:00', icon: '🌆', status: 'available', availableCount: 0, totalCount: 0 }
+            { id: 'fullday', name: '全天', timeRange: getFullDayTimeRange(), icon: '🌍', status: 'available', availableCount: 0, totalCount: 0, isFullDay: true },
+            { id: 'morning', name: '上午时段', timeRange: getPeriodTimeRange('morning'), icon: '🌅', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'noon', name: '中午时段', timeRange: getPeriodTimeRange('noon'), icon: '☀️', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'afternoon', name: '下午时段', timeRange: getPeriodTimeRange('afternoon'), icon: '🌆', status: 'available', availableCount: 0, totalCount: 0 }
         ];
     },
 
