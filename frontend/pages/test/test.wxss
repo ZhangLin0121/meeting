@@ -428,3 +428,276 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #0056b3;
 }
+
+/* 🧪 微信小程序诊断页面样式 */
+.test-container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 页面标题 */
+.page-header {
+  text-align: center;
+  margin-bottom: 40rpx;
+  padding: 30rpx 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  color: white;
+}
+
+.page-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.page-subtitle {
+  display: block;
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+/* 诊断状态网格 */
+.diagnostics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.diagnostic-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx 20rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.diagnostic-card:active {
+  transform: scale(0.98);
+}
+
+.diagnostic-icon {
+  font-size: 48rpx;
+  margin-bottom: 10rpx;
+}
+
+.diagnostic-label {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.diagnostic-status {
+  display: block;
+  font-size: 22rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 信息区域 */
+.info-section {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 2rpx solid #eee;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15rpx;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 24rpx;
+  color: #333;
+  font-weight: bold;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-info .info-item {
+  grid-column: 1 / -1;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15rpx;
+  margin-bottom: 40rpx;
+}
+
+.action-btn {
+  padding: 25rpx 20rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  border: none;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+}
+
+.action-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.15);
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-btn.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.action-btn.warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.action-btn.success {
+  background: #28a745;
+  color: white;
+}
+
+.action-btn[disabled] {
+  opacity: 0.6;
+  transform: none !important;
+}
+
+/* 日志区域 */
+.logs-section {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.logs-container {
+  max-height: 400rpx;
+  border: 2rpx solid #f0f0f0;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  background: #fafafa;
+}
+
+.empty-logs {
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.empty-text {
+  color: #999;
+  font-size: 24rpx;
+}
+
+.log-item {
+  display: flex;
+  margin-bottom: 15rpx;
+  padding: 10rpx;
+  background: white;
+  border-radius: 6rpx;
+  border-left: 4rpx solid #667eea;
+}
+
+.log-time {
+  font-size: 20rpx;
+  color: #999;
+  margin-right: 15rpx;
+  flex-shrink: 0;
+  font-family: monospace;
+}
+
+.log-message {
+  font-size: 24rpx;
+  color: #333;
+  flex: 1;
+  word-break: break-all;
+}
+
+/* 指引区域 */
+.guide-section {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 25rpx;
+}
+
+.guide-item {
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #28a745;
+}
+
+.guide-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.guide-text {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 5rpx;
+  padding-left: 20rpx;
+}
+
+/* 响应式调整 */
+@media (max-width: 600rpx) {
+  .diagnostics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+}

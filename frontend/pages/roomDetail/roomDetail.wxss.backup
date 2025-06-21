@@ -859,6 +859,431 @@ page {
     flex-wrap: wrap;
 }
 
+.time-points-legend .legend-color.time-available {
+    background-color: #d1d1d6;
+}
+
+.time-points-legend .legend-color.time-unavailable {
+    background-color: #8e8e93;
+    opacity: 0.5;
+}
+
+.time-points-legend .legend-color.time-selected {
+    background-color: #007aff;
+}
+
+
+/* 时间段图例 */
+
+.time-slots-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-color {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.legend-color.available {
+    background-color: #34c759;
+}
+
+.legend-color.booked {
+    background-color: #8e8e93;
+}
+
+.legend-color.closed {
+    background-color: #ff3b30;
+}
+
+.legend-color.past {
+    background-color: #8e8e93;
+    opacity: 0.5;
+}
+
+.legend-text {
+    font-size: 11px;
+    color: #8e8e93;
+    font-weight: 500;
+}
+
+
+/* 预约表单 */
+
+.booking-form {
+    padding-top: 24px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.form-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.form-input {
+    width: 100%;
+    height: 88rpx;
+    display: flex;
+    align-items: center;
+    padding: 0 32rpx;
+    background-color: #f5f5f5;
+    border-radius: 20rpx;
+    font-size: 30rpx;
+    color: #333333;
+    border: 2rpx solid transparent;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    background-color: #ffffff;
+    border-color: #007aff;
+    outline: none;
+}
+
+.form-placeholder {
+    color: #999999;
+    font-size: 30rpx;
+}
+
+.auto-fill-hint {
+    font-size: 24rpx;
+    color: #38a169;
+    margin-top: 8rpx;
+    display: block;
+}
+
+
+/* 提交按钮 */
+
+.submit-button-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+    z-index: 99;
+}
+
+.submit-button {
+    width: 100%;
+    background-color: #007aff;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.12);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border: none;
+}
+
+.submit-button:active {
+    transform: scale(0.98);
+    background-color: #0056d3;
+    box-shadow: 0 1px 4px rgba(0, 122, 255, 0.2);
+}
+
+.submit-button.disabled {
+    background: linear-gradient(135deg, #e0e0e0 0%, #cccccc 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: not-allowed;
+}
+
+.submit-button.disabled:active {
+    transform: none;
+}
+
+.submit-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.submit-button.disabled .submit-text {
+    color: #888888;
+}
+
+
+/* 加载状态 */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(247, 247, 247, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 16px;
+}
+
+.loading-text {
+    font-size: 16px;
+    color: #666666;
+    font-weight: 500;
+}
+
+
+/* 无数据状态 */
+
+.no-data-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    min-height: 60vh;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-text {
+    font-size: 18px;
+    color: #666666;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.empty-subtext {
+    font-size: 14px;
+    color: #999999;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.back-button {
+    background-color: #007aff;
+    border-radius: 10px;
+    padding: 12px 24px;
+    transition: background-color 0.2s ease;
+}
+
+.back-button:active {
+    background-color: #0056cc;
+}
+
+.back-text {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+
+/* 预约弹窗样式 */
+
+.booking-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20rpx;
+    box-sizing: border-box;
+}
+
+.booking-modal {
+    background-color: #ffffff;
+    border-radius: 20rpx;
+    width: 100%;
+    max-width: 680rpx;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30rpx 25rpx 20rpx;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+    font-size: 36rpx;
+    font-weight: 600;
+    color: #333333;
+}
+
+.modal-close {
+    width: 48rpx;
+    height: 48rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24rpx;
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+}
+
+.modal-close:active {
+    transform: scale(0.9);
+    background-color: #e5e5e5;
+}
+
+.close-icon {
+    width: 24rpx;
+    height: 24rpx;
+}
+
+.modal-content {
+    flex: 1;
+    padding: 24rpx 20rpx;
+    min-height: 0;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.booking-summary {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.06) 0%, rgba(0, 122, 255, 0.02) 100%);
+    border-radius: 12rpx;
+    padding: 20rpx;
+    margin-bottom: 24rpx;
+    border: 0.5rpx solid rgba(0, 122, 255, 0.1);
+}
+
+.summary-title {
+    font-size: 26rpx;
+    color: #666666;
+    margin-bottom: 8rpx;
+    display: block;
+}
+
+.summary-time {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: #007AFF;
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 32rpx;
+}
+
+.form-group:last-child {
+    margin-bottom: 20rpx;
+}
+
+.form-label {
+    font-size: 30rpx;
+    color: #333333;
+    margin-bottom: 16rpx;
+    display: block;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    max-width: 100%;
+    height: 88rpx;
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
+    border: 2rpx solid #e5e5e5;
+    border-radius: 16rpx;
+    font-size: 30rpx;
+    color: #333333;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.form-input:focus {
+    border-color: #007AFF;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2rpx rgba(0, 122, 255, 0.2);
+}
+
+.form-placeholder {
+    color: #999999;
+    font-size: 30rpx;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 20rpx;
+    padding: 20rpx 25rpx 30rpx;
+    border-top: 1rpx solid #f0f0f0;
+}
+
+.modal-button {
+    flex: 1;
+    padding: 28rpx;
+    border-radius: 16rpx;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.modal-button.cancel {
+    background-color: #f5f5f5;
+    color: #666666;
+}
+
+.modal-button.confirm {
+    background: linear-gradient(135deg, #38a169 0%, #2d8659 100%);
+    color: #ffffff;
+    box-shadow: 0 4rpx 16rpx rgba(56, 161, 105, 0.3);
+}
+
+.modal-button:active {
+    transform: scale(0.98);
+}
+
+.button-text {
+    font-size: 32rpx;
+    font-weight: 500;
+}
+
+
 /* 动画效果 */
 
 .fade-in {
@@ -875,702 +1300,13 @@ page {
         transform: translateY(0);
     }
 }
+/* 动画效果 */
 
-/* 日历预约区域样式 */
-.calendar-booking-section {
-    background-color: #ffffff;
-    margin: 16px 20px;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
 }
 
-/* 日历头部样式 */
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.calendar-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333333;
-    letter-spacing: -0.5px;
-}
-
-.calendar-nav {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.nav-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background-color: #f5f5f5;
-    transition: all 0.2s ease;
-}
-
-.nav-btn:active {
-    background-color: #e0e0e0;
-    transform: scale(0.95);
-}
-
-.nav-text {
-    font-size: 18px;
-    font-weight: 600;
-    color: #666666;
-    line-height: 1;
-}
-
-.current-month {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333333;
-    min-width: 100px;
-    text-align: center;
-}
-
-/* 日历状态说明 */
-.calendar-legend {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background-color: #f8f8f8;
-    border-radius: 12px;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.legend-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.legend-dot.available {
-    background-color: #34c759;
-}
-
-.legend-dot.partial {
-    background-color: #ff9500;
-}
-
-.legend-dot.unavailable {
-    background-color: #ff3b30;
-}
-
-.legend-dot.past {
-    background-color: #8e8e93;
-}
-
-.legend-text {
-    font-size: 12px;
-    color: #666666;
-    font-weight: 500;
-}
-
-/* 日历容器 */
-.calendar-container {
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: #ffffff;
-    border: 1px solid #f0f0f0;
-}
-
-/* 星期标题 */
-.calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background-color: #f8f8f8;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.weekday {
-    padding: 12px 8px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: #666666;
-    background-color: #f8f8f8;
-}
-
-/* 日历网格 */
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background-color: #ffffff;
-}
-
-/* 日历日期项 */
-.calendar-day {
-    position: relative;
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #f0f0f0;
-    border-top: none;
-    border-left: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    background-color: #ffffff;
-    min-height: 48px;
-}
-
-.calendar-day:nth-child(7n) {
-    border-right: none;
-}
-
-.calendar-day.current-month {
-    background-color: #ffffff;
-}
-
-.calendar-day.other-month {
-    background-color: #fafafa;
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-.calendar-day.today {
-    background-color: rgba(0, 122, 255, 0.05);
-    border-color: #007aff;
-}
-
-.calendar-day.selected {
-    background-color: #007aff;
-    color: #ffffff;
-}
-
-.calendar-day.available:active {
-    background-color: rgba(0, 122, 255, 0.1);
-    transform: scale(0.95);
-}
-
-.calendar-day.partial:active {
-    background-color: rgba(255, 149, 0, 0.1);
-}
-
-.calendar-day.unavailable {
-    background-color: #f2f2f7;
-    cursor: not-allowed;
-}
-
-.calendar-day.past {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.day-number {
-    font-size: 14px;
-    font-weight: 500;
-    color: #333333;
-    line-height: 1;
-    margin-bottom: 2px;
-}
-
-.calendar-day.selected .day-number {
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.calendar-day.other-month .day-number {
-    color: #8e8e93;
-}
-
-.calendar-day.today .day-number {
-    color: #007aff;
-    font-weight: 600;
-}
-
-.day-status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    margin-top: 2px;
-}
-
-.day-status-dot.available {
-    background-color: #34c759;
-}
-
-.day-status-dot.partial {
-    background-color: #ff9500;
-}
-
-.day-status-dot.unavailable {
-    background-color: #ff3b30;
-}
-
-.day-status-dot.past {
-    background-color: #8e8e93;
-}
-
-.calendar-day.selected .day-status-dot {
-    background-color: rgba(255, 255, 255, 0.8);
-}
-
-/* 时段选择区域 */
-.period-selection-section {
-    background-color: #ffffff;
-    margin: 16px 20px;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.period-header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.period-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333333;
-    letter-spacing: -0.5px;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.period-date {
-    font-size: 14px;
-    color: #666666;
-    font-weight: 500;
-}
-
-/* 时段卡片容器 */
-.period-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* 时段卡片样式 */
-.period-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-radius: 12px;
-    border: 1px solid #e5e5e7;
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.period-card.available {
-    border-color: #34c759;
-    background-color: rgba(52, 199, 89, 0.02);
-}
-
-.period-card.partial {
-    border-color: #ff9500;
-    background-color: rgba(255, 149, 0, 0.02);
-}
-
-.period-card.unavailable {
-    border-color: #ff3b30;
-    background-color: rgba(255, 59, 48, 0.02);
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.period-card:active:not(.unavailable) {
-    transform: scale(0.98);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-
-.period-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.period-icon {
-    font-size: 20px;
-    line-height: 1;
-}
-
-.period-details {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.period-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333333;
-    line-height: 1.2;
-}
-
-.period-time {
-    font-size: 13px;
-    color: #666666;
-    font-weight: 500;
-}
-
-.period-status {
-    text-align: right;
-}
-
-.status-text {
-    font-size: 13px;
-    font-weight: 600;
-    color: #34c759;
-}
-
-.status-text.unavailable {
-    color: #ff3b30;
-}
-
-/* 预约提示区域 */
-.booking-tips {
-    background-color: #ffffff;
-    margin: 16px 20px;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0, 122, 255, 0.2);
-    background: linear-gradient(135deg, rgba(0, 122, 255, 0.02) 0%, rgba(0, 122, 255, 0.05) 100%);
-}
-
-.tips-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #007aff;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.tips-content {
-    font-size: 14px;
-    color: #333333;
-    font-weight: 500;
-    line-height: 1.4;
-}
-
-/* 预约按钮容器 */
-.booking-button-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 16px 20px;
-    background: linear-gradient(to top, #ffffff 60%, rgba(255, 255, 255, 0.95) 80%, rgba(255, 255, 255, 0) 100%);
-    backdrop-filter: blur(10px);
-    z-index: 100;
-}
-
-.booking-button {
-    width: 100%;
-    padding: 16px 24px;
-    background-color: #007aff;
-    border-radius: 12px;
-    text-align: center;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.3);
-}
-
-.booking-button:active {
-    background-color: #0056d3;
-    transform: scale(0.98);
-    box-shadow: 0 2px 12px rgba(0, 122, 255, 0.4);
-}
-
-.booking-text {
-    font-size: 16px;
-    font-weight: 600;
-    color: #ffffff;
-    letter-spacing: -0.3px;
-}
-
-/* 预约弹窗样式 */
-.booking-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    z-index: 1000;
-    animation: fadeInOverlay 0.3s ease-out;
-}
-
-@keyframes fadeInOverlay {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.booking-modal {
-    width: 100%;
-    max-width: 500px;
-    background-color: #ffffff;
-    border-radius: 20px 20px 0 0;
-    animation: slideUpModal 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-@keyframes slideUpModal {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.modal-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333333;
-    letter-spacing: -0.3px;
-}
-
-.modal-close {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
-}
-
-.modal-close:active {
-    background-color: #f0f0f0;
-}
-
-.close-icon {
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-}
-
-.modal-content {
-    padding: 24px;
-}
-
-.booking-summary {
-    background-color: #f8f8f8;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
-}
-
-.summary-title {
-    font-size: 14px;
-    color: #666666;
-    font-weight: 500;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.summary-time {
-    font-size: 16px;
-    color: #333333;
-    font-weight: 600;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    font-size: 14px;
-    color: #333333;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.form-input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid #e5e5e7;
-    border-radius: 10px;
-    font-size: 16px;
-    color: #333333;
-    background-color: #ffffff;
-    transition: border-color 0.2s ease;
-    box-sizing: border-box;
-}
-
-.form-input:focus {
-    border-color: #007aff;
-    outline: none;
-}
-
-.form-placeholder {
-    color: #8e8e93;
-}
-
-.modal-footer {
-    display: flex;
-    gap: 12px;
-    padding: 16px 24px 24px;
-    border-top: 1px solid #f0f0f0;
-}
-
-.modal-button {
-    flex: 1;
-    padding: 14px 20px;
-    border-radius: 10px;
-    text-align: center;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.modal-button.cancel {
-    background-color: #f2f2f7;
-    border: 1px solid #e5e5e7;
-}
-
-.modal-button.cancel:active {
-    background-color: #e5e5e7;
-    transform: scale(0.98);
-}
-
-.modal-button.confirm {
-    background-color: #007aff;
-    border: 1px solid #007aff;
-}
-
-.modal-button.confirm:active {
-    background-color: #0056d3;
-    transform: scale(0.98);
-}
-
-.button-text {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333333;
-}
-
-.modal-button.confirm .button-text {
-    color: #ffffff;
-}
-
-/* 加载状态样式 */
-.loading-overlay {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #f7f7f7;
-    min-height: 60vh;
-}
-
-.loading-spinner {
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-    opacity: 0.8;
-}
-
-.loading-text {
-    font-size: 16px;
-    color: #666666;
-    font-weight: 500;
-}
-
-/* 无数据状态样式 */
-.no-data-placeholder {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #f7f7f7;
-    min-height: 60vh;
-    padding: 40px 20px;
-}
-
-.empty-icon {
-    width: 80px;
-    height: 80px;
-    opacity: 0.4;
-    margin-bottom: 20px;
-}
-
-.empty-text {
-    font-size: 18px;
-    color: #333333;
-    font-weight: 600;
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-.empty-subtext {
-    font-size: 14px;
-    color: #666666;
-    text-align: center;
-    line-height: 1.5;
-    margin-bottom: 30px;
-}
-
-.back-button {
-    background-color: #007aff;
-    padding: 12px 24px;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-.back-button:active {
-    background-color: #0056d3;
-    transform: scale(0.98);
-}
-
-.back-text {
-    font-size: 16px;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-/* 页面淡入动画 */
-.container.fade-in {
-    animation: pageSlideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-@keyframes pageSlideIn {
+@keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(20px);
@@ -1578,80 +1314,5 @@ page {
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-/* 响应式适配 */
-@media (max-width: 375px) {
-    .calendar-legend {
-        justify-content: center;
-        gap: 12px;
-    }
-    
-    .legend-item {
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        text-align: center;
-    }
-    
-    .legend-text {
-        font-size: 11px;
-    }
-    
-    .calendar-day {
-        min-height: 42px;
-    }
-    
-    .day-number {
-        font-size: 13px;
-    }
-    
-    .period-card {
-        padding: 14px 16px;
-    }
-    
-    .period-name {
-        font-size: 15px;
-    }
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-    .calendar-booking-section,
-    .period-selection-section,
-    .booking-tips {
-        background-color: #1c1c1e;
-        border-color: #38383a;
-    }
-    
-    .calendar-title,
-    .period-title,
-    .period-name,
-    .day-number {
-        color: #ffffff;
-    }
-    
-    .calendar-legend {
-        background-color: #2c2c2e;
-    }
-    
-    .calendar-container {
-        background-color: #1c1c1e;
-        border-color: #38383a;
-    }
-    
-    .calendar-weekdays {
-        background-color: #2c2c2e;
-    }
-    
-    .calendar-day {
-        background-color: #1c1c1e;
-        border-color: #38383a;
-    }
-    
-    .period-card {
-        background-color: #1c1c1e;
-        border-color: #38383a;
     }
 }

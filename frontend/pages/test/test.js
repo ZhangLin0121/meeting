@@ -1,4 +1,4 @@
-// pages/test/test.js
+// pages/test/test.js - 微信小程序诊断测试页面
 const request = require('../../utils/request.js');
 const app = getApp();
 const WechatAuth = require('../../utils/auth.js');
@@ -8,245 +8,384 @@ Page({
      * 页面的初始数据
      */
     data: {
-        logs: [],
-        testResults: [],
-        userInfo: null,
-        loginStatus: '未登录',
-        apiConnected: false,
-        loading: false,
-        avatarUrl: '', // 测试获取的头像URL
-        wechatUserInfo: {} // 测试获取的微信用户信息
+        // 诊断状态
+        diagnostics: {
+            appStatus: '检查中...',
+            loginStatus: '检查中...',
+            apiStatus: '检查中...',
+            storageStatus: '检查中...',
+            networkStatus: '检查中...'
+        },
+        // 详细信息
+        details: {
+            userInfo: null,
+            systemInfo: null,
+            networkType: null,
+            logs: []
+        },
+        // 测试按钮状态
+        testing: false
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad() {
-        console.log('📋 测试页面加载');
-        this.addLog('测试页面加载完成');
-
-        // 开始基础测试
-        this.runBasicTests();
+        console.log('🧪 诊断页面启动');
+        this.addLog('诊断页面启动');
+        this.startDiagnostics();
     },
 
     /**
      * 添加日志
      */
     addLog(message) {
-        const timestamp = new Date().toLocaleTimeString();
-        const logEntry = `[${timestamp}] ${message}`;
-
-        const logs = this.data.logs;
-        logs.unshift(logEntry);
-
-        // 只保留最近20条日志
-        if (logs.length > 20) {
-            logs.splice(20);
-        }
-
-        this.setData({ logs });
-        console.log('📋', logEntry);
-    },
-
-    /**
-     * 添加测试结果
-     */
-    addTestResult(testName, success, message) {
-        const testResults = this.data.testResults;
-        testResults.unshift({
-            name: testName,
-            success: success,
-            message: message,
-            timestamp: new Date().toLocaleTimeString()
+        const logs = this.data.details.logs;
+        logs.unshift({
+            time: new Date().toLocaleTimeString(),
+            message: message
         });
-
-        this.setData({ testResults });
-
-        const status = success ? '✅' : '❌';
-        this.addLog(`${status} ${testName}: ${message}`);
-    },
-
-    /**
-     * 运行基础测试
-     */
-    async runBasicTests() {
-        this.addLog('🧪 开始运行基础测试...');
-
-        // 测试1: App实例获取
-        await this.testAppInstance();
-
-        // 测试2: 登录状态检查
-        await this.testLoginStatus();
-
-        // 测试3: API连接测试
-        await this.testAPIConnection();
-
-        // 测试4: 智能登录测试
-        await this.testSmartLogin();
-
-        this.addLog('🎉 基础测试完成');
-    },
-
-    /**
-     * 测试App实例获取
-     */
-    async testAppInstance() {
-        try {
-            const app = getApp();
-            if (app && app.globalData) {
-                this.addTestResult('App实例获取', true, '成功获取App实例和globalData');
-            } else {
-                this.addTestResult('App实例获取', false, 'App实例或globalData为空');
-            }
-        } catch (error) {
-            this.addTestResult('App实例获取', false, `异常: ${error.message}`);
+        
+        // 只保留最近50条日志
+        if (logs.length > 50) {
+            logs.splice(50);
         }
-    },
-
-    /**
-     * 测试登录状态检查
-     */
-    async testLoginStatus() {
-        try {
-            const WechatAuth = require('../../utils/auth.js');
-            const userInfo = WechatAuth.checkLoginStatus();
-
-            if (userInfo && userInfo.openid) {
-                this.setData({
-                    userInfo: userInfo,
-                    loginStatus: '已登录'
-                });
-                this.addTestResult('登录状态检查', true, `用户已登录: ${userInfo.openid.substring(0, 8)}...`);
-            } else {
-                this.setData({ loginStatus: '未登录' });
-                this.addTestResult('登录状态检查', false, '用户未登录');
-            }
-        } catch (error) {
-            this.addTestResult('登录状态检查', false, `异常: ${error.message}`);
-        }
-    },
-
-    /**
-     * 测试API连接
-     */
-    async testAPIConnection() {
-        try {
-            const request = require('../../utils/request.js');
-            const result = await request.get('/api/health');
-
-            if (result.success) {
-                this.setData({ apiConnected: true });
-                this.addTestResult('API连接测试', true, 'API连接正常');
-            } else {
-                this.addTestResult('API连接测试', false, result.message || 'API连接失败');
-            }
-        } catch (error) {
-            this.addTestResult('API连接测试', false, `连接异常: ${error.message || error}`);
-        }
-    },
-
-    /**
-     * 测试智能登录
-     */
-    async testSmartLogin() {
-        try {
-            this.addLog('🔐 开始智能登录测试...');
-            const WechatAuth = require('../../utils/auth.js');
-
-            const startTime = Date.now();
-            const userInfo = await WechatAuth.smartLogin();
-            const endTime = Date.now();
-
-            if (userInfo && userInfo.openid) {
-                this.setData({
-                    userInfo: userInfo,
-                    loginStatus: '已登录'
-                });
-                this.addTestResult('智能登录测试', true, `登录成功，耗时${endTime - startTime}ms`);
-            } else {
-                this.addTestResult('智能登录测试', false, '登录失败：返回数据无效');
-            }
-        } catch (error) {
-            this.addTestResult('智能登录测试', false, `登录异常: ${error.message}`);
-        }
-    },
-
-    /**
-     * 测试页面登录流程（模拟roomList的登录流程）
-     */
-    async testPageLoginFlow() {
-        try {
-            this.addLog('🔄 开始测试页面登录流程...');
-
-            // 模拟roomList的登录流程
-            const WechatAuth = require('../../utils/auth.js');
-            const userInfo = await WechatAuth.smartLogin();
-
-            if (userInfo && userInfo.openid) {
-                // 模拟设置页面数据
-                this.setData({
-                    userInfo: userInfo,
-                    loginStatus: '已登录'
-                });
-
-                // 模拟角色检查
-                try {
-                    const request = require('../../utils/request.js');
-                    const roleResult = await request.get('/api/user/role', {
-                        headers: {
-                            'X-User-Openid': userInfo.openid
-                        }
-                    });
-
-                    if (roleResult.success) {
-                        this.addLog(`👤 用户角色: ${roleResult.data.role}`);
-                    }
-                } catch (roleError) {
-                    this.addLog(`⚠️ 角色检查失败: ${roleError.message}`);
-                }
-
-                this.addTestResult('页面登录流程', true, '页面登录流程测试成功');
-            } else {
-                this.addTestResult('页面登录流程', false, '页面登录流程失败');
-            }
-        } catch (error) {
-            this.addTestResult('页面登录流程', false, `流程异常: ${error.message}`);
-        }
-    },
-
-    /**
-     * 清除日志
-     */
-    clearLogs() {
+        
         this.setData({
-            logs: [],
-            testResults: []
+            'details.logs': logs
         });
-        this.addLog('日志已清除');
     },
 
     /**
-     * 重新运行测试
+     * 开始诊断
      */
-    rerunTests() {
-        this.clearLogs();
-        this.runBasicTests();
+    async startDiagnostics() {
+        this.addLog('开始系统诊断...');
+        
+        try {
+            // 1. 检查App状态
+            await this.checkAppStatus();
+            
+            // 2. 检查网络状态
+            await this.checkNetworkStatus();
+            
+            // 3. 检查存储状态
+            await this.checkStorageStatus();
+            
+            // 4. 检查登录状态
+            await this.checkLoginStatus();
+            
+            // 5. 检查API连接
+            await this.checkAPIStatus();
+            
+            this.addLog('诊断完成！');
+            
+        } catch (error) {
+            console.error('❌ 诊断过程出错:', error);
+            this.addLog(`诊断出错: ${error.message}`);
+        }
     },
 
     /**
-     * 测试登录流程
+     * 检查App状态
      */
-    testLogin() {
-        this.testPageLoginFlow();
+    async checkAppStatus() {
+        try {
+            this.addLog('检查App状态...');
+            
+            const app = getApp();
+            const systemInfo = wx.getSystemInfoSync();
+            
+            let status = '✅ 正常';
+            if (!app) {
+                status = '❌ App实例不存在';
+            } else if (!app.globalData) {
+                status = '⚠️ globalData不存在';
+            }
+            
+            this.setData({
+                'diagnostics.appStatus': status,
+                'details.systemInfo': {
+                    platform: systemInfo.platform,
+                    system: systemInfo.system,
+                    version: systemInfo.version,
+                    SDKVersion: systemInfo.SDKVersion,
+                    brand: systemInfo.brand,
+                    model: systemInfo.model
+                }
+            });
+            
+            this.addLog(`App状态: ${status}`);
+            this.addLog(`系统平台: ${systemInfo.platform} ${systemInfo.system}`);
+            
+        } catch (error) {
+            const errorMsg = '❌ App状态检查失败';
+            this.setData({
+                'diagnostics.appStatus': errorMsg
+            });
+            this.addLog(`${errorMsg}: ${error.message}`);
+        }
     },
 
     /**
-     * 跳转到房间列表
+     * 检查网络状态
+     */
+    async checkNetworkStatus() {
+        try {
+            this.addLog('检查网络状态...');
+            
+            const networkInfo = await new Promise((resolve, reject) => {
+                wx.getNetworkType({
+                    success: resolve,
+                    fail: reject
+                });
+            });
+            
+            let status = '✅ 网络正常';
+            if (networkInfo.networkType === 'none') {
+                status = '❌ 网络不可用';
+            } else if (networkInfo.networkType === 'unknown') {
+                status = '⚠️ 网络状态未知';
+            }
+            
+            this.setData({
+                'diagnostics.networkStatus': status,
+                'details.networkType': networkInfo.networkType
+            });
+            
+            this.addLog(`网络状态: ${status} (${networkInfo.networkType})`);
+            
+        } catch (error) {
+            const errorMsg = '❌ 网络状态检查失败';
+            this.setData({
+                'diagnostics.networkStatus': errorMsg
+            });
+            this.addLog(`${errorMsg}: ${error.message}`);
+        }
+    },
+
+    /**
+     * 检查存储状态
+     */
+    async checkStorageStatus() {
+        try {
+            this.addLog('检查存储状态...');
+            
+            const userInfo = wx.getStorageSync('userInfo');
+            const logs = wx.getStorageSync('logs');
+            const loginTime = wx.getStorageSync('loginTime');
+            
+            let status = '✅ 存储正常';
+            let details = [];
+            
+            if (userInfo) {
+                details.push(`用户信息: 已存储 (openid: ${userInfo.openid ? '有' : '无'})`);
+            } else {
+                details.push('用户信息: 未存储');
+                status = '⚠️ 缺少用户信息';
+            }
+            
+            if (loginTime) {
+                const loginDate = new Date(loginTime);
+                details.push(`登录时间: ${loginDate.toLocaleString()}`);
+            } else {
+                details.push('登录时间: 未记录');
+            }
+            
+            this.setData({
+                'diagnostics.storageStatus': status,
+                'details.userInfo': userInfo
+            });
+            
+            this.addLog(`存储状态: ${status}`);
+            details.forEach(detail => this.addLog(detail));
+            
+        } catch (error) {
+            const errorMsg = '❌ 存储状态检查失败';
+            this.setData({
+                'diagnostics.storageStatus': errorMsg
+            });
+            this.addLog(`${errorMsg}: ${error.message}`);
+        }
+    },
+
+    /**
+     * 检查登录状态
+     */
+    async checkLoginStatus() {
+        try {
+            this.addLog('检查登录状态...');
+            
+            const app = getApp();
+            const storageUserInfo = wx.getStorageSync('userInfo');
+            let globalUserInfo = null;
+            
+            if (app && app.globalData && app.globalData.userInfo) {
+                globalUserInfo = app.globalData.userInfo;
+            }
+            
+            let status = '❌ 未登录';
+            let details = [];
+            
+            if (globalUserInfo && globalUserInfo.openid) {
+                status = '✅ 全局状态已登录';
+                details.push(`全局openid: ${globalUserInfo.openid}`);
+            }
+            
+            if (storageUserInfo && storageUserInfo.openid) {
+                if (status === '❌ 未登录') {
+                    status = '⚠️ 仅本地存储有登录信息';
+                }
+                details.push(`存储openid: ${storageUserInfo.openid}`);
+            }
+            
+            this.setData({
+                'diagnostics.loginStatus': status
+            });
+            
+            this.addLog(`登录状态: ${status}`);
+            details.forEach(detail => this.addLog(detail));
+            
+        } catch (error) {
+            const errorMsg = '❌ 登录状态检查失败';
+            this.setData({
+                'diagnostics.loginStatus': errorMsg
+            });
+            this.addLog(`${errorMsg}: ${error.message}`);
+        }
+    },
+
+    /**
+     * 检查API连接
+     */
+    async checkAPIStatus() {
+        try {
+            this.addLog('检查API连接...');
+            
+            // 测试健康检查接口
+            const healthResult = await request.get('/api/health');
+            
+            let status = '✅ API连接正常';
+            this.addLog(`API健康检查: ${healthResult.message || '成功'}`);
+            
+            // 测试会议室列表接口
+            try {
+                const roomsResult = await request.get('/api/rooms');
+                if (roomsResult.success) {
+                    this.addLog(`会议室接口: 正常 (${roomsResult.data ? roomsResult.data.length : 0}个会议室)`);
+                } else {
+                    this.addLog(`会议室接口: ${roomsResult.message}`);
+                    status = '⚠️ 部分API异常';
+                }
+            } catch (roomError) {
+                this.addLog(`会议室接口: 失败 - ${roomError.message}`);
+                status = '⚠️ 部分API异常';
+            }
+            
+            this.setData({
+                'diagnostics.apiStatus': status
+            });
+            
+        } catch (error) {
+            const errorMsg = '❌ API连接失败';
+            this.setData({
+                'diagnostics.apiStatus': errorMsg
+            });
+            this.addLog(`${errorMsg}: ${error.message}`);
+            this.addLog('请检查网络连接和服务器状态');
+        }
+    },
+
+    /**
+     * 强制重新登录
+     */
+    async forceLogin() {
+        try {
+            this.setData({ testing: true });
+            this.addLog('开始强制重新登录...');
+            
+            const WechatAuth = require('../../utils/auth.js');
+            const userInfo = await WechatAuth.performWechatLogin();
+            
+            if (userInfo && userInfo.openid) {
+                this.addLog(`重新登录成功: ${userInfo.openid}`);
+                wx.showToast({
+                    title: '登录成功',
+                    icon: 'success'
+                });
+                
+                // 重新运行诊断
+                setTimeout(() => {
+                    this.startDiagnostics();
+                }, 1000);
+            } else {
+                throw new Error('登录返回数据无效');
+            }
+            
+        } catch (error) {
+            this.addLog(`强制登录失败: ${error.message}`);
+            wx.showModal({
+                title: '登录失败',
+                content: error.message,
+                showCancel: false
+            });
+        } finally {
+            this.setData({ testing: false });
+        }
+    },
+
+    /**
+     * 清除所有数据
+     */
+    clearAllData() {
+        wx.showModal({
+            title: '确认清除',
+            content: '这将清除所有本地数据，需要重新登录',
+            success: (res) => {
+                if (res.confirm) {
+                    try {
+                        wx.clearStorageSync();
+                        const app = getApp();
+                        if (app && app.globalData) {
+                            app.globalData.userInfo = null;
+                        }
+                        
+                        this.addLog('已清除所有本地数据');
+                        wx.showToast({
+                            title: '清除成功',
+                            icon: 'success'
+                        });
+                        
+                        // 重新运行诊断
+                        setTimeout(() => {
+                            this.startDiagnostics();
+                        }, 1000);
+                        
+                    } catch (error) {
+                        this.addLog(`清除数据失败: ${error.message}`);
+                    }
+                }
+            }
+        });
+    },
+
+    /**
+     * 跳转到会议室列表
      */
     goToRoomList() {
-        wx.navigateTo({
+        wx.switchTab({
             url: '/pages/roomList/roomList'
         });
+    },
+
+    /**
+     * 重新运行诊断
+     */
+    runDiagnostics() {
+        this.setData({
+            'details.logs': []
+        });
+        this.startDiagnostics();
     },
 
     /**
@@ -260,7 +399,7 @@ Page({
      * 生命周期函数--监听页面显示
      */
     onShow() {
-
+        console.log('🧪 诊断页面显示');
     },
 
     /**

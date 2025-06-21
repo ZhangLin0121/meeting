@@ -71,7 +71,7 @@ Page({
         afternoonStatus: 'available',
 
         // 数据缓存
-        monthlyAvailability: new Map() // 缓存每个月的可用性数据
+        monthlyAvailability: {} // 缓存每个月的可用性数据（使用对象代替Map）
     },
 
     /**
@@ -237,14 +237,249 @@ Page({
         const maxDate = new Date();
         maxDate.setDate(today.getDate() + 30); // 1个月（30天）
 
+        // 初始化日历数据
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+
         this.setData({
             selectedDate: this.formatDate(today),
             selectedDateWithWeekday: this.formatDateWithWeekday(today),
+            selectedDateDisplay: this.formatDateWithWeekday(today),
             minDate: this.formatDate(today),
-            maxDate: this.formatDate(maxDate)
+            maxDate: this.formatDate(maxDate),
+            currentYear: currentYear,
+            currentMonth: currentMonth
         });
 
+        // 生成日历数据
+        this.generateCalendarDays(currentYear, currentMonth);
         this.fetchRoomAvailability(this.formatDate(today));
+    },
+
+    /**
+     * 生成日历天数数据
+     */
+    generateCalendarDays(year, month) {
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+        const firstDayOfWeek = firstDay.getDay(); // 0=周日, 1=周一, ...
+        const daysInMonth = lastDay.getDate();
+        
+        const today = new Date();
+        const todayStr = this.formatDate(today);
+        
+        const calendarDays = [];
+        
+        // 添加上个月的日期（填充前面的空白）
+        const prevMonth = month === 1 ? 12 : month - 1;
+        const prevYear = month === 1 ? year - 1 : year;
+        const daysInPrevMonth = new Date(prevYear, prevMonth, 0).getDate();
+        
+        for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+            const day = daysInPrevMonth - i;
+            calendarDays.push({
+                day: day,
+                fullDate: this.formatDate(new Date(prevYear, prevMonth - 1, day)),
+                isCurrentMonth: false,
+                isToday: false,
+                isSelected: false,
+                status: 'past' // 上个月的日期标记为过期
+            });
+        }
+        
+        // 添加当前月的日期
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDate = new Date(year, month - 1, day);
+            const dateStr = this.formatDate(currentDate);
+            const isPast = currentDate < today;
+            
+            calendarDays.push({
+                day: day,
+                fullDate: dateStr,
+                isCurrentMonth: true,
+                isToday: dateStr === todayStr,
+                isSelected: dateStr === this.data.selectedDate,
+                status: isPast ? 'past' : 'available' // 默认可用，后续会根据实际数据更新
+            });
+        }
+        
+        // 添加下个月的日期（填充后面的空白，确保6行完整显示）
+        const totalCells = Math.ceil(calendarDays.length / 7) * 7;
+        const nextMonth = month === 12 ? 1 : month + 1;
+        const nextYear = month === 12 ? year + 1 : year;
+        
+        let nextDay = 1;
+        for (let i = calendarDays.length; i < totalCells; i++) {
+            calendarDays.push({
+                day: nextDay,
+                fullDate: this.formatDate(new Date(nextYear, nextMonth - 1, nextDay)),
+                isCurrentMonth: false,
+                isToday: false,
+                isSelected: false,
+                status: 'available' // 下个月的日期标记为可用
+            });
+            nextDay++;
+        }
+        
+        this.setData({
+            calendarDays: calendarDays
+        });
+        
+        // 异步获取月度可用性数据
+        this.fetchMonthlyAvailability(year, month);
+    },
+
+    /**
+     * 获取月度可用性数据
+     */
+    async fetchMonthlyAvailability(year, month) {
+        try {
+            const monthKey = `${year}-${month.toString().padStart(2, '0')}`;
+            
+            // 检查缓存
+            if (this.data.monthlyAvailability[monthKey]) {
+                this.updateCalendarAvailability(this.data.monthlyAvailability[monthKey]);
+                return;
+            }
+            
+            const result = await this.requestAPI('GET', `/api/rooms/${this.data.roomId}/monthly-availability?year=${year}&month=${month}`);
+            if (result.success && result.data) {
+                // 缓存数据
+                this.data.monthlyAvailability[monthKey] = result.data;
+                this.updateCalendarAvailability(result.data);
+            }
+        } catch (error) {
+            console.error('❌ 获取月度可用性失败:', error);
+        }
+    },
+
+    /**
+     * 更新日历可用性显示
+     */
+    updateCalendarAvailability(monthlyData) {
+        const updatedDays = this.data.calendarDays.map(day => {
+            if (!day.isCurrentMonth) return day;
+            
+            const dateAvailability = monthlyData[day.fullDate];
+            if (dateAvailability) {
+                return {
+                    ...day,
+                    status: dateAvailability.status || 'available'
+                };
+            }
+            return day;
+        });
+        
+        this.setData({
+            calendarDays: updatedDays
+        });
+    },
+
+    /**
+     * 上一个月
+     */
+    prevMonth() {
+        const { currentYear, currentMonth } = this.data;
+        let newYear = currentYear;
+        let newMonth = currentMonth - 1;
+        
+        if (newMonth < 1) {
+            newMonth = 12;
+            newYear = currentYear - 1;
+        }
+        
+        this.setData({
+            currentYear: newYear,
+            currentMonth: newMonth
+        });
+        
+        this.generateCalendarDays(newYear, newMonth);
+    },
+
+    /**
+     * 下一个月
+     */
+    nextMonth() {
+        const { currentYear, currentMonth } = this.data;
+        let newYear = currentYear;
+        let newMonth = currentMonth + 1;
+        
+        if (newMonth > 12) {
+            newMonth = 1;
+            newYear = currentYear + 1;
+        }
+        
+        this.setData({
+            currentYear: newYear,
+            currentMonth: newMonth
+        });
+        
+        this.generateCalendarDays(newYear, newMonth);
+    },
+
+    /**
+     * 选择日期
+     */
+    onDateSelect(e) {
+        const { date } = e.currentTarget.dataset;
+        const selectedDay = this.data.calendarDays.find(day => day.fullDate === date);
+        
+        if (!selectedDay || !selectedDay.isCurrentMonth || selectedDay.status === 'past') {
+            return;
+        }
+        
+        // 更新选中状态
+        const updatedDays = this.data.calendarDays.map(day => ({
+            ...day,
+            isSelected: day.fullDate === date
+        }));
+        
+        const selectedDate = new Date(date);
+        
+        this.setData({
+            calendarDays: updatedDays,
+            selectedDate: date,
+            selectedDateDisplay: this.formatDateWithWeekday(selectedDate),
+            selectedPeriod: null, // 重置时段选择
+            selectedPeriodName: ''
+        });
+        
+        // 获取选中日期的可用性
+        this.fetchRoomAvailability(date);
+    },
+
+    /**
+     * 选择时段
+     */
+    onPeriodSelect(e) {
+        const { period } = e.currentTarget.dataset;
+        const periodCard = this.data.calendarDays.find(day => day.isSelected);
+        
+        if (!periodCard) {
+            wx.showToast({ title: '请先选择日期', icon: 'none' });
+            return;
+        }
+        
+        // 检查时段是否可用
+        const periodStatus = this.data[`${period}Status`];
+        if (periodStatus === 'unavailable') {
+            wx.showToast({ title: '该时段已约满', icon: 'none' });
+            return;
+        }
+        
+        // 获取时段名称
+        const periodNames = {
+            morning: '上午时段',
+            noon: '中午时段',
+            afternoon: '下午时段'
+        };
+        
+        this.setData({
+            selectedPeriod: period,
+            selectedPeriodName: periodNames[period] || period
+        });
+        
+        console.log('✅ 选中时段:', period, periodNames[period]);
     },
 
     /**
@@ -297,6 +532,19 @@ Page({
                 // 生成分组的时间点数据
                 const groupedTimePoints = this.generateGroupedTimePoints(timePoints);
 
+                // 计算各时段状态
+                const morningSlots = timeSlots.filter(slot => slot.period === 'morning');
+                const noonSlots = timeSlots.filter(slot => slot.period === 'noon');
+                const afternoonSlots = timeSlots.filter(slot => slot.period === 'afternoon');
+
+                const calculateStatus = (slots) => {
+                    if (slots.length === 0) return 'unavailable';
+                    const availableCount = slots.filter(slot => slot.status === 'available').length;
+                    if (availableCount === 0) return 'unavailable';
+                    if (availableCount < slots.length) return 'partial';
+                    return 'available';
+                };
+
                 // 重置选择状态
                 this.setData({
                     timeSlots,
@@ -305,6 +553,9 @@ Page({
                     morningTimePoints: groupedTimePoints.morning,
                     noonTimePoints: groupedTimePoints.noon,
                     afternoonTimePoints: groupedTimePoints.afternoon,
+                    morningStatus: calculateStatus(morningSlots),
+                    noonStatus: calculateStatus(noonSlots),
+                    afternoonStatus: calculateStatus(afternoonSlots),
                     selectedStartIndex: -1,
                     selectedEndIndex: -1,
                     selectedStartTime: null,

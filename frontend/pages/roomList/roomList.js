@@ -17,34 +17,122 @@ Page({
         apiBaseUrl: 'https://www.cacophonyem.me/meeting',
         // 胶囊按钮信息
         menuButtonInfo: null,
-        customNavBarHeight: 0
+        customNavBarHeight: 0,
+        // 🆘 紧急调试信息
+        debugInfo: {
+            appLoaded: false,
+            userLoggedIn: false,
+            apiConnected: false,
+            errorMessage: '',
+            loadingSteps: []
+        }
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad() {
-        console.log('会议室列表页面加载');
-
-        // 获取系统信息，包括状态栏高度
-        this.getSystemInfo();
+        console.log('🏢 会议室列表页面加载开始');
         
-        // 获取用户openid
-        this.getUserOpenId();
+        try {
+            // 🆘 紧急调试：记录页面加载
+            this.addDebugInfo('页面加载开始');
+            this.setData({
+                'debugInfo.appLoaded': true
+            });
+
+            // 获取系统信息，包括状态栏高度
+            this.getSystemInfo();
+            
+            // 获取用户openid
+            this.getUserOpenId();
+            
+            console.log('✅ 页面加载完成');
+            this.addDebugInfo('页面加载完成');
+            
+        } catch (error) {
+            console.error('❌ 页面加载失败:', error);
+            this.handleCriticalError('页面加载失败', error);
+        }
+    },
+
+    /**
+     * 🆘 紧急调试：添加调试信息
+     */
+    addDebugInfo(message) {
+        const steps = this.data.debugInfo.loadingSteps;
+        steps.push({
+            time: new Date().toLocaleTimeString(),
+            message: message
+        });
+        
+        this.setData({
+            'debugInfo.loadingSteps': steps
+        });
+    },
+
+    /**
+     * 🆘 紧急错误处理
+     */
+    handleCriticalError(title, error) {
+        const errorMessage = `${title}: ${error.message || error}`;
+        console.error('🆘 严重错误:', errorMessage);
+        
+        this.setData({
+            'debugInfo.errorMessage': errorMessage,
+            loading: false
+        });
+        
+        // 显示错误信息给用户
+        wx.showModal({
+            title: '页面加载异常',
+            content: '检测到页面加载问题，点击"查看详情"进入诊断页面',
+            showCancel: true,
+            cancelText: '重试',
+            confirmText: '查看详情',
+            success: (res) => {
+                if (res.confirm) {
+                    // 跳转到诊断页面
+                    wx.navigateTo({
+                        url: '/pages/test/test'
+                    });
+                } else if (res.cancel) {
+                    // 重新加载
+                    this.onLoad();
+                }
+            }
+        });
     },
 
     /**
      * 获取用户openid
      */
     getUserOpenId() {
-        const app = getApp();
-        if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
-            this.setData({ userOpenId: app.globalData.userInfo.openid });
-        } else {
-            const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo && userInfo.openid) {
-                this.setData({ userOpenId: userInfo.openid });
+        try {
+            this.addDebugInfo('开始获取用户openid');
+            
+            const app = getApp();
+            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
+                this.setData({ 
+                    userOpenId: app.globalData.userInfo.openid,
+                    'debugInfo.userLoggedIn': true
+                });
+                this.addDebugInfo(`从全局状态获取openid: ${app.globalData.userInfo.openid}`);
+            } else {
+                const userInfo = wx.getStorageSync('userInfo');
+                if (userInfo && userInfo.openid) {
+                    this.setData({ 
+                        userOpenId: userInfo.openid,
+                        'debugInfo.userLoggedIn': true
+                    });
+                    this.addDebugInfo(`从本地存储获取openid: ${userInfo.openid}`);
+                } else {
+                    this.addDebugInfo('未找到用户openid，需要重新登录');
+                }
             }
+        } catch (error) {
+            console.error('❌ 获取用户openid失败:', error);
+            this.addDebugInfo(`获取openid失败: ${error.message}`);
         }
     },
 
@@ -834,6 +922,26 @@ Page({
             address: room.location,
             scale: 18
         });
+    },
+
+    /**
+     * 🆘 跳转到诊断页面
+     */
+    goToDiagnostics() {
+        wx.navigateTo({
+            url: '/pages/test/test'
+        });
+    },
+
+    /**
+     * 🆘 重试加载
+     */
+    retryLoad() {
+        this.setData({
+            'debugInfo.errorMessage': '',
+            'debugInfo.loadingSteps': []
+        });
+        this.onLoad();
     },
 
     /**

@@ -155,4 +155,156 @@
             </view>
         </view>
     </view>
+</view>
+
+<!-- 🧪 微信小程序诊断页面 -->
+<view class="test-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">🧪 系统诊断</text>
+    <text class="page-subtitle">检测微信小程序状态</text>
+  </view>
+
+  <!-- 诊断状态卡片 -->
+  <view class="diagnostics-grid">
+    <view class="diagnostic-card">
+      <view class="diagnostic-icon">📱</view>
+      <text class="diagnostic-label">应用状态</text>
+      <text class="diagnostic-status">{{diagnostics.appStatus}}</text>
+    </view>
+    
+    <view class="diagnostic-card">
+      <view class="diagnostic-icon">🌐</view>
+      <text class="diagnostic-label">网络连接</text>
+      <text class="diagnostic-status">{{diagnostics.networkStatus}}</text>
+    </view>
+    
+    <view class="diagnostic-card">
+      <view class="diagnostic-icon">💾</view>
+      <text class="diagnostic-label">本地存储</text>
+      <text class="diagnostic-status">{{diagnostics.storageStatus}}</text>
+    </view>
+    
+    <view class="diagnostic-card">
+      <view class="diagnostic-icon">🔐</view>
+      <text class="diagnostic-label">登录状态</text>
+      <text class="diagnostic-status">{{diagnostics.loginStatus}}</text>
+    </view>
+    
+    <view class="diagnostic-card">
+      <view class="diagnostic-icon">🔗</view>
+      <text class="diagnostic-label">API连接</text>
+      <text class="diagnostic-status">{{diagnostics.apiStatus}}</text>
+    </view>
+  </view>
+
+  <!-- 系统信息 -->
+  <view class="info-section" wx:if="{{details.systemInfo}}">
+    <text class="section-title">📋 系统信息</text>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="info-label">平台:</text>
+        <text class="info-value">{{details.systemInfo.platform}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">系统:</text>
+        <text class="info-value">{{details.systemInfo.system}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">品牌:</text>
+        <text class="info-value">{{details.systemInfo.brand}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">型号:</text>
+        <text class="info-value">{{details.systemInfo.model}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">微信版本:</text>
+        <text class="info-value">{{details.systemInfo.version}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">基础库:</text>
+        <text class="info-value">{{details.systemInfo.SDKVersion}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 用户信息 -->
+  <view class="info-section" wx:if="{{details.userInfo}}">
+    <text class="section-title">👤 用户信息</text>
+    <view class="user-info">
+      <view class="info-item">
+        <text class="info-label">OpenID:</text>
+        <text class="info-value">{{details.userInfo.openid}}</text>
+      </view>
+      <view class="info-item" wx:if="{{details.userInfo.nickName}}">
+        <text class="info-label">昵称:</text>
+        <text class="info-value">{{details.userInfo.nickName}}</text>
+      </view>
+      <view class="info-item" wx:if="{{details.userInfo.isAdmin}}">
+        <text class="info-label">管理员:</text>
+        <text class="info-value">{{details.userInfo.isAdmin ? '是' : '否'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="action-btn primary" bindtap="runDiagnostics">
+      🔄 重新诊断
+    </button>
+    
+    <button class="action-btn secondary" bindtap="forceLogin" disabled="{{testing}}">
+      {{testing ? '登录中...' : '🔐 强制登录'}}
+    </button>
+    
+    <button class="action-btn warning" bindtap="clearAllData">
+      🗑️ 清除数据
+    </button>
+    
+    <button class="action-btn success" bindtap="goToRoomList">
+      🏢 进入主页
+    </button>
+  </view>
+
+  <!-- 诊断日志 -->
+  <view class="logs-section">
+    <text class="section-title">📜 诊断日志</text>
+    <scroll-view class="logs-container" scroll-y="true">
+      <view wx:if="{{details.logs.length === 0}}" class="empty-logs">
+        <text class="empty-text">暂无日志记录</text>
+      </view>
+      <view wx:for="{{details.logs}}" wx:key="index" class="log-item">
+        <text class="log-time">[{{item.time}}]</text>
+        <text class="log-message">{{item.message}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 问题解决指引 -->
+  <view class="guide-section">
+    <text class="section-title">💡 问题解决指引</text>
+    <view class="guide-content">
+      <view class="guide-item">
+        <text class="guide-title">如果显示空白页面：</text>
+        <text class="guide-text">1. 检查网络连接状态</text>
+        <text class="guide-text">2. 尝试强制登录</text>
+        <text class="guide-text">3. 清除数据后重新登录</text>
+      </view>
+      
+      <view class="guide-item">
+        <text class="guide-title">如果API连接失败：</text>
+        <text class="guide-text">1. 确认网络连接正常</text>
+        <text class="guide-text">2. 检查服务器状态</text>
+        <text class="guide-text">3. 联系管理员</text>
+      </view>
+      
+      <view class="guide-item">
+        <text class="guide-title">如果登录失败：</text>
+        <text class="guide-text">1. 重新授权微信登录</text>
+        <text class="guide-text">2. 检查微信版本</text>
+        <text class="guide-text">3. 重启小程序</text>
+      </view>
+    </view>
+  </view>
 </view> 

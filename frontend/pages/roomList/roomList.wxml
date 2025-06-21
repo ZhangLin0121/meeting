@@ -1,5 +1,18 @@
 <!-- 🎨 Apple iOS Design - 会议室列表页面 -->
 <view class="ios-app-container">
+  
+  <!-- 🆘 紧急调试信息面板 (仅在出现问题时显示) -->
+  <view wx:if="{{debugInfo.errorMessage}}" class="debug-panel">
+    <view class="debug-header">
+      <text class="debug-title">🆘 页面加载异常</text>
+      <text class="debug-subtitle">点击"查看详情"进入诊断页面</text>
+    </view>
+    <text class="debug-error">{{debugInfo.errorMessage}}</text>
+    <view class="debug-actions">
+      <button class="debug-btn" bindtap="goToDiagnostics">📊 查看详情</button>
+      <button class="debug-btn" bindtap="retryLoad">🔄 重试加载</button>
+    </view>
+  </view>
   <!-- iOS 风格导航栏 -->
   <view class="ios-navbar" style="padding-top: {{statusBarHeight}}px;">
     <view class="navbar-content">

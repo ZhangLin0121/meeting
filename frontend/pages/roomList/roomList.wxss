@@ -1,5 +1,70 @@
 /* 🎨 Apple iOS Design System - 会议室列表页面 */
 
+/* 🆘 紧急调试面板样式 */
+.debug-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx;
+}
+
+.debug-header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.debug-title {
+  display: block;
+  color: #ff4757;
+  font-size: 48rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+
+.debug-subtitle {
+  display: block;
+  color: #fff;
+  font-size: 28rpx;
+  opacity: 0.8;
+}
+
+.debug-error {
+  color: #ffa502;
+  font-size: 26rpx;
+  text-align: center;
+  margin-bottom: 40rpx;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10rpx;
+  border: 2rpx solid #ffa502;
+}
+
+.debug-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.debug-btn {
+  padding: 20rpx 40rpx;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+}
+
+.debug-btn:active {
+  background: #0056b3;
+}
+
 .ios-navbar {
     position: fixed;
     top: 0;
