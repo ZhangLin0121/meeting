@@ -21,7 +21,7 @@ const CONFIG = {
         timeout: 10000
     },
     [ENV.PRODUCTION]: {
-        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
+        apiBaseUrl: 'http://47.122.68.192/meeting', // 临时使用HTTP避免SSL问题
         environment: 'production',
         debug: false,
         timeout: 15000
