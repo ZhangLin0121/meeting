@@ -314,7 +314,9 @@ Page({
                     status: backendSlot.status,
                     period: backendSlot.period,
                     isSelected: false,
-                    index: index
+                    index: index,
+                    canBeStartTime: backendSlot.canBeStartTime || false,
+                    canBeEndTime: backendSlot.canBeEndTime || false
                 }));
 
                 console.log('🕐 转换后的前端时间槽:', timeSlots);
@@ -446,10 +448,25 @@ Page({
         if (timeSlot.status !== 'available') return;
 
         if (this.data.selectedStartIndex === -1) {
+            // 选择开始时间
+            if (!timeSlot.canBeStartTime) {
+                wx.showToast({ title: '该时间不能作为开始时间', icon: 'none' });
+                return;
+            }
             this.setStartTime(index);
         } else if (this.data.selectedEndIndex === -1) {
+            // 选择结束时间
+            if (!timeSlot.canBeEndTime) {
+                wx.showToast({ title: '该时间不能作为结束时间', icon: 'none' });
+                return;
+            }
             this.setEndTime(this.data.selectedStartIndex, index);
         } else {
+            // 重新选择开始时间
+            if (!timeSlot.canBeStartTime) {
+                wx.showToast({ title: '该时间不能作为开始时间', icon: 'none' });
+                return;
+            }
             this.setStartTime(index);
         }
     },

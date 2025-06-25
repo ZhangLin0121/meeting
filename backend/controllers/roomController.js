@@ -489,10 +489,12 @@ class RoomController {
                 const isBooked = bookings.some(booking => {
                     const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
                     const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
-                    // 一个时间槽被预约，如果它的开始时间在预约时间范围内
                     const slotStart = minutes;
                     const slotEnd = minutes + 30;
+                    
                     // 检查时间槽是否与预约时间有重叠
+                    // 如果时间槽的开始时间等于预约的结束时间，则不算重叠（可以作为新预约的开始）
+                    // 如果时间槽的结束时间等于预约的开始时间，则不算重叠（可以作为新预约的结束）
                     const hasOverlap = slotStart < bookingEnd && slotEnd > bookingStart;
                     return hasOverlap;
                 });
@@ -508,6 +510,17 @@ class RoomController {
                 // 检查是否为过去的时间（只有查询今天时才需要检查）
                 const isPastTime = queryDate && TimeHelper.isPastTime(queryDate, startTime);
 
+                // 检查当前时间槽是否是某个预约的边界时间
+                const isUsedAsEndTime = bookings.some(booking => {
+                    const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
+                    return minutes === bookingEnd;
+                });
+
+                const isUsedAsStartTime = bookings.some(booking => {
+                    const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
+                    return minutes === bookingStart;
+                });
+
                 let status = 'available';
                 if (isClosed) {
                     status = 'closed';
@@ -521,7 +534,31 @@ class RoomController {
                     startTime,
                     endTime,
                     status,
-                    period: period.name
+                    period: period.name,
+                    time: startTime,  // 添加time字段用于前端显示
+                    canBeStartTime: status === 'available', // 可以作为开始时间（除非被占用或过期）
+                    canBeEndTime: status === 'available' && !isUsedAsEndTime // 不能作为结束时间如果已被用作结束时间
+                });
+            }
+            
+            // 为每个时段添加结束时间点作为可选择的时间点
+            // 注意：只有当结束时间点不会与下一个时段的开始时间重复时才添加
+            if (period.name === 'morning') {
+                // 上午时段添加12:00时间点 - 但不添加，因为会与中午时段重复
+                // 中午时段已经包含12:00开始的时间槽
+            } else if (period.name === 'noon') {
+                // 中午时段添加14:30时间点 - 但不添加，因为会与下午时段重复
+                // 下午时段已经包含14:30开始的时间槽
+            } else if (period.name === 'afternoon') {
+                // 下午时段添加22:00时间点 - 这个可以添加，因为后面没有时段了
+                const endTimePoint = TimeHelper.minutesToTime(period.end);
+                slots.push({
+                    startTime: endTimePoint,
+                    endTime: TimeHelper.minutesToTime(period.end + 30),
+                    status: 'available',
+                    period: period.name,
+                    time: endTimePoint,
+                    isBoundary: true
                 });
             }
         });
