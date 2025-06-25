@@ -95,10 +95,11 @@
       <!-- 时间段选择 - 两层级设计 -->
       <view class="time-slots-container">
         <text class="time-slots-title">选择预约时段</text>
-        <text class="time-slots-subtitle">🎯 三种预约方式：
-1️⃣ 点击"预约全天"预约整个工作日
-2️⃣ 点击"预约整时段"预约单个时段  
-3️⃣ 点击时段卡片展开选择具体时间</text>
+        <text class="time-slots-subtitle">🎯 四种预约方式：
+1️⃣ 点击"预约全天"预约整个工作日（08:30-22:00）
+2️⃣ 点击"预约上午"预约上午时段（08:30-12:00）
+3️⃣ 点击"预约下午"预约下午时段（12:00-22:00）
+4️⃣ 点击"自选时间"展开选择任意时间段</text>
         
         <!-- 时段选择卡片 -->
         <view class="period-cards-container">
@@ -129,7 +130,7 @@
                   data-period="{{item.id}}"
                   catchtap="onQuickBookPeriod"
                 >
-                  <text class="quick-book-text">{{item.isFullDay ? '预约全天' : '预约整时段'}}</text>
+                  <text class="quick-book-text">{{item.isFullDay ? '预约全天' : (item.isCustom ? '自选时间' : '预约' + item.name)}}</text>
                 </view>
                 
                 <!-- 部分被占用时显示禁用按钮 -->
@@ -152,21 +153,22 @@
               </view>
             </view>
             
-            <!-- 详细时间段选择区域（展开时显示，全天预约不显示） -->
+                          <!-- 详细时间段选择区域（展开时显示，全天预约不显示） -->
             <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id && !item.isFullDay}}" catchtap="preventClose">
               <view class="detail-slots-header">
-                <text class="detail-title">选择具体时间段（可选择多个连续时间段）</text>
+                <text class="detail-title" wx:if="{{item.isCustom}}">自由选择任意时间段（可选择多个连续时间段）</text>
+                <text class="detail-title" wx:else>选择具体时间段（可选择多个连续时间段）</text>
               </view>
               
               <!-- 详细时间段网格 -->
               <view class="time-slots-grid">
-                <!-- 显示当前时段的所有时间槽 -->
+                <!-- 自选时间段显示所有时间槽，其他时段只显示对应时段的时间槽 -->
                 <view 
                   wx:for="{{timeSlots}}" 
                   wx:key="index"
                   wx:for-item="slot"
                   wx:for-index="slotIndex"
-                  wx:if="{{slot.period === item.id}}"
+                  wx:if="{{item.isCustom || (item.id === 'morning' && slot.time >= '08:30' && slot.time < '12:00') || (item.id === 'afternoon' && slot.time >= '12:00' && slot.time <= '22:00')}}"
                   class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
                   data-index="{{slot.index}}"
                   catchtap="onTimeSlotTap"

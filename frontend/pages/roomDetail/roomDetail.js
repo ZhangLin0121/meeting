@@ -362,9 +362,9 @@ Page({
     generateTimePeriodsArray() {
         return [
             { id: 'fullday', name: '全天', timeRange: '08:30 - 22:00', icon: '🌍', status: 'available', availableCount: 0, totalCount: 0, isFullDay: true },
-            { id: 'morning', name: '上午时段', timeRange: '08:30 - 12:00', icon: '🌅', status: 'available', availableCount: 0, totalCount: 0 },
-            { id: 'noon', name: '中午时段', timeRange: '12:00 - 14:30', icon: '☀️', status: 'available', availableCount: 0, totalCount: 0 },
-            { id: 'afternoon', name: '下午时段', timeRange: '14:30 - 22:00', icon: '🌆', status: 'available', availableCount: 0, totalCount: 0 }
+            { id: 'morning', name: '上午', timeRange: '08:30 - 12:00', icon: '🌅', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'afternoon', name: '下午', timeRange: '12:00 - 22:00', icon: '🌆', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'custom', name: '自选时间段', timeRange: '灵活选择', icon: '⏰', status: 'available', availableCount: 0, totalCount: 0, isCustom: true }
         ];
     },
 
@@ -380,11 +380,20 @@ Page({
                 // 全天包含所有时间槽
                 periodSlots = timeSlots;
             } else if (period.id === 'morning') {
-                periodSlots = timeSlots.filter(slot => slot.period === 'morning');
-            } else if (period.id === 'noon') {
-                periodSlots = timeSlots.filter(slot => slot.period === 'noon');
+                // 上午：08:30-12:00，包含morning时段的所有时间槽
+                periodSlots = timeSlots.filter(slot => {
+                    const time = slot.time;
+                    return time >= '08:30' && time < '12:00';
+                });
             } else if (period.id === 'afternoon') {
-                periodSlots = timeSlots.filter(slot => slot.period === 'afternoon');
+                // 下午：12:00-22:00，包含noon和afternoon时段的所有时间槽
+                periodSlots = timeSlots.filter(slot => {
+                    const time = slot.time;
+                    return time >= '12:00' && time <= '22:00';
+                });
+            } else if (period.id === 'custom') {
+                // 自选时间段：显示所有可用时间槽用于选择
+                periodSlots = timeSlots.filter(slot => slot.status === 'available');
             }
 
             const totalCount = periodSlots.length;
@@ -395,8 +404,14 @@ Page({
             period.status = availableCount === 0 ? 'unavailable' : availableCount < totalCount ? 'partial' : 'available';
 
             // 添加是否可以整体预约的标识
-            // 只有当所有时间槽都是available状态时，才允许预约整个时段
-            period.canBookWhole = availableCount > 0 && availableCount === totalCount;
+            if (period.id === 'custom') {
+                // 自选时间段总是可以"选择"，不需要检查整体可用性
+                period.canBookWhole = true;
+                period.status = 'available';
+            } else {
+                // 只有当所有时间槽都是available状态时，才允许预约整个时段
+                period.canBookWhole = availableCount > 0 && availableCount === totalCount;
+            }
 
             // 检查全天是否约满
             if (period.id === 'fullday' && period.status === 'unavailable') {
@@ -480,6 +495,13 @@ Page({
         const selectedPeriod = this.data.timePeriods.find(p => p.id === periodId);
         if (!selectedPeriod) return;
 
+        // 如果是自选时间段，展开选择界面而不是直接预约
+        if (periodId === 'custom') {
+            const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
+            this.setData({ expandedPeriod });
+            return;
+        }
+
         // 检查该时段是否有部分时间已被占用
         if (this.isPeriodPartiallyBooked(periodId)) {
             wx.showModal({
@@ -510,16 +532,14 @@ Page({
                 const time = slot.time;
                 return time >= '08:30' && time < '12:00';
             });
-        } else if (periodId === 'noon') {
-            periodSlots = timeSlots.filter(slot => {
-                const time = slot.time;
-                return time >= '12:00' && time < '14:30';
-            });
         } else if (periodId === 'afternoon') {
             periodSlots = timeSlots.filter(slot => {
                 const time = slot.time;
-                return time >= '14:30' && time < '22:00';
+                return time >= '12:00' && time <= '22:00';
             });
+        } else if (periodId === 'custom') {
+            // 自选时间段不需要检查部分预约，总是允许用户自由选择
+            return false;
         }
 
         if (periodSlots.length === 0) return false;
@@ -545,12 +565,12 @@ Page({
         } else if (periodId === 'morning') {
             startTime = '08:30';
             endTime = '12:00';
-        } else if (periodId === 'noon') {
-            startTime = '12:00';
-            endTime = '14:30';
         } else if (periodId === 'afternoon') {
-            startTime = '14:30';
+            startTime = '12:00';
             endTime = '22:00';
+        } else if (periodId === 'custom') {
+            // 自选时间段不支持快速预约，应该展开让用户选择
+            return;
         }
 
         // 如果是全天预约，需要更新其他时段的可用性显示

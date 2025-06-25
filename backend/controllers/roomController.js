@@ -460,22 +460,18 @@ class RoomController {
         const config = require('../config');
         const slots = [];
 
+        // 简化为两个时段：上午和下午
         // 上午时间段 8:30-12:00
         const morningStart = TimeHelper.timeToMinutes(config.office.startTime);
         const morningEnd = TimeHelper.timeToMinutes(config.office.endTimeMorning);
 
-        // 中午时间段 12:00-14:30
-        const noonStart = TimeHelper.timeToMinutes(config.office.startTimeNoon);
-        const noonEnd = TimeHelper.timeToMinutes(config.office.endTimeNoon);
-
-        // 下午时间段 14:30-22:00
-        const afternoonStart = TimeHelper.timeToMinutes(config.office.startTimeAfternoon);
+        // 下午时间段 12:00-22:00（合并了原来的中午和下午）
+        const afternoonStart = TimeHelper.timeToMinutes(config.office.startTimeNoon);
         const afternoonEnd = TimeHelper.timeToMinutes(config.office.endTime);
 
-        // 生成30分钟间隔的时间段 - 修复：添加中午时段
+        // 生成30分钟间隔的时间段
         const periods = [
             { start: morningStart, end: morningEnd, name: 'morning' },
-            { start: noonStart, end: noonEnd, name: 'noon' },
             { start: afternoonStart, end: afternoonEnd, name: 'afternoon' }
         ];
 
@@ -549,10 +545,9 @@ class RoomController {
             }
         });
         
-        // 添加边界时间点：12:00归属中午，14:30归属下午
+        // 添加边界时间点：12:00归属下午
         const boundaryTimes = [
-            { minutes: TimeHelper.timeToMinutes('12:00'), period: 'noon' },
-            { minutes: TimeHelper.timeToMinutes('14:30'), period: 'afternoon' }
+            { minutes: TimeHelper.timeToMinutes('12:00'), period: 'afternoon' }
         ];
         
         boundaryTimes.forEach(boundary => {
