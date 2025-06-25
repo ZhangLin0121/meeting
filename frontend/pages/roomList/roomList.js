@@ -19,15 +19,10 @@ Page({
         // 胶囊按钮信息
         menuButtonInfo: null,
         customNavBarHeight: 0,
-        // 新增数据
-        currentTime: '',
-        stats: {
-            totalRooms: 0,
-            availableRooms: 0,
-            occupiedRooms: 0,
-            todayBookings: 0
-        },
-        recommendedRooms: []
+        // 页面配置
+        refreshing: false,
+        hasMore: true,
+        currentPage: 1
     },
 
     /**
@@ -42,25 +37,11 @@ Page({
         // 获取用户openid
         this.getUserOpenId();
 
-        // 初始化当前时间
-        this.updateCurrentTime();
+        // 加载会议室数据
+        this.loadRooms();
     },
 
-    /**
-     * 更新当前时间显示
-     */
-    updateCurrentTime() {
-        const now = new Date();
-        const timeStr = now.toLocaleString('zh-CN', {
-            month: 'numeric',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        this.setData({
-            currentTime: timeStr
-        });
-    },
+
 
     /**
      * 获取用户openid
@@ -107,12 +88,8 @@ Page({
      */
     async initializePage() {
         try {
-            console.log('🔐 开始页面初始化登录流程...');
-
             const userInfo = await this.loginUser();
             if (userInfo && userInfo.openid) {
-                console.log('✅ 用户登录成功，开始加载页面数据...');
-
                 // 更新页面数据
                 this.setData({
                     userOpenId: userInfo.openid
@@ -129,10 +106,8 @@ Page({
                     })
                 ]);
 
-                // 生成推荐会议室
-                this.generateRecommendations();
 
-                console.log('✅ 页面初始化完成');
+
             } else {
                 throw new Error('登录失败：无法获取用户信息');
             }
@@ -157,44 +132,7 @@ Page({
         }
     },
 
-    /**
-     * 生成推荐会议室列表
-     */
-    generateRecommendations() {
-        const { rooms } = this.data;
-        if (rooms.length === 0) return;
 
-        // 简单的推荐算法：选择容量适中且可用的会议室
-        const recommended = rooms
-            .filter(room => room.status === 'available')
-            .filter(room => room.capacity >= 6 && room.capacity <= 15) // 中等容量
-            .slice(0, 3); // 最多3个推荐
-
-        this.setData({
-            recommendedRooms: recommended
-        });
-    },
-
-    /**
-     * 计算统计数据
-     */
-    calculateStats(rooms) {
-        const totalRooms = rooms.length;
-        const availableRooms = rooms.filter(room => room.status === 'available').length;
-        const occupiedRooms = totalRooms - availableRooms;
-
-        // 模拟今日预约数据（实际项目中应该从API获取）
-        const todayBookings = Math.floor(Math.random() * totalRooms) + 1;
-
-        this.setData({
-            stats: {
-                totalRooms,
-                availableRooms,
-                occupiedRooms,
-                todayBookings
-            }
-        });
-    },
 
     /**
      * 生命周期函数--监听页面隐藏
@@ -369,8 +307,6 @@ Page({
         }
 
         this.setData({ loading: true });
-        console.log('⏳ 开始加载会议室列表，loading状态已设置为true');
-
         try {
             console.log('🏢 开始获取会议室列表...', {
                 userOpenId: this.data.userOpenId.substring(0, 8) + '...',
@@ -973,162 +909,11 @@ Page({
     },
 
     /**
-     * 快速预约今日会议室
-     */
-    quickBookToday() {
-        wx.showModal({
-            title: '今日预约',
-            content: '跳转到今日可用会议室列表？',
-            success: (res) => {
-                if (res.confirm) {
-                    // 筛选今日可用的会议室
-                    this.filterAvailableRooms();
-                }
-            }
-        });
-    },
-
-    /**
-     * 筛选可用会议室
-     */
-    filterAvailableRooms() {
-        const availableRooms = this.data.rooms.filter(room => room.status === 'available');
-        this.setData({
-            rooms: availableRooms
-        });
-
-        wx.showToast({
-            title: `找到${availableRooms.length}间可用会议室`,
-            icon: 'success'
-        });
-    },
-
-    /**
-     * 显示热门会议室
-     */
-    showPopularRooms() {
-        // 模拟热门会议室（实际应该基于预订频率）
-        const popularRooms = this.data.rooms
-            .sort((a, b) => b.capacity - a.capacity) // 按容量排序作为热门指标
-            .slice(0, 3);
-
-        if (popularRooms.length > 0) {
-            wx.showModal({
-                title: '热门会议室',
-                content: `推荐：${popularRooms.map(room => room.name).join('、')}`,
-                showCancel: false
-            });
-        }
-    },
-
-    /**
-     * 快速预约会议室
-     */
-    quickBookRoom(e) {
-        const room = e.currentTarget.dataset.room;
-        console.log('🏃‍♂️ 快速预约会议室:', room.name);
-
-        if (room.status !== 'available') {
-            wx.showToast({
-                title: '该会议室不可用',
-                icon: 'none'
-            });
-            return;
-        }
-
-        wx.showModal({
-            title: '快速预约',
-            content: `确认预约 ${room.name}？`,
-            success: (res) => {
-                if (res.confirm) {
-                    // 跳转到预约页面
-                    wx.navigateTo({
-                        url: `/pages/roomDetail/roomDetail?roomId=${room.id}&quickBook=true`
-                    });
-                }
-            }
-        });
-    },
-
-    /**
-     * 预览会议室详情
-     */
-    previewRoom(e) {
-        const room = e.currentTarget.dataset.room;
-        console.log('👀 预览会议室:', room.name);
-
-        this.goToRoomDetail(e);
-    },
-
-    /**
      * 跳转到我的预约
      */
     goToMyBookings() {
-        wx.showModal({
-            title: '我的预约',
-            content: '预约管理功能开发中，敬请期待！',
-            showCancel: false
-        });
-    },
-
-    /**
-     * 添加到收藏
-     */
-    addToFavorites(e) {
-        const room = e.currentTarget.dataset.room;
-        console.log('⭐ 添加收藏:', room.name);
-
-        wx.showToast({
-            title: `已收藏 ${room.name}`,
-            icon: 'success',
-            duration: 2000
-        });
-
-        // TODO: 实际收藏逻辑
-    },
-
-    /**
-     * 分享会议室
-     */
-    shareRoom(e) {
-        const room = e.currentTarget.dataset.room;
-        console.log('📤 分享会议室:', room.name);
-
-        wx.showModal({
-            title: '分享会议室',
-            content: `要分享 ${room.name} 的信息吗？`,
-            success: (res) => {
-                if (res.confirm) {
-                    // TODO: 实现分享功能
-                    wx.showToast({
-                        title: '分享成功',
-                        icon: 'success'
-                    });
-                }
-            }
-        });
-    },
-
-    /**
-     * 显示会议室地图
-     */
-    showRoomMap(e) {
-        const room = e.currentTarget.dataset.room;
-        console.log('🗺️ 显示地图:', room.name);
-
-        wx.showModal({
-            title: '会议室位置',
-            content: `${room.name} 位于 ${room.location}`,
-            confirmText: '导航',
-            success: (res) => {
-                if (res.confirm) {
-                    // TODO: 实现导航功能
-                    wx.showToast({
-                        title: '导航功能开发中',
-                        icon: 'none'
-                    });
-                }
-            }
+        wx.switchTab({
+            url: '/pages/myBookings/myBookings'
         });
     }
 });

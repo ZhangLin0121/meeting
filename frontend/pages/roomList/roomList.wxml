@@ -63,103 +63,11 @@
       </view>
     </view>
 
-    <!-- 内容区域 -->
+    <!-- 会议室列表 -->
     <view wx:else class="content-wrapper">
-      
-      <!-- 数据统计卡片 -->
-      <view class="stats-section">
-        <view class="stats-card">
-          <view class="stats-header">
-            <text class="stats-title">今日概览</text>
-            <text class="stats-time">{{currentTime}}</text>
-          </view>
-          <view class="stats-grid">
-            <view class="stat-item">
-              <text class="stat-number">{{stats.totalRooms}}</text>
-              <text class="stat-label">总会议室</text>
-            </view>
-            <view class="stat-item">
-              <text class="stat-number available">{{stats.availableRooms}}</text>
-              <text class="stat-label">可用会议室</text>
-            </view>
-            <view class="stat-item">
-              <text class="stat-number occupied">{{stats.occupiedRooms}}</text>
-              <text class="stat-label">使用中</text>
-            </view>
-            <view class="stat-item">
-              <text class="stat-number">{{stats.todayBookings}}</text>
-              <text class="stat-label">今日预约</text>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <!-- 快速操作区域 -->
-      <view class="quick-actions-section">
-        <view class="section-header">
-          <text class="section-title">快速操作</text>
-        </view>
-        <view class="quick-actions-grid">
-          <view class="quick-action-item" bindtap="quickBookToday">
-            <view class="action-icon calendar">
-              <image src="/images/icons/calendar.png" mode="aspectFit"></image>
-            </view>
-            <text class="action-text">今日预约</text>
-          </view>
-          <view class="quick-action-item" bindtap="goToMyBookings">
-            <view class="action-icon bookings">
-              <image src="/images/icons/bookmark.png" mode="aspectFit"></image>
-            </view>
-            <text class="action-text">我的预约</text>
-          </view>
-          <view class="quick-action-item" bindtap="showCapacityFilter">
-            <view class="action-icon filter">
-              <image src="/images/icons/filter.png" mode="aspectFit"></image>
-            </view>
-            <text class="action-text">按容量筛选</text>
-          </view>
-          <view class="quick-action-item" bindtap="showPopularRooms">
-            <view class="action-icon popular">
-              <image src="/images/icons/star.png" mode="aspectFit"></image>
-            </view>
-            <text class="action-text">热门会议室</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 推荐会议室 -->
-      <view wx:if="{{recommendedRooms.length > 0}}" class="recommended-section">
-        <view class="section-header">
-          <text class="section-title">推荐会议室</text>
-          <text class="section-subtitle">根据您的使用习惯推荐</text>
-        </view>
-        <scroll-view class="recommended-scroll" scroll-x show-scrollbar="{{false}}">
-          <view class="recommended-list">
-            <view wx:for="{{recommendedRooms}}" wx:key="id" 
-                  class="recommended-card" 
-                  data-room="{{item}}"
-                  bindtap="goToRoomDetail">
-              <view class="recommended-image">
-                <image 
-                  class="room-thumbnail" 
-                  src="{{item.displayImage}}" 
-                  mode="aspectFill"
-                  lazy-load
-                />
-                <view class="recommended-badge">推荐</view>
-              </view>
-              <view class="recommended-info">
-                <text class="recommended-name">{{item.name}}</text>
-                <text class="recommended-capacity">{{item.capacity}}人</text>
-              </view>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
-
       <!-- 会议室列表标题 -->
       <view class="section-header">
-        <text class="section-title">全部会议室</text>
+        <text class="section-title">会议室列表</text>
         <text class="section-subtitle">共{{rooms.length}}间会议室</text>
       </view>
 
