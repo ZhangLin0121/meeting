@@ -479,10 +479,14 @@ class RoomController {
             { start: afternoonStart, end: afternoonEnd, name: 'afternoon' }
         ];
 
+        // 收集所有时间槽，之后去重
+        const allSlots = [];
+        
         periods.forEach(period => {
-            // 每个时段都包含其完整范围，包括边界时间点
-            // 这样上午包含12:00，中午也包含12:00和14:30，下午也包含14:30
-            for (let minutes = period.start; minutes <= period.end; minutes += 30) {
+            // 每个时段包含其完整范围，但边界时间归属于下一个时段
+            const endLimit = period.name === 'afternoon' ? period.end : period.end - 30;
+            
+            for (let minutes = period.start; minutes <= endLimit; minutes += 30) {
                 const startTime = TimeHelper.minutesToTime(minutes);
                 const endTime = TimeHelper.minutesToTime(minutes + 30);
 
@@ -531,21 +535,91 @@ class RoomController {
                     status = 'past'; // 过去的时间段标记为不可用
                 }
 
-                slots.push({
+                allSlots.push({
                     startTime,
                     endTime,
                     status,
                     period: period.name,
                     time: startTime,  // 添加time字段用于前端显示
                     canBeStartTime: status === 'available', // 可以作为开始时间（除非被占用或过期）
-                    canBeEndTime: status === 'available' && !isUsedAsEndTime // 不能作为结束时间如果已被用作结束时间
+                    canBeEndTime: status === 'available' && !isUsedAsEndTime, // 不能作为结束时间如果已被用作结束时间
+                    isUsedAsEndTime: isUsedAsEndTime, // 调试信息
+                    isUsedAsStartTime: isUsedAsStartTime // 调试信息
                 });
             }
-            
-            // 边界时间点已在主循环中处理，无需额外添加
         });
-
-        return slots;
+        
+        // 添加边界时间点：12:00归属中午，14:30归属下午
+        const boundaryTimes = [
+            { minutes: TimeHelper.timeToMinutes('12:00'), period: 'noon' },
+            { minutes: TimeHelper.timeToMinutes('14:30'), period: 'afternoon' }
+        ];
+        
+        boundaryTimes.forEach(boundary => {
+            const startTime = TimeHelper.minutesToTime(boundary.minutes);
+            const endTime = TimeHelper.minutesToTime(boundary.minutes + 30);
+            
+            // 检查边界时间的预约状态
+            const isBooked = bookings.some(booking => {
+                const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
+                const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
+                const slotStart = boundary.minutes;
+                const slotEnd = boundary.minutes + 30;
+                
+                const hasOverlap = slotStart < bookingEnd && slotEnd > bookingStart;
+                return hasOverlap;
+            });
+            
+            const isPastTime = queryDate && TimeHelper.isPastTime(queryDate, startTime);
+            
+            const isUsedAsEndTime = bookings.some(booking => {
+                const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
+                return boundary.minutes === bookingEnd;
+            });
+            
+            let status = 'available';
+            if (isBooked) {
+                status = 'booked';
+            } else if (isPastTime) {
+                status = 'past';
+            }
+            
+            allSlots.push({
+                startTime,
+                endTime,
+                status,
+                period: boundary.period,
+                time: startTime,
+                canBeStartTime: status === 'available',
+                canBeEndTime: status === 'available' && !isUsedAsEndTime,
+                isUsedAsEndTime: isUsedAsEndTime,
+                isUsedAsStartTime: false,
+                isBoundary: true
+            });
+        });
+        
+        // 去重：如果有相同时间的时间槽，保留状态较好的那个（available > booked > past）
+        const uniqueSlots = [];
+        const timeMap = new Map();
+        
+        allSlots.forEach(slot => {
+            const existing = timeMap.get(slot.time);
+            if (!existing) {
+                timeMap.set(slot.time, slot);
+            } else {
+                // 优先级：available > booked > past
+                const statusPriority = { available: 3, booked: 2, past: 1, closed: 0 };
+                if (statusPriority[slot.status] > statusPriority[existing.status]) {
+                    timeMap.set(slot.time, slot);
+                }
+            }
+        });
+        
+        // 转换为数组并排序
+        timeMap.forEach(slot => uniqueSlots.push(slot));
+        uniqueSlots.sort((a, b) => TimeHelper.timeToMinutes(a.time) - TimeHelper.timeToMinutes(b.time));
+        
+        return uniqueSlots;
     }
 
     /**
