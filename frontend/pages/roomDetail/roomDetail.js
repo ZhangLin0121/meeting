@@ -362,8 +362,8 @@ Page({
     generateTimePeriodsArray() {
         return [
             { id: 'fullday', name: '全天', timeRange: '08:30 - 22:00', icon: '🌍', status: 'available', availableCount: 0, totalCount: 0, isFullDay: true },
-            { id: 'morning', name: '上午时段', timeRange: '08:30 - 12:00', icon: '🌅', status: 'available', availableCount: 0, totalCount: 0 },
-            { id: 'noon', name: '中午时段', timeRange: '12:00 - 14:30', icon: '☀️', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'morning', name: '上午时段', timeRange: '08:30 - 11:30', icon: '🌅', status: 'available', availableCount: 0, totalCount: 0 },
+            { id: 'noon', name: '中午时段', timeRange: '12:00 - 14:00', icon: '☀️', status: 'available', availableCount: 0, totalCount: 0 },
             { id: 'afternoon', name: '下午时段', timeRange: '14:30 - 22:00', icon: '🌆', status: 'available', availableCount: 0, totalCount: 0 }
         ];
     },
