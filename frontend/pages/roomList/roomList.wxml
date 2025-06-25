@@ -4,7 +4,7 @@
   <view class="ios-navbar" style="padding-top: {{statusBarHeight}}px;">
     <view class="navbar-content">
       <view class="nav-left"></view>
-      <text class="nav-title">会议室列表</text>
+      <text class="nav-title">会议室预订</text>
       <view class="nav-right" bindtap="goToAdminPanel" wx:if="{{isAdmin}}">
         <view class="nav-button">
           <image class="nav-icon" src="/images/icons/admin.png" mode="aspectFit"></image>
@@ -63,79 +63,203 @@
       </view>
     </view>
 
-    <!-- 会议室列表 -->
-    <scroll-view
-      wx:else
-      class="room-list"
-      scroll-y
-      bindscrolltolower="onReachBottom"
-      refresher-enabled="{{true}}"
-      refresher-triggered="{{refreshing}}"
-      bindrefresherrefresh="onRefresh"
-    >
-      <view class="room-grid">
-        <view wx:for="{{rooms}}" wx:key="id" 
-              class="room-card-wrapper" 
-              data-room="{{item}}"
-              bindtap="goToRoomDetail">
-          
-          <view class="room-card">
-            <!-- 房间图片 -->
-            <view class="room-image-container">
-              <image 
-                wx:if="{{!item.imageError}}"
-                class="room-image" 
-                src="{{item.displayImage}}" 
-                mode="aspectFill" 
-                lazy-load
-                binderror="onImageError"
-                bindload="onImageLoad"
-                data-room-id="{{item.id}}"
-              />
-              <view wx:else class="room-image-placeholder">
-                <image class="placeholder-icon" src="/images/icons/image-placeholder.png" mode="aspectFit"></image>
-              </view>
-              
-              <!-- 状态标签 -->
-              <view class="status-chip image-status-chip {{item.status === 'available' ? 'available' : 'occupied'}}">
-                <text class="status-text">{{item.status === 'available' ? '可预约' : '已占用'}}</text>
-              </view>
+    <!-- 内容区域 -->
+    <view wx:else class="content-wrapper">
+      
+      <!-- 数据统计卡片 -->
+      <view class="stats-section">
+        <view class="stats-card">
+          <view class="stats-header">
+            <text class="stats-title">今日概览</text>
+            <text class="stats-time">{{currentTime}}</text>
+          </view>
+          <view class="stats-grid">
+            <view class="stat-item">
+              <text class="stat-number">{{stats.totalRooms}}</text>
+              <text class="stat-label">总会议室</text>
             </view>
-
-            <!-- 房间信息 -->
-            <view class="room-info">
-              <view class="room-header">
-                <text class="room-name">{{item.name}}</text>
-                <view class="capacity-badge">
-                  <image class="capacity-icon" src="/images/icons/people.png" mode="aspectFit"></image>
-                  <text class="capacity-text">{{item.capacity}}</text>
-                </view>
-              </view>
-              
-              <view class="room-location">
-                <image class="location-icon" src="/images/icons/location.png" mode="aspectFit"></image>
-                <text class="location-text">{{item.location}}</text>
-              </view>
-              
-              <text class="room-description">{{item.description || '暂无描述'}}</text>
-              
-              <!-- 底部行动区域 -->
-              <view class="room-actions">
-              </view>
+            <view class="stat-item">
+              <text class="stat-number available">{{stats.availableRooms}}</text>
+              <text class="stat-label">可用会议室</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-number occupied">{{stats.occupiedRooms}}</text>
+              <text class="stat-label">使用中</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-number">{{stats.todayBookings}}</text>
+              <text class="stat-label">今日预约</text>
             </view>
           </view>
         </view>
       </view>
 
-      <!-- 加载更多 -->
-      <view wx:if="{{loadingMore}}" class="loading-more">
-        <view class="mini-spinner"></view>
-        <text class="loading-more-text">正在加载更多...</text>
+      <!-- 快速操作区域 -->
+      <view class="quick-actions-section">
+        <view class="section-header">
+          <text class="section-title">快速操作</text>
+        </view>
+        <view class="quick-actions-grid">
+          <view class="quick-action-item" bindtap="quickBookToday">
+            <view class="action-icon calendar">
+              <image src="/images/icons/calendar.png" mode="aspectFit"></image>
+            </view>
+            <text class="action-text">今日预约</text>
+          </view>
+          <view class="quick-action-item" bindtap="goToMyBookings">
+            <view class="action-icon bookings">
+              <image src="/images/icons/bookmark.png" mode="aspectFit"></image>
+            </view>
+            <text class="action-text">我的预约</text>
+          </view>
+          <view class="quick-action-item" bindtap="showCapacityFilter">
+            <view class="action-icon filter">
+              <image src="/images/icons/filter.png" mode="aspectFit"></image>
+            </view>
+            <text class="action-text">按容量筛选</text>
+          </view>
+          <view class="quick-action-item" bindtap="showPopularRooms">
+            <view class="action-icon popular">
+              <image src="/images/icons/star.png" mode="aspectFit"></image>
+            </view>
+            <text class="action-text">热门会议室</text>
+          </view>
+        </view>
       </view>
 
-      <!-- 底部间距 -->
-      <view class="bottom-spacing"></view>
-    </scroll-view>
+      <!-- 推荐会议室 -->
+      <view wx:if="{{recommendedRooms.length > 0}}" class="recommended-section">
+        <view class="section-header">
+          <text class="section-title">推荐会议室</text>
+          <text class="section-subtitle">根据您的使用习惯推荐</text>
+        </view>
+        <scroll-view class="recommended-scroll" scroll-x show-scrollbar="{{false}}">
+          <view class="recommended-list">
+            <view wx:for="{{recommendedRooms}}" wx:key="id" 
+                  class="recommended-card" 
+                  data-room="{{item}}"
+                  bindtap="goToRoomDetail">
+              <view class="recommended-image">
+                <image 
+                  class="room-thumbnail" 
+                  src="{{item.displayImage}}" 
+                  mode="aspectFill"
+                  lazy-load
+                />
+                <view class="recommended-badge">推荐</view>
+              </view>
+              <view class="recommended-info">
+                <text class="recommended-name">{{item.name}}</text>
+                <text class="recommended-capacity">{{item.capacity}}人</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- 会议室列表标题 -->
+      <view class="section-header">
+        <text class="section-title">全部会议室</text>
+        <text class="section-subtitle">共{{rooms.length}}间会议室</text>
+      </view>
+
+      <!-- 会议室列表 -->
+      <scroll-view
+        class="room-list"
+        scroll-y
+        bindscrolltolower="onReachBottom"
+        refresher-enabled="{{true}}"
+        refresher-triggered="{{refreshing}}"
+        bindrefresherrefresh="onRefresh"
+      >
+        <view class="room-grid">
+          <view wx:for="{{rooms}}" wx:key="id" 
+                class="room-card-wrapper" 
+                data-room="{{item}}"
+                bindtap="goToRoomDetail">
+            
+            <view class="room-card">
+              <!-- 房间图片 -->
+              <view class="room-image-container">
+                <image 
+                  wx:if="{{!item.imageError}}"
+                  class="room-image" 
+                  src="{{item.displayImage}}" 
+                  mode="aspectFill" 
+                  lazy-load
+                  binderror="onImageError"
+                  bindload="onImageLoad"
+                  data-room-id="{{item.id}}"
+                />
+                <view wx:else class="room-image-placeholder">
+                  <image class="placeholder-icon" src="/images/icons/image-placeholder.png" mode="aspectFit"></image>
+                </view>
+                
+                <!-- 状态标签 -->
+                <view class="status-chip image-status-chip {{item.status === 'available' ? 'available' : 'occupied'}}">
+                  <text class="status-text">{{item.status === 'available' ? '可预约' : '已占用'}}</text>
+                </view>
+              </view>
+
+              <!-- 房间信息 -->
+              <view class="room-info">
+                <view class="room-header">
+                  <text class="room-name">{{item.name}}</text>
+                  <view class="capacity-badge">
+                    <image class="capacity-icon" src="/images/icons/people.png" mode="aspectFit"></image>
+                    <text class="capacity-text">{{item.capacity}}</text>
+                  </view>
+                </view>
+                
+                <view class="room-location">
+                  <image class="location-icon" src="/images/icons/location.png" mode="aspectFit"></image>
+                  <text class="location-text">{{item.location}}</text>
+                </view>
+                
+                <text class="room-description">{{item.description || '暂无描述'}}</text>
+                
+                <!-- 设备标签 -->
+                <view wx:if="{{item.equipment && item.equipment.length > 0}}" class="equipment-tags">
+                  <view wx:for="{{item.equipment}}" wx:key="*this" 
+                        wx:for-item="equipment"
+                        class="equipment-tag">
+                    <text class="equipment-text">{{equipment}}</text>
+                  </view>
+                </view>
+                
+                <!-- 底部行动区域 -->
+                <view class="room-actions">
+                  <view class="action-buttons">
+                    <button class="action-btn primary" 
+                            data-room="{{item}}"
+                            bindtap="quickBookRoom"
+                            catchtap="true">
+                      立即预约
+                    </button>
+                    <button class="action-btn secondary" 
+                            data-room="{{item}}"
+                            bindtap="previewRoom"
+                            catchtap="true">
+                      查看详情
+                    </button>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 加载更多 -->
+        <view wx:if="{{loadingMore}}" class="loading-more">
+          <view class="mini-spinner"></view>
+          <text class="loading-more-text">正在加载更多...</text>
+        </view>
+
+        <!-- 底部间距 -->
+        <view class="bottom-spacing"></view>
+      </scroll-view>
+    </view>
+
   </view>
 
 </view> 

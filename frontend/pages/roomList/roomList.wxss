@@ -82,6 +82,10 @@
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
 }
 
+.content-wrapper {
+    padding-bottom: 60px;
+}
+
 
 /* ==================== 搜索区域 ==================== */
 
@@ -175,6 +179,222 @@
 }
 
 
+/* ==================== 统计卡片区域 ==================== */
+
+.stats-section {
+    margin: 20px 12px;
+}
+
+.stats-card {
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 122, 255, 0.2);
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.stats-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+.stats-time {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.stat-number.available {
+    color: #30D158;
+}
+
+.stat-number.occupied {
+    color: #FF6B6B;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+
+/* ==================== 快速操作区域 ==================== */
+
+.quick-actions-section {
+    margin: 20px 12px;
+}
+
+.section-header {
+    margin-bottom: 16px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1c1c1e;
+    margin-bottom: 4px;
+}
+
+.section-subtitle {
+    font-size: 14px;
+    color: #8e8e93;
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.quick-action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 12px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.quick-action-item:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
+}
+
+.action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.action-icon.calendar {
+    background: rgba(255, 149, 0, 0.1);
+}
+
+.action-icon.bookings {
+    background: rgba(52, 199, 89, 0.1);
+}
+
+.action-icon.filter {
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.action-icon.popular {
+    background: rgba(255, 204, 0, 0.1);
+}
+
+.action-icon image {
+    width: 24px;
+    height: 24px;
+}
+
+.action-text {
+    font-size: 12px;
+    color: #1c1c1e;
+    text-align: center;
+    font-weight: 500;
+}
+
+
+/* ==================== 推荐会议室区域 ==================== */
+
+.recommended-section {
+    margin: 20px 12px;
+}
+
+.recommended-scroll {
+    margin-top: 16px;
+}
+
+.recommended-list {
+    display: flex;
+    gap: 12px;
+    padding: 0 12px;
+}
+
+.recommended-card {
+    flex-shrink: 0;
+    width: 120px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.recommended-card:active {
+    transform: scale(0.95);
+}
+
+.recommended-image {
+    position: relative;
+    height: 80px;
+}
+
+.room-thumbnail {
+    width: 100%;
+    height: 100%;
+}
+
+.recommended-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 149, 0, 0.9);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.recommended-info {
+    padding: 12px;
+}
+
+.recommended-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1c1c1e;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.recommended-capacity {
+    font-size: 12px;
+    color: #8e8e93;
+}
+
+
 /* ==================== 状态页面 ==================== */
 
 .loading-view,
@@ -200,13 +420,6 @@
     border-top: 2px solid #007AFF;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-bottom: 12px;
-}
-
-.loading-label {
-    font-size: 15px;
-    color: #8e8e93;
-    font-weight: 400;
 }
 
 @keyframes spin {
@@ -218,78 +431,73 @@
     }
 }
 
-.empty-icon .sf-symbol-large {
-    font-size: 64px;
+.loading-label {
+    margin-top: 12px;
+    font-size: 16px;
     color: #8e8e93;
-    margin-bottom: 16px;
+}
+
+.empty-content {
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-image {
+    width: 100%;
+    height: 100%;
 }
 
 .empty-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: #1c1c1e;
     margin-bottom: 8px;
-    letter-spacing: -0.5px;
 }
 
 .empty-subtitle {
-    font-size: 15px;
+    font-size: 14px;
     color: #8e8e93;
-    margin-bottom: 24px;
-    line-height: 1.4;
+    margin-bottom: 20px;
 }
 
 .ios-button {
     background: #007AFF;
+    color: white;
     border: none;
     border-radius: 12px;
     padding: 12px 24px;
     font-size: 16px;
     font-weight: 600;
-    color: white;
-    letter-spacing: -0.4px;
     transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.ios-button:active {
-    background: #0056d3;
-    transform: scale(0.95);
+.ios-button.secondary {
+    background: rgba(0, 122, 255, 0.1);
+    color: #007AFF;
 }
 
-.ios-button.secondary {
-    background: rgba(142, 142, 147, 0.12);
-    color: #007AFF;
+.ios-button:active {
+    transform: scale(0.95);
 }
 
 
 /* ==================== 会议室列表 ==================== */
 
 .room-list {
-    height: calc(100vh - 180px);
-    width: 100%;
+    height: 400px;
+    margin-top: 16px;
 }
 
 .room-grid {
-    width: 100%;
-    max-width: 1200px;
-    padding: 24px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 16px;
-}
-
-@media screen and (max-width: 1200px) {
-    .room-grid {
-        padding: 16px;
-    }
-}
-
-@media screen and (max-width: 768px) {
-    .room-grid {
-        padding: 8px;
-        gap: 12px;
-    }
+    padding: 0 12px;
 }
 
 .room-card-wrapper {
@@ -302,284 +510,204 @@
 
 .room-card {
     background: white;
-    border-radius: 24px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-    border: 0.5px solid rgba(0, 0, 0, 0.03);
-    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-    position: relative;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
-
-.room-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-    pointer-events: none;
-    border-radius: 24px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.room-card:hover {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
-}
-
-.room-card:hover::before {
-    opacity: 1;
-}
-
-
-/* ==================== 房间图片 ==================== */
 
 .room-image-container {
     position: relative;
-    height: 240px;
+    height: 180px;
     overflow: hidden;
-    margin: 16px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-@media screen and (max-width: 768px) {
-    .room-image-container {
-        margin: 12px;
-        height: 220px;
-    }
-}
-
-.room-image-container::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
-    pointer-events: none;
-    border-radius: 0 0 20px 20px;
-    transition: opacity 0.3s ease;
-}
-
-.room-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 20px;
-    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.room-card:hover .room-image {
-    transform: scale(1.08);
-    filter: brightness(1.05) saturate(1.1);
-}
-
-.room-card:hover .room-image-container::after {
-    opacity: 0.8;
-}
-
+.room-image,
 .room-image-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #f2f2f7 0%, #e5e5ea 100%);
+}
+
+.room-image-placeholder {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .placeholder-icon {
-    font-size: 48px;
-    color: #d1d1d6;
+    width: 40px;
+    height: 40px;
+    opacity: 0.4;
 }
 
-
-/* 可用性指示器 */
-
-.availability-indicator {
+.status-chip {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    width: 12px;
-    height: 12px;
-    border-radius: 6px;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.availability-indicator.available .indicator-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: #34c759;
-}
-
-.availability-indicator.occupied .indicator-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: #ff3b30;
-}
-
-
-/* 图片内状态标签 */
-
-.image-status-chip {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    padding: 4px 8px;
-    border-radius: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     font-size: 12px;
-    font-weight: 500;
-    letter-spacing: -0.2px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-
-/* ==================== 房间信息 ==================== */
-
-.room-info {
-    padding: 0 20px 24px 20px;
-    background: linear-gradient(to bottom, rgba(248, 249, 250, 0.3) 0%, transparent 30%);
-    position: relative;
+.image-status-chip {
+    top: 12px;
+    right: 12px;
 }
 
-@media screen and (max-width: 768px) {
-    .room-info {
-        padding: 0 16px 20px 16px;
-    }
+.status-chip.available {
+    background: rgba(52, 199, 89, 0.9);
+    color: white;
+}
+
+.status-chip.occupied {
+    background: rgba(255, 59, 48, 0.9);
+    color: white;
+}
+
+.room-info {
+    padding: 20px;
 }
 
 .room-header {
     display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 12px;
-    margin-top: 16px;
-    width: 100%;
 }
 
 .room-name {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
     color: #1c1c1e;
-    letter-spacing: -0.7px;
+    line-height: 1.3;
     flex: 1;
-    text-align: left;
-    line-height: 1.2;
-    margin-bottom: 4px;
+    margin-right: 12px;
 }
 
 .capacity-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: linear-gradient(135deg, rgba(0, 122, 255, 0.12) 0%, rgba(88, 86, 214, 0.12) 100%);
-    padding: 8px 12px;
+    gap: 4px;
+    background: rgba(0, 122, 255, 0.1);
+    padding: 6px 10px;
     border-radius: 12px;
-    border: 1px solid rgba(0, 122, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    flex-shrink: 0;
 }
 
 .capacity-icon {
     width: 14px;
     height: 14px;
-    opacity: 0.9;
 }
 
 .capacity-text {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: #007AFF;
-    letter-spacing: -0.2px;
 }
 
 .room-location {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 12px;
-    padding: 6px 12px;
-    background: rgba(142, 142, 147, 0.08);
-    border-radius: 12px;
-    width: fit-content;
 }
 
 .location-icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.8;
+    width: 14px;
+    height: 14px;
 }
 
 .location-text {
     font-size: 14px;
-    color: #6c6c70;
-    font-weight: 500;
+    color: #8e8e93;
 }
 
 .room-description {
-    font-size: 15px;
-    color: #48484a;
-    line-height: 1.5;
+    font-size: 14px;
+    color: #6c6c70;
+    line-height: 1.4;
     margin-bottom: 16px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    padding: 0 2px;
 }
 
 
-/* ==================== 房间操作 ==================== */
+/* 设备标签 */
+
+.equipment-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.equipment-tag {
+    background: rgba(116, 116, 128, 0.08);
+    border: 1px solid rgba(116, 116, 128, 0.16);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+.equipment-text {
+    font-size: 11px;
+    color: #6c6c70;
+    font-weight: 500;
+}
+
+
+/* 操作按钮 */
 
 .room-actions {
+    margin-top: 16px;
+}
+
+.action-buttons {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    gap: 8px;
 }
 
-.status-chip {
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: -0.2px;
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.status-chip.available {
-    background: rgba(52, 199, 89, 0.15);
-    color: #34c759;
+.action-btn.primary {
+    background: #007AFF;
+    color: white;
 }
 
-.status-chip.occupied {
-    background: rgba(255, 59, 48, 0.15);
-    color: #ff3b30;
+.action-btn.secondary {
+    background: rgba(0, 122, 255, 0.1);
+    color: #007AFF;
 }
 
-
-/* ==================== 加载更多 ==================== */
+.action-btn:active {
+    transform: scale(0.95);
+}
 
 .loading-more {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     padding: 20px;
-    margin: 16px 0;
+    gap: 12px;
 }
 
 .mini-spinner {
     width: 16px;
     height: 16px;
-    border: 1.5px solid #f3f3f3;
-    border-top: 1.5px solid #007AFF;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007AFF;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -589,77 +717,24 @@
     color: #8e8e93;
 }
 
-
-/* ==================== 响应式设计 ==================== */
-
-@media (max-width: 768px) {
-    .room-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    .main-content {
-        padding: 0 16px 16px;
-    }
-    .search-section {
-        padding: 12px 16px;
-    }
-}
-
-@media (max-width: 375px) {
-    .room-card {
-        margin: 0 -4px;
-    }
-    .room-image-container {
-        height: 140px;
-    }
-}
-
-
-/* ==================== 暗黑模式支持 ==================== */
-
-@media (prefers-color-scheme: dark) {
-    .ios-app-container {
-        background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
-    }
-    .search-section {
-        background: rgba(28, 28, 30, 0.8);
-        border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
-    }
-    .room-name,
-    .empty-title {
-        color: #ffffff;
-    }
-    .room-card {
-        background: #2c2c2e;
-        border: 0.5px solid rgba(255, 255, 255, 0.04);
-    }
-    .search-bar {
-        background: rgba(118, 118, 128, 0.24);
-    }
-    .search-input {
-        color: #ffffff;
-    }
-    .room-description {
-        color: #aeaeb2;
-    }
-}
-
-
-/* ==================== 底部间距 ==================== */
-
 .bottom-spacing {
     height: 40px;
 }
 
-
-/* ==================== 新增图标样式 ==================== */
-
-.clear-icon {
-    width: 16px;
-    height: 16px;
-}
-
-.filter-icon {
-    width: 18px;
-    height: 18px;
+@media screen and (max-width: 768px) {
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    .action-buttons {
+        flex-direction: column;
+    }
+    .room-grid {
+        padding: 0 8px;
+        gap: 12px;
+    }
 }
