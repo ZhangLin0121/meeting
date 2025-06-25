@@ -480,8 +480,9 @@ class RoomController {
         ];
 
         periods.forEach(period => {
-            // 修复：使用 <= 包含结束时间点，确保所有时间段都被包含
-            for (let minutes = period.start; minutes <= period.end - 30; minutes += 30) {
+            // 每个时段都包含其完整范围，包括边界时间点
+            // 这样上午包含12:00，中午也包含12:00和14:30，下午也包含14:30
+            for (let minutes = period.start; minutes <= period.end; minutes += 30) {
                 const startTime = TimeHelper.minutesToTime(minutes);
                 const endTime = TimeHelper.minutesToTime(minutes + 30);
 
@@ -541,26 +542,7 @@ class RoomController {
                 });
             }
             
-            // 为每个时段添加结束时间点作为可选择的时间点
-            // 注意：只有当结束时间点不会与下一个时段的开始时间重复时才添加
-            if (period.name === 'morning') {
-                // 上午时段添加12:00时间点 - 但不添加，因为会与中午时段重复
-                // 中午时段已经包含12:00开始的时间槽
-            } else if (period.name === 'noon') {
-                // 中午时段添加14:30时间点 - 但不添加，因为会与下午时段重复
-                // 下午时段已经包含14:30开始的时间槽
-            } else if (period.name === 'afternoon') {
-                // 下午时段添加22:00时间点 - 这个可以添加，因为后面没有时段了
-                const endTimePoint = TimeHelper.minutesToTime(period.end);
-                slots.push({
-                    startTime: endTimePoint,
-                    endTime: TimeHelper.minutesToTime(period.end + 30),
-                    status: 'available',
-                    period: period.name,
-                    time: endTimePoint,
-                    isBoundary: true
-                });
-            }
+            // 边界时间点已在主循环中处理，无需额外添加
         });
 
         return slots;
