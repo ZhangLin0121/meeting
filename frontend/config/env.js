@@ -10,7 +10,7 @@ const ENV = {
 };
 
 // 当前环境 - 在这里切换环境
-const CURRENT_ENV = ENV.DEVELOPMENT; // 改为 ENV.PRODUCTION 切换到生产环境
+const CURRENT_ENV = ENV.DEVELOPMENT; // 改为 ENV.DEVELOPMENT 启用调试模式
 
 // 不同环境的配置
 const CONFIG = {

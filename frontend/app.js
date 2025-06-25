@@ -1,9 +1,11 @@
 // app.js
 const envConfig = require('./config/env.js');
+const performance = require('./utils/performance.js');
+require('./utils/console-override.js'); // 优化console输出
 
 App({
     onLaunch() {
-        console.log('🚀 小程序启动');
+        performance.log('🚀 小程序启动');
 
         // 展示本地存储能力
         const logs = wx.getStorageSync('logs') || []
