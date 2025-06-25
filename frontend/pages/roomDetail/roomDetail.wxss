@@ -450,26 +450,7 @@ page {
 }
 
 
-/* 可用性指示器 - Apple简约风格 */
-
-.availability-indicator {
-    text-align: right;
-}
-
-.availability-text {
-    font-size: 12px;
-    font-weight: 500;
-    color: #34c759;
-    letter-spacing: -0.1px;
-}
-
-.availability-text.partial {
-    color: #8e8e93;
-}
-
-.availability-text.unavailable {
-    color: #ff3b30;
-}
+/* 可用性指示器样式已移除 - 精简版不需要 */
 
 
 /* 快速预约按钮 */

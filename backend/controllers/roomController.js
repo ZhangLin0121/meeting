@@ -480,7 +480,8 @@ class RoomController {
         ];
 
         periods.forEach(period => {
-            for (let minutes = period.start; minutes < period.end; minutes += 30) {
+            // 修复：使用 <= 包含结束时间点，确保所有时间段都被包含
+            for (let minutes = period.start; minutes <= period.end - 30; minutes += 30) {
                 const startTime = TimeHelper.minutesToTime(minutes);
                 const endTime = TimeHelper.minutesToTime(minutes + 30);
 

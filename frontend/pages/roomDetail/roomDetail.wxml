@@ -119,18 +119,7 @@
               </view>
               
               <view class="period-actions">
-                <!-- 可用性指示 -->
-                <view class="availability-indicator">
-                  <text class="availability-text" wx:if="{{item.status === 'available'}}">
-                    {{item.availableCount}}/{{item.totalCount}} 可用
-                  </text>
-                  <text class="availability-text partial" wx:elif="{{item.status === 'partial'}}">
-                    {{item.availableCount}}/{{item.totalCount}} 可用
-                  </text>
-                  <text class="availability-text unavailable" wx:else>
-                    已约满
-                  </text>
-                </view>
+                <!-- 移除可用性指示 - 精简版不需要X/X可用显示 -->
                 
                 <!-- 快速预约按钮 -->
                 <!-- 完全可用时显示正常预约按钮 -->
