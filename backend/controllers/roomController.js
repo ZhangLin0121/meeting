@@ -542,6 +542,122 @@ class RoomController {
     }
 
     /**
+     * 获取会议室指定月份的可用性
+     * GET /api/rooms/:id/monthly-availability
+     */
+    static async getRoomMonthlyAvailability(req, res) {
+        try {
+            const { id } = req.params;
+            const { year, month } = req.query;
+
+            if (!year || !month) {
+                return ResponseHelper.error(res, '缺少年份或月份参数', 400);
+            }
+
+            // 验证参数
+            const yearNum = parseInt(year);
+            const monthNum = parseInt(month);
+            if (isNaN(yearNum) || isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+                return ResponseHelper.error(res, '年份或月份参数无效', 400);
+            }
+
+            // 检查会议室是否存在
+            const room = await ConferenceRoom.findById(id);
+            if (!room) {
+                return ResponseHelper.notFound(res, '会议室不存在');
+            }
+
+            // 计算该月的第一天和最后一天
+            const firstDay = new Date(yearNum, monthNum - 1, 1);
+            const lastDay = new Date(yearNum, monthNum, 0);
+            
+            console.log('📅 获取月度可用性:', {
+                roomId: id,
+                year: yearNum,
+                month: monthNum,
+                firstDay: firstDay.toISOString(),
+                lastDay: lastDay.toISOString()
+            });
+
+            // 获取整个月的预约数据
+            const monthStart = TimeHelper.getStartOfDay(firstDay);
+            const monthEnd = TimeHelper.getEndOfDay(lastDay);
+
+            const bookings = await Booking.find({
+                roomId: id,
+                bookingDate: {
+                    $gte: monthStart,
+                    $lte: monthEnd
+                },
+                status: 'booked'
+            }).sort({ bookingDate: 1, startTime: 1 });
+
+            // 获取整个月的临时关闭数据
+            const closures = await TemporaryClosure.find({
+                roomId: id,
+                closureDate: {
+                    $gte: monthStart,
+                    $lte: monthEnd
+                }
+            });
+
+            // 构建日期可用性数据
+            const dates = {};
+            const today = new Date();
+            
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const currentDate = new Date(yearNum, monthNum - 1, day);
+                const dateStr = day.toString();
+                
+                // 检查是否为过去的日期
+                if (currentDate < TimeHelper.getStartOfDay(today)) {
+                    dates[dateStr] = {
+                        availability: 'past',
+                        availableSlots: 0,
+                        isWorkday: TimeHelper.isWorkday(currentDate)
+                    };
+                    continue;
+                }
+
+                // 获取当天的可用性状态
+                const dayAvailability = await this.getRoomAvailabilityStatus(id, currentDate);
+                
+                dates[dateStr] = {
+                    availability: dayAvailability.availability,
+                    availableSlots: dayAvailability.availableSlots || 0,
+                    isWorkday: TimeHelper.isWorkday(currentDate),
+                    reason: dayAvailability.reason
+                };
+            }
+
+            console.log('📊 月度可用性结果:', {
+                totalDays: Object.keys(dates).length,
+                availableDays: Object.values(dates).filter(d => d.availability === 'available').length,
+                fullDays: Object.values(dates).filter(d => d.availability === 'full').length,
+                pastDays: Object.values(dates).filter(d => d.availability === 'past').length
+            });
+
+            return ResponseHelper.success(res, {
+                year: yearNum,
+                month: monthNum,
+                roomId: id,
+                roomName: room.name,
+                dates,
+                summary: {
+                    totalDays: lastDay.getDate(),
+                    availableDays: Object.values(dates).filter(d => d.availability === 'available').length,
+                    fullDays: Object.values(dates).filter(d => d.availability === 'full').length,
+                    pastDays: Object.values(dates).filter(d => d.availability === 'past').length
+                }
+            }, '获取月度可用性成功');
+
+        } catch (error) {
+            console.error('获取月度可用性失败:', error);
+            return ResponseHelper.serverError(res, '获取月度可用性失败', error.message);
+        }
+    }
+
+    /**
      * 获取会议室在指定日期的可用性状态
      * @param {string} roomId 会议室ID
      * @param {Date} date 日期

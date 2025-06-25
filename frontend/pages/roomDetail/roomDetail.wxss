@@ -280,48 +280,7 @@ page {
 }
 
 
-/* 日期选择器 */
-
-.date-picker-container {
-    margin-bottom: 24px;
-}
-
-.picker-label {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333333;
-    margin-bottom: 12px;
-}
-
-.date-picker {
-    width: 100%;
-}
-
-.picker-display {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f5f5f5;
-    border-radius: 12px;
-    padding: 14px 16px;
-    transition: background-color 0.2s ease;
-}
-
-.picker-display:active {
-    background-color: #ebebeb;
-}
-
-.picker-text {
-    font-size: 15px;
-    color: #333333;
-    font-weight: 500;
-}
-
-.picker-arrow {
-    width: 16px;
-    height: 16px;
-    opacity: 0.6;
-}
+/* 日期选择器已替换为日历组件 */
 
 
 /* 时间段选择 - 两层级设计 */
@@ -583,6 +542,7 @@ page {
 }
 
 .time-slot {
+    position: relative;
     padding: 12px 8px;
     border-radius: 8px;
     text-align: center;
@@ -647,14 +607,34 @@ page {
     color: #8e8e93;
 }
 
-.time-slot.selected {
-    background-color: #007aff;
-    border-color: #007aff;
+.time-slot.selected-start {
+    background-color: #34c759;
+    border-color: #34c759;
 }
 
-.time-slot.selected .time-slot-text {
+.time-slot.selected-start .time-slot-text {
     color: #ffffff;
     font-weight: 600;
+}
+
+.time-slot.selected-end {
+    background-color: #ff3b30;
+    border-color: #ff3b30;
+}
+
+.time-slot.selected-end .time-slot-text {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.time-point-label {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #ffffff;
+    font-weight: 500;
 }
 
 

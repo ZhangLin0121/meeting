@@ -1,5 +1,7 @@
 {
-    "usingComponents": {},
+    "usingComponents": {
+        "calendar": "../../components/calendar/calendar"
+    },
     "navigationStyle": "custom",
     "enablePullDownRefresh": false,
     "backgroundTextStyle": "dark",

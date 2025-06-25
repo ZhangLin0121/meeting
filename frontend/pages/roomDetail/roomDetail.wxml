@@ -74,23 +74,12 @@
 
     <!-- 预约功能区 -->
     <view class="booking-section">      
-      <!-- 日期选择器 -->
-      <view class="date-picker-container">
-        <text class="picker-label">预约日期</text>
-        <picker
-          mode="date"
-          value="{{selectedDate}}"
-          start="{{minDate}}"
-          end="{{maxDate}}"
-          bindchange="bindDateChange"
-          class="date-picker"
-        >
-          <view class="picker-display">
-            <text class="picker-text">{{selectedDateWithWeekday}}</text>
-            <image class="picker-arrow" src="/images/icons/arrow.png" mode="aspectFit"></image>
-          </view>
-        </picker>
-      </view>
+      <!-- 日历组件 -->
+      <calendar
+        roomId="{{roomId}}"
+        selectedDate="{{selectedDate}}"
+        bindatechange="onCalendarDateChange"
+      ></calendar>
 
       <!-- 时间段选择 - 两层级设计 -->
       <view class="time-slots-container">
@@ -156,24 +145,26 @@
                           <!-- 详细时间段选择区域（只有自选时间段展开时显示） -->
             <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id && item.isCustom}}" catchtap="preventClose">
               <view class="detail-slots-header">
-                <text class="detail-title">自由选择任意时间段（可选择多个连续时间段）</text>
+                <text class="detail-title">选择开始时间点和结束时间点（上一段的结束时间可作为下一段的开始时间）</text>
               </view>
               
               <!-- 详细时间段网格 -->
               <view class="time-slots-grid">
                 <!-- 自选时间段显示所有时间槽，其他时段只显示对应时段的时间槽 -->
-                <view 
-                  wx:for="{{timeSlots}}" 
-                  wx:key="index"
-                  wx:for-item="slot"
-                  wx:for-index="slotIndex"
-                  wx:if="{{item.isCustom || (item.id === 'morning' && slot.time >= '08:30' && slot.time < '12:00') || (item.id === 'afternoon' && slot.time >= '12:00' && slot.time <= '22:00')}}"
-                  class="time-slot {{slot.status}} {{slot.isSelected ? 'selected' : ''}}"
-                  data-index="{{slot.index}}"
-                  catchtap="onTimeSlotTap"
-                >
-                  <text class="time-slot-text">{{slot.time}}</text>
-                </view>
+                                  <view 
+                    wx:for="{{timeSlots}}" 
+                    wx:key="index"
+                    wx:for-item="slot"
+                    wx:for-index="slotIndex"
+                    wx:if="{{item.isCustom || (item.id === 'morning' && slot.time >= '08:30' && slot.time < '12:00') || (item.id === 'afternoon' && slot.time >= '12:00' && slot.time <= '22:00')}}"
+                    class="time-slot {{slot.status}} {{slot.isSelected === 'start' ? 'selected-start' : ''}} {{slot.isSelected === 'end' ? 'selected-end' : ''}}"
+                    data-index="{{slot.index}}"
+                    catchtap="onTimeSlotTap"
+                  >
+                    <text class="time-slot-text">{{slot.time}}</text>
+                    <text wx:if="{{slot.isSelected === 'start'}}" class="time-point-label">开始</text>
+                    <text wx:if="{{slot.isSelected === 'end'}}" class="time-point-label">结束</text>
+                  </view>
               </view>
               
               <!-- 时间段说明 -->
