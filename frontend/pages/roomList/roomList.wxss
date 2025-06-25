@@ -78,12 +78,14 @@
 
 .ios-app-container {
     min-height: 100vh;
-    background: linear-gradient(180deg, #f2f2f7 0%, #ffffff 100%);
+    /* 使用更简洁的纯色背景，减少"容器感" */
+    background: #f8f9fa;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
 }
 
 .content-wrapper {
-    padding-bottom: 60px;
+    /* 减少底部padding */
+    padding-bottom: 40px;
 }
 
 
@@ -96,9 +98,11 @@
     z-index: 900;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    background: rgba(248, 248, 248, 0.8);
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
-    padding: 12px 20px;
+    /* 使用与主背景一致的颜色，减少分层感 */
+    background: rgba(248, 249, 250, 0.95);
+    /* 移除边框，让搜索区域更融入页面 */
+    border-bottom: none;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -169,12 +173,13 @@
 
 .main-content {
     min-height: 100vh;
-    padding: 0 12px 20px;
+    /* 减少左右padding，让内容更贴近屏幕边缘 */
+    padding: 0 4px 20px;
 }
 
 @media screen and (max-width: 768px) {
     .main-content {
-        padding: 0 4px 20px;
+        padding: 0 2px 20px;
     }
 }
 
@@ -182,7 +187,8 @@
 /* ==================== 会议室列表样式 ==================== */
 
 .section-header {
-    margin: 20px 12px 16px;
+    /* 减少上下边距，让内容更紧凑 */
+    margin: 16px 12px 12px;
 }
 
 .section-title {
@@ -293,14 +299,17 @@
 /* ==================== 会议室列表 ==================== */
 
 .room-list {
-    height: 400px;
+    /* 移除固定高度限制，让列表自然展开 */
+    min-height: calc(100vh - 200px);
     margin-top: 16px;
 }
 
 .room-grid {
     display: grid;
-    gap: 16px;
-    padding: 0 12px;
+    /* 减少卡片间距，让布局更紧凑 */
+    gap: 12px;
+    /* 减少左右padding，让列表更接近屏幕边缘 */
+    padding: 0 8px;
 }
 
 .room-card-wrapper {
@@ -313,10 +322,13 @@
 
 .room-card {
     background: white;
-    border-radius: 20px;
+    /* 减少圆角，看起来不那么"盒子化" */
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* 减少阴影效果，让卡片更自然 */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    /* 移除边框，让卡片更简洁 */
+    border: none;
 }
 
 .room-image-container {

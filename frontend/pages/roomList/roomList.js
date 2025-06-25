@@ -37,8 +37,7 @@ Page({
         // 获取用户openid
         this.getUserOpenId();
 
-        // 加载会议室数据
-        this.loadRooms();
+        // 页面加载完成，会在onShow中初始化数据
     },
 
 
@@ -325,9 +324,6 @@ Page({
                     rooms: processedRooms,
                     loading: false
                 });
-
-                // 计算统计数据
-                this.calculateStats(processedRooms);
 
                 wx.showToast({
                     title: `加载了${processedRooms.length}个会议室`,

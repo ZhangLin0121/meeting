@@ -71,15 +71,8 @@
         <text class="section-subtitle">共{{rooms.length}}间会议室</text>
       </view>
 
-      <!-- 会议室列表 -->
-      <scroll-view
-        class="room-list"
-        scroll-y
-        bindscrolltolower="onReachBottom"
-        refresher-enabled="{{true}}"
-        refresher-triggered="{{refreshing}}"
-        bindrefresherrefresh="onRefresh"
-      >
+      <!-- 会议室列表 - 移除scroll-view限制，让列表自然展开 -->
+      <view class="room-list">
         <view class="room-grid">
           <view wx:for="{{rooms}}" wx:key="id" 
                 class="room-card-wrapper" 
@@ -248,7 +241,7 @@
 
         <!-- 底部间距 -->
         <view class="bottom-spacing"></view>
-      </scroll-view>
+      </view>
     </view>
 
   </view>
