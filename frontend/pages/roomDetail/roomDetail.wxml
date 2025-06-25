@@ -96,10 +96,10 @@
       <view class="time-slots-container">
         <text class="time-slots-title">选择预约时段</text>
         <text class="time-slots-subtitle">🎯 四种预约方式：
-1️⃣ 点击"预约全天"预约整个工作日（08:30-22:00）
-2️⃣ 点击"预约上午"预约上午时段（08:30-12:00）
-3️⃣ 点击"预约下午"预约下午时段（12:00-22:00）
-4️⃣ 点击"自选时间"展开选择任意时间段</text>
+1️⃣ 点击"预约全天"直接预约整个工作日（08:30-22:00）
+2️⃣ 点击"预约上午"直接预约上午时段（08:30-12:00）
+3️⃣ 点击"预约下午"直接预约下午时段（12:00-22:00）
+4️⃣ 点击"自选时间"展开选择任意时间段组合</text>
         
         <!-- 时段选择卡片 -->
         <view class="period-cards-container">
@@ -141,9 +141,9 @@
                   <text class="quick-book-text">部分已占用</text>
                 </view>
                 
-                <!-- 展开/收起图标（全天预约不显示展开图标） -->
+                <!-- 展开/收起图标（只有自选时间段显示展开图标） -->
                 <view 
-                  wx:if="{{!item.isFullDay}}"
+                  wx:if="{{item.isCustom}}"
                   class="expand-icon {{expandedPeriod === item.id ? 'rotated' : ''}}" 
                   catchtap="onPeriodTap" 
                   data-period="{{item.id}}"
@@ -153,11 +153,10 @@
               </view>
             </view>
             
-                          <!-- 详细时间段选择区域（展开时显示，全天预约不显示） -->
-            <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id && !item.isFullDay}}" catchtap="preventClose">
+                          <!-- 详细时间段选择区域（只有自选时间段展开时显示） -->
+            <view class="period-detail-slots" wx:if="{{expandedPeriod === item.id && item.isCustom}}" catchtap="preventClose">
               <view class="detail-slots-header">
-                <text class="detail-title" wx:if="{{item.isCustom}}">自由选择任意时间段（可选择多个连续时间段）</text>
-                <text class="detail-title" wx:else>选择具体时间段（可选择多个连续时间段）</text>
+                <text class="detail-title">自由选择任意时间段（可选择多个连续时间段）</text>
               </view>
               
               <!-- 详细时间段网格 -->

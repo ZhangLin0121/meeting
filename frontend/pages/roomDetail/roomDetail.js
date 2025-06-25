@@ -439,13 +439,13 @@ Page({
     },
 
     /**
-     * 时段点击事件 - 选择或展开时段
+     * 时段点击事件 - 只有自选时间段才展开
      */
     onPeriodTap(e) {
         const periodId = e.currentTarget.dataset.period;
 
-        // 全天预约不允许展开详细选择
-        if (periodId === 'fullday') {
+        // 只有自选时间段允许展开详细选择
+        if (periodId !== 'custom') {
             return;
         }
 
