@@ -102,7 +102,7 @@
                 </view>
               </view>
 
-              <!-- 房间信息 -->
+              <!-- 房间信息 - 精简版 -->
               <view class="room-info">
                 <view class="room-header">
                   <text class="room-name">{{item.name}}</text>
@@ -117,115 +117,14 @@
                   <text class="location-text">{{item.location}}</text>
                 </view>
                 
-                <!-- 可用性状态条 -->
-                <view class="availability-bar">
-                  <view class="availability-info">
-                    <view class="status-dot {{item.status}}"></view>
-                    <text class="status-text">{{item.status === 'available' ? '立即可用' : '使用中'}}</text>
-                  </view>
-                  <view class="next-available" wx:if="{{item.status === 'occupied'}}">
-                    <text class="next-time">14:00后可用</text>
-                  </view>
-                </view>
-                
                 <text class="room-description">{{item.description || '现代化会议室，配备完善设施'}}</text>
                 
-                <!-- 会议室特色标签 -->
-                <view class="room-features">
-                  <view class="feature-item" wx:if="{{item.capacity >= 20}}">
-                    <image class="feature-icon" src="/images/icons/meeting-room.png" mode="aspectFit"></image>
-                    <text class="feature-text">大型会议</text>
-                  </view>
-                  <view class="feature-item" wx:if="{{item.equipment && item.equipment.includes('投影设备')}}">
-                    <image class="feature-icon" src="/images/icons/camera.png" mode="aspectFit"></image>
-                    <text class="feature-text">投影设备</text>
-                  </view>
-                  <view class="feature-item" wx:if="{{item.equipment && item.equipment.includes('视频会议设备')}}">
-                    <image class="feature-icon" src="/images/icons/contact.png" mode="aspectFit"></image>
-                    <text class="feature-text">视频会议</text>
-                  </view>
-                  <view class="feature-item" wx:if="{{item.capacity <= 8}}">
-                    <image class="feature-icon" src="/images/icons/user.png" mode="aspectFit"></image>
-                    <text class="feature-text">私密空间</text>
-                  </view>
-                </view>
-                
-                <!-- 设备标签 -->
+                <!-- 设备标签 - 保留设备信息，这个有用 -->
                 <view wx:if="{{item.equipment && item.equipment.length > 0}}" class="equipment-tags">
                   <view wx:for="{{item.equipment}}" wx:key="*this" 
                         wx:for-item="equipment"
                         class="equipment-tag">
                     <text class="equipment-text">{{equipment}}</text>
-                  </view>
-                </view>
-                
-                <!-- 预约统计信息 -->
-                <view class="booking-stats">
-                  <view class="stat-item">
-                    <image class="stat-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
-                    <view class="stat-info">
-                      <text class="stat-number">{{item.todayBookings || 0}}</text>
-                      <text class="stat-label">今日预约</text>
-                    </view>
-                  </view>
-                  <view class="stat-item">
-                    <image class="stat-icon" src="/images/icons/history.png" mode="aspectFit"></image>
-                    <view class="stat-info">
-                      <text class="stat-number">{{item.popularity || 85}}%</text>
-                      <text class="stat-label">使用率</text>
-                    </view>
-                  </view>
-                  <view class="stat-item">
-                    <image class="stat-icon" src="/images/icons/star.png" mode="aspectFit"></image>
-                    <view class="stat-info">
-                      <text class="stat-number">{{item.rating || 4.8}}</text>
-                      <text class="stat-label">评分</text>
-                    </view>
-                  </view>
-                </view>
-                
-                <!-- 时间信息 -->
-                <view class="time-info">
-                  <view class="time-item">
-                    <text class="time-label">开放时间</text>
-                    <text class="time-value">08:00 - 22:00</text>
-                  </view>
-                  <view class="time-item" wx:if="{{item.nextBooking}}">
-                    <text class="time-label">下次预约</text>
-                    <text class="time-value">{{item.nextBooking || '暂无'}}</text>
-                  </view>
-                </view>
-                
-                <!-- 底部行动区域 -->
-                <view class="room-actions">
-                  <view class="action-buttons">
-                    <button class="action-btn primary" 
-                            data-room="{{item}}"
-                            bindtap="quickBookRoom"
-                            catchtap="true">
-                      <image class="btn-icon" src="/images/icons/booking.png" mode="aspectFit"></image>
-                      立即预约
-                    </button>
-                    <button class="action-btn secondary" 
-                            data-room="{{item}}"
-                            bindtap="previewRoom"
-                            catchtap="true">
-                      <image class="btn-icon" src="/images/icons/search.png" mode="aspectFit"></image>
-                      查看详情
-                    </button>
-                  </view>
-                  
-                  <!-- 快速操作 -->
-                  <view class="quick-operations">
-                    <view class="quick-op-item" data-room="{{item}}" bindtap="addToFavorites" catchtap="true">
-                      <image class="op-icon" src="/images/icons/star.png" mode="aspectFit"></image>
-                    </view>
-                    <view class="quick-op-item" data-room="{{item}}" bindtap="shareRoom" catchtap="true">
-                      <image class="op-icon" src="/images/icons/export.png" mode="aspectFit"></image>
-                    </view>
-                    <view class="quick-op-item" data-room="{{item}}" bindtap="showRoomMap" catchtap="true">
-                      <image class="op-icon" src="/images/icons/location.png" mode="aspectFit"></image>
-                    </view>
                   </view>
                 </view>
               </view>
