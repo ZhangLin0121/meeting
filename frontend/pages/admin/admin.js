@@ -51,7 +51,7 @@ Page({
 
         // 图片上传相关
         imageUploading: false,
-        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
+        apiBaseUrl: 'http://localhost:3000',
 
         // 设备选项
         equipmentOptions: [
@@ -107,7 +107,7 @@ Page({
 
             if (app && app.globalData) {
                 this.setData({
-                    apiBaseUrl: app.globalData.apiBaseUrl || 'https://www.cacophonyem.me/meeting'
+                    apiBaseUrl: app.globalData.apiBaseUrl || 'http://localhost:3000'
                 });
                 console.log('✅ 成功获取App全局数据');
 
@@ -119,7 +119,7 @@ Page({
             } else {
                 console.warn('⚠️ App实例未就绪，使用默认配置');
                 this.setData({
-                    apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+                    apiBaseUrl: 'http://localhost:3000'
                 });
 
                 // 延迟重试获取用户数据
@@ -132,7 +132,7 @@ Page({
 
             // 使用默认配置
             this.setData({
-                apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+                apiBaseUrl: 'http://localhost:3000'
             });
 
             // 延迟重试
@@ -170,13 +170,13 @@ Page({
      */
     getSystemInfo() {
         try {
-            const systemInfo = wx.getSystemInfoSync();
+            const windowInfo = wx.getWindowInfo();
             const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
-            console.log('📱 系统信息:', systemInfo);
+            console.log('📱 窗口信息:', windowInfo);
             console.log('🔘 胶囊按钮信息:', menuButtonInfo);
 
-            const statusBarHeight = systemInfo.statusBarHeight || 20;
+            const statusBarHeight = windowInfo.statusBarHeight || 20;
 
             // 计算自定义导航栏的安全高度
             // 胶囊按钮顶部到状态栏底部的距离 * 2 + 胶囊按钮高度
@@ -320,19 +320,8 @@ Page({
                         equipmentDisplay = room.equipment.join(', ');
                     }
 
-                    // 处理图片URL - 与roomList保持一致的逻辑
-                    let displayImage = '/images/default_room.png';
-                    if (room.images && Array.isArray(room.images) && room.images.length > 0) {
-                        // 构建完整的图片URL，与roomList逻辑保持一致
-                        const imagePath = room.images[0];
-                        displayImage = imagePath.startsWith('http') ? imagePath : `${this.data.apiBaseUrl}${imagePath}`;
-                        console.log('🖼️ 处理图片URL (loadRooms):', {
-                            roomName: room.name,
-                            originalImagePath: imagePath,
-                            finalDisplayImage: displayImage,
-                            apiBaseUrl: this.data.apiBaseUrl
-                        });
-                    }
+                    // 处理图片URL - 使用本地SVG图片
+                    let displayImage = this.getLocalRoomImage(room.name, room.id);
 
                     return {
                         ...room,
@@ -1123,6 +1112,50 @@ Page({
                 });
             }
         });
+    },
+
+    /**
+     * 获取本地会议室图片
+     */
+    getLocalRoomImage(roomName, roomId) {
+        // 根据房间名称或ID返回对应的本地SVG图片
+        const roomImages = [
+            '/images/meeting-room-1.svg',
+            '/images/meeting-room-2.svg',
+            '/images/meeting-room-3.svg',
+            '/images/meeting-room-4.svg'
+        ];
+
+        // 根据房间名称匹配图片
+        if (roomName) {
+            const name = roomName.toLowerCase();
+            if (name.includes('小型') || name.includes('small')) {
+                return '/images/meeting-room-3.svg';
+            } else if (name.includes('培训') || name.includes('training')) {
+                return '/images/meeting-room-4.svg';
+            } else if (name.includes('现代') || name.includes('modern')) {
+                return '/images/meeting-room-2.svg';
+            } else if (name.includes('大型') || name.includes('large')) {
+                return '/images/meeting-room-2.svg';
+            }
+        }
+
+        // 根据房间ID的哈希值选择图片，确保同一房间总是显示相同图片
+        const hash = roomId ? this.simpleHash(roomId) : 0;
+        return roomImages[hash % roomImages.length];
+    },
+
+    /**
+     * 简单哈希函数
+     */
+    simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 转换为32位整数
+        }
+        return Math.abs(hash);
     },
 
     /**

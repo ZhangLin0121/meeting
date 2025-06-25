@@ -1,7 +1,0 @@
-
-            <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="500" height="300" fill="#f3e5f5"/>
-                <rect x="50" y="50" width="400" height="200" rx="8" fill="#ffffff" stroke="#9c27b0"/>
-                <text x="250" y="150" text-anchor="middle" font-family="Arial" font-size="16" fill="#7b1fa2">培训教室</text>
-                <text x="250" y="170" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Training Room</text>
-            </svg>

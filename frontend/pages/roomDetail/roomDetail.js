@@ -1,11 +1,5 @@
 // pages/roomDetail/roomDetail.js
 const request = require('../../utils/request.js');
-const babelHelpers = require('../../utils/babel-helpers.js');
-
-// 添加全局辅助函数，解决 slicedToArray 错误
-if (typeof global !== 'undefined') {
-    global._slicedToArray = babelHelpers.slicedToArray;
-}
 
 Page({
 
@@ -25,7 +19,7 @@ Page({
         },
         showBookingModal: false,
         submittingBooking: false,
-        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
+        apiBaseUrl: 'http://localhost:3000',
         statusBarHeight: 0,
 
         // 日期选择相关
@@ -71,16 +65,14 @@ Page({
             return;
         }
 
-        // 获取状态栏高度并调试
-        const systemInfo = wx.getSystemInfoSync();
-        const statusBarHeight = systemInfo.statusBarHeight || 44;
+        // 获取状态栏高度并调试 - 使用新的API
+        const windowInfo = wx.getWindowInfo();
+        const statusBarHeight = windowInfo.statusBarHeight || 44;
 
         console.log('🔍 调试信息:');
-        console.log('📱 完整系统信息:', systemInfo);
-        console.log('📱 原始状态栏高度:', systemInfo.statusBarHeight);
+        console.log('📱 窗口信息:', windowInfo);
+        console.log('📱 原始状态栏高度:', windowInfo.statusBarHeight);
         console.log('📱 最终状态栏高度:', statusBarHeight);
-        console.log('📱 设备型号:', systemInfo.model);
-        console.log('📱 系统:', systemInfo.system);
 
         this.setData({
             roomId,
@@ -153,7 +145,7 @@ Page({
 
             if (app && app.globalData) {
                 this.setData({
-                    apiBaseUrl: app.globalData.apiBaseUrl || 'https://www.cacophonyem.me/meeting'
+                    apiBaseUrl: app.globalData.apiBaseUrl || 'http://localhost:3000'
                 });
                 console.log('✅ 成功获取App全局数据');
 
@@ -165,7 +157,7 @@ Page({
             } else {
                 console.warn('⚠️ App实例未就绪，使用默认配置');
                 this.setData({
-                    apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+                    apiBaseUrl: 'http://localhost:3000'
                 });
 
                 // 延迟重试获取用户数据
@@ -178,7 +170,7 @@ Page({
 
             // 使用默认配置
             this.setData({
-                apiBaseUrl: 'https://www.cacophonyem.me/meeting'
+                apiBaseUrl: 'http://localhost:3000'
             });
 
             // 延迟重试

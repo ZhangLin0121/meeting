@@ -1,5 +1,8 @@
 {
-  "setting": {
-    "compileHotReLoad": true
-  }
+    "setting": {
+        "compileHotReLoad": true,
+        "urlCheck": false,
+        "ignoreHttpUrlCheck": true
+    },
+    "libVersion": "3.8.9"
 }

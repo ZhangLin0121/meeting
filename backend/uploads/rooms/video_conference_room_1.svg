@@ -1,7 +1,0 @@
-
-            <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="500" height="300" fill="#e0f2f1"/>
-                <rect x="50" y="50" width="400" height="200" rx="8" fill="#ffffff" stroke="#009688"/>
-                <text x="250" y="150" text-anchor="middle" font-family="Arial" font-size="16" fill="#00695c">视频会议室</text>
-                <text x="250" y="170" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Video Conference Room</text>
-            </svg>

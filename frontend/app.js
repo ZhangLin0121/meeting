@@ -89,15 +89,16 @@ App({
      */
     async performLogin() {
         try {
-            // 检测设备类型并记录
-            const systemInfo = wx.getSystemInfoSync();
+            // 检测设备类型并记录 - 使用新的API
+            const deviceInfo = wx.getDeviceInfo();
+            const appBaseInfo = wx.getAppBaseInfo();
             console.log('📱 设备信息:', {
-                platform: systemInfo.platform,
-                system: systemInfo.system,
-                brand: systemInfo.brand,
-                model: systemInfo.model,
-                version: systemInfo.version,
-                SDKVersion: systemInfo.SDKVersion
+                platform: deviceInfo.platform,
+                system: deviceInfo.system,
+                brand: deviceInfo.brand,
+                model: deviceInfo.model,
+                version: appBaseInfo.version,
+                SDKVersion: appBaseInfo.SDKVersion
             });
 
             // 使用新的微信认证工具
@@ -112,7 +113,7 @@ App({
                 console.log('✅ 微信登录完成，openid:', userInfo.openid);
 
                 // 安卓设备额外验证
-                if (systemInfo.platform === 'android') {
+                if (deviceInfo.platform === 'android') {
                     console.log('📱 安卓设备：验证登录状态...');
                     setTimeout(() => {
                         const savedInfo = wx.getStorageSync('userInfo');
@@ -286,20 +287,7 @@ App({
         }
     },
 
-    /**
-     * 测试API连接
-     */
-    async testAPIConnection() {
-        try {
-            const request = require('./utils/request.js');
-            const result = await request.get('/api/health');
-            console.log('✅ API连接测试成功:', result);
-            return true;
-        } catch (error) {
-            console.error('❌ API连接测试失败:', error);
-            return false;
-        }
-    },
+
 
     globalData: {
         userInfo: null,

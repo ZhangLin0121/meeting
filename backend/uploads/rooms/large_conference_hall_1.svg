@@ -1,7 +1,0 @@
-
-            <svg width="500" height="300" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="500" height="300" fill="#e8f5e8"/>
-                <rect x="30" y="30" width="440" height="240" rx="8" fill="#ffffff" stroke="#4caf50"/>
-                <text x="250" y="150" text-anchor="middle" font-family="Arial" font-size="18" fill="#2e7d32">大型会议厅</text>
-                <text x="250" y="170" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Large Conference Hall</text>
-            </svg>

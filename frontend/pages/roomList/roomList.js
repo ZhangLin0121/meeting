@@ -14,7 +14,7 @@ Page({
         isAdmin: false,
         statusBarHeight: 0,
         userOpenId: '',
-        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
+        apiBaseUrl: 'http://localhost:3000',
         // 胶囊按钮信息
         menuButtonInfo: null,
         customNavBarHeight: 0
@@ -28,7 +28,7 @@ Page({
 
         // 获取系统信息，包括状态栏高度
         this.getSystemInfo();
-        
+
         // 获取用户openid
         this.getUserOpenId();
     },
@@ -195,13 +195,13 @@ Page({
      */
     getSystemInfo() {
         try {
-            const systemInfo = wx.getSystemInfoSync();
+            const windowInfo = wx.getWindowInfo();
             const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
 
-            console.log('📱 系统信息:', systemInfo);
+            console.log('📱 窗口信息:', windowInfo);
             console.log('🔘 胶囊按钮信息:', menuButtonInfo);
 
-            const statusBarHeight = systemInfo.statusBarHeight || 20;
+            const statusBarHeight = windowInfo.statusBarHeight || 20;
 
             // 计算自定义导航栏的安全高度
             // 胶囊按钮顶部到状态栏底部的距离 * 2 + 胶囊按钮高度
@@ -382,13 +382,8 @@ Page({
                         status = hasAvailableSlot ? 'available' : 'unavailable';
                     }
 
-                    // 处理图片显示逻辑
-                    let displayImage = '/images/default_room.png';
-                    if (room.images && room.images.length > 0) {
-                        // 构建完整的图片URL
-                        const imageUrl = room.images[0];
-                        displayImage = imageUrl.startsWith('http') ? imageUrl : `${this.data.apiBaseUrl}${imageUrl}`;
-                    }
+                    // 处理图片显示逻辑 - 使用本地SVG图片
+                    let displayImage = this.getLocalRoomImage(room.name, room.id);
 
                     return {
                         ...room,
@@ -452,6 +447,27 @@ Page({
             searchKeyword: ''
         });
         this.fetchRooms();
+    },
+
+    /**
+     * 获取本地会议室图片
+     */
+    getLocalRoomImage(roomName, roomId) {
+        // 直接使用默认图片，等待管理员上传真实图片
+        return '/images/default_room.png';
+    },
+
+    /**
+     * 简单哈希函数
+     */
+    simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 转换为32位整数
+        }
+        return Math.abs(hash);
     },
 
     /**
