@@ -383,8 +383,19 @@ Page({
                         status = hasAvailableSlot ? 'available' : 'unavailable';
                     }
 
-                    // 处理图片显示逻辑 - 使用本地SVG图片
-                    let displayImage = this.getLocalRoomImage(room.name, room.id);
+                    // 处理图片显示逻辑 - 优先使用上传的图片
+                    let displayImage = '/images/default_room.png';
+                    if (room.images && Array.isArray(room.images) && room.images.length > 0) {
+                        // 构建完整的图片URL
+                        const imagePath = room.images[0];
+                        displayImage = imagePath.startsWith('http') ? imagePath : `${this.data.apiBaseUrl}${imagePath}`;
+                        console.log('🖼️ 房间列表处理图片URL:', {
+                            roomName: room.name,
+                            originalImagePath: imagePath,
+                            finalDisplayImage: displayImage,
+                            apiBaseUrl: this.data.apiBaseUrl
+                        });
+                    }
 
                     return {
                         ...room,

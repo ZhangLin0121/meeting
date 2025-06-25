@@ -330,8 +330,19 @@ Page({
                         equipmentDisplay = room.equipment.join(', ');
                     }
 
-                    // 处理图片URL - 使用本地SVG图片
-                    let displayImage = this.getLocalRoomImage(room.name, room.id);
+                    // 处理图片URL - 与roomList保持一致的逻辑
+                    let displayImage = '/images/default_room.png';
+                    if (room.images && Array.isArray(room.images) && room.images.length > 0) {
+                        // 构建完整的图片URL，与roomList逻辑保持一致
+                        const imagePath = room.images[0];
+                        displayImage = imagePath.startsWith('http') ? imagePath : `${this.data.apiBaseUrl}${imagePath}`;
+                        console.log('🖼️ 管理员页面处理图片URL:', {
+                            roomName: room.name,
+                            originalImagePath: imagePath,
+                            finalDisplayImage: displayImage,
+                            apiBaseUrl: this.data.apiBaseUrl
+                        });
+                    }
 
                     return {
                         ...room,
