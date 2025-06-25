@@ -1,5 +1,6 @@
 // pages/roomDetail/roomDetail.js
 const request = require('../../utils/request.js');
+const envConfig = require('../../config/env.js');
 
 Page({
 
@@ -19,7 +20,7 @@ Page({
         },
         showBookingModal: false,
         submittingBooking: false,
-        apiBaseUrl: 'http://localhost:3000',
+        apiBaseUrl: envConfig.apiBaseUrl,
         statusBarHeight: 0,
 
         // 日期选择相关
@@ -145,7 +146,7 @@ Page({
 
             if (app && app.globalData) {
                 this.setData({
-                    apiBaseUrl: app.globalData.apiBaseUrl || 'http://localhost:3000'
+                    apiBaseUrl: app.globalData.apiBaseUrl || envConfig.apiBaseUrl
                 });
                 console.log('✅ 成功获取App全局数据');
 
@@ -157,7 +158,7 @@ Page({
             } else {
                 console.warn('⚠️ App实例未就绪，使用默认配置');
                 this.setData({
-                    apiBaseUrl: 'http://localhost:3000'
+                    apiBaseUrl: envConfig.apiBaseUrl
                 });
 
                 // 延迟重试获取用户数据
@@ -170,7 +171,7 @@ Page({
 
             // 使用默认配置
             this.setData({
-                apiBaseUrl: 'http://localhost:3000'
+                apiBaseUrl: envConfig.apiBaseUrl
             });
 
             // 延迟重试

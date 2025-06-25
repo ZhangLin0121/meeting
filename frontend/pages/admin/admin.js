@@ -1,4 +1,5 @@
 const request = require('../../utils/request.js');
+const envConfig = require('../../config/env.js');
 
 Page({
 
@@ -51,7 +52,7 @@ Page({
 
         // 图片上传相关
         imageUploading: false,
-        apiBaseUrl: 'http://localhost:3000',
+        apiBaseUrl: envConfig.apiBaseUrl,
 
         // 设备选项
         equipmentOptions: [
@@ -107,7 +108,7 @@ Page({
 
             if (app && app.globalData) {
                 this.setData({
-                    apiBaseUrl: app.globalData.apiBaseUrl || 'http://localhost:3000'
+                    apiBaseUrl: app.globalData.apiBaseUrl || envConfig.apiBaseUrl
                 });
                 console.log('✅ 成功获取App全局数据');
 
@@ -119,7 +120,7 @@ Page({
             } else {
                 console.warn('⚠️ App实例未就绪，使用默认配置');
                 this.setData({
-                    apiBaseUrl: 'http://localhost:3000'
+                    apiBaseUrl: envConfig.apiBaseUrl
                 });
 
                 // 延迟重试获取用户数据
@@ -132,7 +133,7 @@ Page({
 
             // 使用默认配置
             this.setData({
-                apiBaseUrl: 'http://localhost:3000'
+                apiBaseUrl: envConfig.apiBaseUrl
             });
 
             // 延迟重试
@@ -282,6 +283,15 @@ Page({
                     url: '/pages/roomList/roomList'
                 });
             }
+        });
+    },
+
+    /**
+     * 跳转到调试页面
+     */
+    goToDebug() {
+        wx.navigateTo({
+            url: '/pages/debug/debug'
         });
     },
 

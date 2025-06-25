@@ -3,15 +3,17 @@
  * 处理API请求、错误处理、重试机制
  */
 
+const envConfig = require('../config/env.js');
+
 class RequestUtil {
     constructor() {
         try {
             const app = getApp();
-            this.baseURL = (app && app.globalData && app.globalData.apiBaseUrl) || 'https://www.cacophonyem.me/meeting';
+            this.baseURL = (app && app.globalData && app.globalData.apiBaseUrl) || envConfig.apiBaseUrl;
         } catch (error) {
-            this.baseURL = 'https://www.cacophonyem.me/meeting';
+            this.baseURL = envConfig.apiBaseUrl;
         }
-        this.timeout = 10000;
+        this.timeout = envConfig.timeout;
     }
 
     request(options) {

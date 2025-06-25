@@ -13,7 +13,9 @@
         <text class="header-title">管理员后台</text>
       </view>
       <view class="header-right">
-        <!-- 占位，保持布局平衡 -->
+        <view class="debug-button" bindtap="goToDebug">
+          <text class="debug-text">调试</text>
+        </view>
       </view>
     </view>
   </view>

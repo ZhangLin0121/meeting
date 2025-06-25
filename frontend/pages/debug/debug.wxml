@@ -1,0 +1,47 @@
+<!--pages/debug/debug.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">🔧 API调试工具</text>
+    <text class="env">环境: {{environment}}</text>
+    <text class="api">API: {{apiUrl}}</text>
+  </view>
+
+  <view class="status-card">
+    <text class="status-title">当前状态</text>
+    <view class="status-item">
+      <text>用户: {{userInfo.openid || '未登录'}}</text>
+    </view>
+    <view class="status-item">
+      <text>角色: {{userInfo.role || '未知'}}</text>
+    </view>
+    <view class="status-item">
+      <text>管理员: {{isAdmin ? '是' : '否'}}</text>
+    </view>
+  </view>
+
+  <view class="button-group">
+    <button class="test-btn" bindtap="testApiHealth">测试API连接</button>
+    <button class="test-btn" bindtap="testUserRole">测试用户权限</button>
+    <button class="test-btn" bindtap="testGetRooms">获取会议室列表</button>
+    <button class="test-btn" wx:if="{{isAdmin}}" bindtap="testCreateRoom">创建测试会议室</button>
+  </view>
+
+  <view class="logs-section">
+    <view class="logs-header">
+      <text class="logs-title">调试日志</text>
+      <button class="clear-btn" bindtap="clearLogs">清空</button>
+    </view>
+    <scroll-view class="logs-container" scroll-y="true">
+      <view class="log-item" wx:for="{{logs}}" wx:key="index">
+        <text class="log-text">{{item}}</text>
+      </view>
+      <view wx:if="{{logs.length === 0}}" class="empty-logs">
+        <text>暂无日志</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="footer">
+    <button class="back-btn" bindtap="goBack">返回</button>
+  </view>
+</view> 

@@ -1,5 +1,6 @@
 // pages/roomList/roomList.js
 const request = require('../../utils/request.js');
+const envConfig = require('../../config/env.js');
 
 Page({
 
@@ -14,7 +15,7 @@ Page({
         isAdmin: false,
         statusBarHeight: 0,
         userOpenId: '',
-        apiBaseUrl: 'http://localhost:3000',
+        apiBaseUrl: envConfig.apiBaseUrl,
         // 胶囊按钮信息
         menuButtonInfo: null,
         customNavBarHeight: 0

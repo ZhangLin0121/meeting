@@ -7,8 +7,8 @@
     "setting": {
         "bundle": false,
         "userConfirmedBundleSwitch": false,
-        "urlCheck": true,
-        "ignoreHttpUrlCheck": false,
+        "urlCheck": false,
+        "ignoreHttpUrlCheck": true,
         "scopeDataCheck": false,
         "coverView": true,
         "es6": false,

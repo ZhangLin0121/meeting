@@ -1381,3 +1381,24 @@ page {
         transform: translateY(0);
     }
 }
+
+
+/* 调试按钮样式 */
+
+.debug-button {
+    background: #ff6b6b;
+    padding: 12rpx 24rpx;
+    border-radius: 30rpx;
+    transition: all 0.2s ease;
+}
+
+.debug-button:active {
+    transform: scale(0.95);
+    background: #ff5252;
+}
+
+.debug-text {
+    font-size: 24rpx;
+    color: white;
+    font-weight: 500;
+}

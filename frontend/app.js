@@ -1,4 +1,6 @@
 // app.js
+const envConfig = require('./config/env.js');
+
 App({
     onLaunch() {
         console.log('🚀 小程序启动');
@@ -291,7 +293,9 @@ App({
 
     globalData: {
         userInfo: null,
-        apiBaseUrl: 'https://www.cacophonyem.me/meeting',
+        apiBaseUrl: envConfig.apiBaseUrl,
+        environment: envConfig.environment,
+        debug: envConfig.debug,
         networkType: 'unknown',
         isConnected: true,
         loginCode: null
