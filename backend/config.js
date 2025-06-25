@@ -13,7 +13,7 @@ module.exports = {
 
     // 文件上传配置
     uploadPath: process.env.UPLOAD_PATH || 'uploads',
-    maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 5242880, // 5MB
+    maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 20971520, // 20MB
 
     // 微信小程序配置
     wechat: {

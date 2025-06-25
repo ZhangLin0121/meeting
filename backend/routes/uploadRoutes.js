@@ -72,7 +72,7 @@ const fileFilter = (req, file, cb) => {
 const roomUpload = multer({
     storage: roomStorage,
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB限制
+        fileSize: 20 * 1024 * 1024, // 20MB限制
     },
     fileFilter: fileFilter
 });
@@ -204,7 +204,7 @@ router.delete('/room-image', requireAdmin, (req, res) => {
 router.use((error, req, res, next) => {
     if (error instanceof multer.MulterError) {
         if (error.code === 'LIMIT_FILE_SIZE') {
-            return ResponseHelper.error(res, '图片文件大小不能超过5MB', 400);
+            return ResponseHelper.error(res, '图片文件大小不能超过20MB', 400);
         }
         return ResponseHelper.error(res, `上传错误: ${error.message}`, 400);
     }

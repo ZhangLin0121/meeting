@@ -335,7 +335,7 @@
             <view wx:else class="choose-image-button" bindtap="chooseImage">
               <image class="upload-icon" src="/images/icons/add.png" mode="aspectFit"></image>
               <text class="upload-text">选择图片</text>
-              <text class="upload-hint">支持 JPG、PNG、GIF、SVG 格式，最大5MB</text>
+                              <text class="upload-hint">支持 JPG、PNG、GIF、SVG 格式，最大20MB</text>
             </view>
           </view>
         </view>
