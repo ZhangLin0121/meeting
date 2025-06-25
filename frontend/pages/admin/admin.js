@@ -876,6 +876,10 @@ Page({
             wx.showToast({ title: '请输入容纳人数', icon: 'none' });
             return;
         }
+        if (!location || !location.trim()) {
+            wx.showToast({ title: '请输入会议室位置', icon: 'none' });
+            return;
+        }
 
         const roomData = {
             name: name.trim(),
@@ -884,6 +888,11 @@ Page({
             equipment,
             description: description.trim()
         };
+
+        // 如果是创建模式，需要生成roomId
+        if (!this.data.isEditMode) {
+            roomData.roomId = this.generateRoomId(name.trim());
+        }
 
         // 处理图片数据
         if (this.data.roomForm.uploadedImagePath) {
@@ -1164,6 +1173,18 @@ Page({
         // 根据房间ID的哈希值选择图片，确保同一房间总是显示相同图片
         const hash = roomId ? this.simpleHash(roomId) : 0;
         return roomImages[hash % roomImages.length];
+    },
+
+    /**
+     * 生成会议室ID
+     * 格式：ROOM_时间戳_随机数
+     */
+    generateRoomId(roomName) {
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 1000);
+        // 去除特殊字符，只保留字母和数字
+        const cleanName = roomName.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '').substring(0, 8);
+        return `ROOM_${timestamp}_${random}_${cleanName}`;
     },
 
     /**

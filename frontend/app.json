@@ -4,8 +4,7 @@
         "pages/roomDetail/roomDetail",
         "pages/admin/admin",
         "pages/myBookings/myBookings",
-        "pages/profile/profile",
-        "pages/debug/debug"
+        "pages/profile/profile"
     ],
     "tabBar": {
         "color": "#8E8E93",
