@@ -731,9 +731,8 @@ class BookingController {
             // 使用更安全的方式设置响应头
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
-            // 使用encodeURIComponent编码文件名，确保HTTP头部安全
-            const encodedFilename = encodeURIComponent(safeFilename);
-            res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodedFilename}`);
+            // 简化Content-Disposition，去掉复杂的UTF-8编码以兼容微信小程序
+            res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
 
             // 发送文件
             res.sendFile(filePath, (err) => {
