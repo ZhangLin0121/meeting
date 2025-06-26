@@ -283,6 +283,7 @@ page {
 /* 日期选择器已替换为日历组件 */
 
 
+
 /* 时间段选择 - 两层级设计 */
 
 .time-slots-container {
@@ -309,9 +310,19 @@ page {
 /* 时段卡片容器 */
 
 .period-cards-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 时段加载提示 */
+.loading-periods {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #666666;
+  font-size: 14px;
 }
 
 

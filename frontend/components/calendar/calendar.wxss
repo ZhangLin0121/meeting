@@ -1,10 +1,10 @@
 /* 日历组件样式 */
 .calendar-container {
   background-color: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  margin: 16px 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 8px 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* 日历头部 - 月份切换 */
@@ -12,17 +12,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 0 10px;
+  margin-bottom: 8px;
+  padding: 0 4px;
 }
 
 .month-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
   background-color: #f8f9fa;
   transition: background-color 0.2s ease;
 }
@@ -32,8 +32,8 @@
 }
 
 .nav-arrow {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   opacity: 0.7;
 }
 
@@ -43,7 +43,7 @@
 }
 
 .month-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #333333;
 }
@@ -80,14 +80,14 @@
 /* 星期标题 */
 .weekdays-header {
   display: flex;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 
 .weekday-item {
   flex: 1;
   text-align: center;
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 4px 0;
+  font-size: 12px;
   font-weight: 500;
   color: #666666;
 }
@@ -104,31 +104,34 @@
 
 .calendar-day {
   width: calc(100% / 7);
-  height: 50px;
+  height: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: 4px;
+  margin-bottom: 2px;
   transition: all 0.2s ease;
 }
 
 /* 日期数字 */
 .day-number {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   z-index: 2;
 }
 
 /* 不同状态的日期样式 */
 .calendar-day.other-month {
-  opacity: 0.3;
+  opacity: 0.2;
+  pointer-events: none;
 }
 
 .calendar-day.other-month .day-number {
-  color: #cccccc;
+  color: #e0e0e0;
+  font-size: 12px;
+  font-weight: 300;
 }
 
 .calendar-day.past-date {
@@ -185,17 +188,41 @@
 /* 选中状态 */
 .calendar-day.selected {
   background-color: #007aff;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 3px 12px rgba(0, 122, 255, 0.4);
+  border: 2px solid #007aff;
+  z-index: 10;
 }
 
 .calendar-day.selected .day-number {
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .calendar-day.selected .today-marker {
   background-color: white;
   color: #007aff;
+}
+
+/* 选中状态动画 */
+.calendar-day.selected {
+  animation: pulse-selected 0.3s ease-out;
+}
+
+@keyframes pulse-selected {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 122, 255, 0);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.6);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(0, 122, 255, 0.4);
+  }
 }
 
 /* 可用性指示器 */

@@ -81,21 +81,22 @@
         bindatechange="onCalendarDateChange"
       ></calendar>
 
+
+
       <!-- 时间段选择 - 两层级设计 -->
       <view class="time-slots-container">
-        <text class="time-slots-title">选择预约时段</text>
-        <text class="time-slots-subtitle">🎯 四种预约方式：
-1️⃣ 点击"预约全天"直接预约整个工作日（08:30-22:00）
-2️⃣ 点击"预约上午"直接预约上午时段（08:30-12:00）
-3️⃣ 点击"预约下午"直接预约下午时段（12:00-22:00）
-4️⃣ 点击"自选时间"展开选择任意时间段组合</text>
         
         <!-- 时段选择卡片 -->
         <view class="period-cards-container">
+          <!-- 加载提示 -->
+          <view wx:if="{{timePeriods.length === 0}}" class="loading-periods">
+            <text class="loading-text">正在加载时段信息...</text>
+          </view>
+          
+          <!-- 时段卡片 -->
           <view 
             wx:for="{{timePeriods}}" 
             wx:key="id"
-            wx:if="{{item.isFullDay || !isFullDayUnavailable}}"
             class="period-card {{item.status}} {{expandedPeriod === item.id ? 'expanded' : ''}} {{item.isFullDay ? 'fullday-card' : ''}}"
           >
             <!-- 时段卡片头部 -->

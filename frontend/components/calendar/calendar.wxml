@@ -39,7 +39,7 @@
       <view 
         wx:for="{{calendarDays}}" 
         wx:key="date"
-        class="calendar-day {{getDateStatusClass(item.availability, item.isPast, item.isCurrentMonth)}} {{item.isToday ? 'today' : ''}} {{item.isSelected ? 'selected' : ''}}"
+        class="calendar-day {{utils.getDateStatusClass(item.availability, item.isPast, item.isCurrentMonth)}} {{item.isToday ? 'today' : ''}} {{item.isSelected ? 'selected' : ''}}"
         data-index="{{index}}"
         bindtap="onDateTap"
       >

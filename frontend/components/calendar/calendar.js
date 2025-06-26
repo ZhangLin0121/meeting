@@ -34,7 +34,7 @@ Component({
 
     observers: {
         'roomId': function(newRoomId) {
-            if (newRoomId) {
+            if (newRoomId && this.data.currentYear && this.data.currentMonth) {
                 this.fetchMonthlyAvailability();
             }
         }
@@ -112,11 +112,16 @@ Component({
         async fetchMonthlyAvailability() {
             if (!this.data.roomId) return;
             
+            // 检查年月参数的有效性，避免在初始化过程中发送无效请求
+            const { currentYear, currentMonth } = this.data;
+            if (!currentYear || !currentMonth || currentYear === 0 || currentMonth === 0) {
+                console.log('📅 年月参数无效，跳过API请求:', { currentYear, currentMonth });
+                return;
+            }
+            
             this.setData({ loading: true });
             
             try {
-                const { currentYear, currentMonth } = this.data;
-                
                 console.log('📅 获取月度可用性:', {
                     roomId: this.data.roomId,
                     year: currentYear,
@@ -309,4 +314,4 @@ Component({
             }
         }
     }
-}); 
+});
