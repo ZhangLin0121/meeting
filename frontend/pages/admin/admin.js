@@ -1056,9 +1056,9 @@ Page({
         console.log('🔗 准备下载文件:', { downloadUrl, filename });
         wx.showLoading({ title: '下载中...', mask: true });
 
-        // 尝试解决URL编码问题
-        const cleanUrl = downloadUrl.replace(/[^\x00-\x7F]/g, ""); // 移除非ASCII字符
-        console.log('🔗 清理后的URL:', cleanUrl);
+        // 确保URL格式正确，不移除非ASCII字符，避免破坏文件名
+        const cleanUrl = downloadUrl.trim();
+        console.log('🔗 使用的下载URL:', cleanUrl);
 
         // 下载文件
         wx.downloadFile({
