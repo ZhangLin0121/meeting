@@ -52,10 +52,10 @@ class BookingController {
             //     return ResponseHelper.error(res, '只能预约工作日的会议室');
             // }
 
-            // 验证时间是否在办公时间内
-            if (!TimeHelper.isOfficeTime(startTime) || !TimeHelper.isOfficeTime(endTime)) {
-                return ResponseHelper.error(res, '预约时间必须在办公时间内');
-            }
+            // 验证时间是否在办公时间内 - 已取消限制，允许全时段预约
+            // if (!TimeHelper.isOfficeTime(startTime) || !TimeHelper.isOfficeTime(endTime)) {
+            //     return ResponseHelper.error(res, '预约时间必须在办公时间内');
+            // }
 
             // 验证是否跨越午休时间（全天预约除外）
             if (TimeHelper.isInvalidLunchBreakCrossing(startTime, endTime)) {
@@ -435,9 +435,10 @@ class BookingController {
             //     return ResponseHelper.error(res, '只能预约工作日的会议室');
             // }
 
-            if (!TimeHelper.isOfficeTime(startTime) || !TimeHelper.isOfficeTime(endTime)) {
-                return ResponseHelper.error(res, '预约时间必须在办公时间内');
-            }
+            // 验证时间是否在办公时间内 - 已取消限制，允许全时段预约
+            // if (!TimeHelper.isOfficeTime(startTime) || !TimeHelper.isOfficeTime(endTime)) {
+            //     return ResponseHelper.error(res, '预约时间必须在办公时间内');
+            // }
 
             // 验证是否跨越午休时间（全天预约除外）
             if (TimeHelper.isInvalidLunchBreakCrossing(startTime, endTime)) {

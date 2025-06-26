@@ -78,7 +78,7 @@
       <calendar
         roomId="{{roomId}}"
         selectedDate="{{selectedDate}}"
-        bindatechange="onCalendarDateChange"
+        binddatechange="onCalendarDateChange"
       ></calendar>
 
 
