@@ -620,7 +620,7 @@ class RoomController {
                 }
 
                 // 获取当天的可用性状态
-                const dayAvailability = await this.getRoomAvailabilityStatus(id, currentDate);
+                const dayAvailability = await RoomController.getRoomAvailabilityStatus(id, currentDate);
                 
                 dates[dateStr] = {
                     availability: dayAvailability.availability,
@@ -698,7 +698,7 @@ class RoomController {
             });
 
             // 检查是否完全被预约或关闭
-            const timeSlots = this.generateTimeSlots(bookings, partialClosures, date);
+            const timeSlots = RoomController.generateTimeSlots(bookings, partialClosures, date);
             const availableSlots = timeSlots.filter(slot => slot.status === 'available');
 
             return {
