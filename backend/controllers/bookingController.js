@@ -725,11 +725,8 @@ class BookingController {
                 return ResponseHelper.notFound(res, '文件不存在或已过期');
             }
 
-            // 安全处理文件名，移除可能导致问题的字符
-            const safeFilename = filename
-                .replace(/[^\w\-_.]/g, '_') // 移除非字母数字字符
-                .replace(/_{2,}/g, '_') // 合并多个连续下划线
-                .replace(/^_+|_+$/g, ''); // 移除开头和结尾的下划线
+            // 简化文件名处理，保持原始文件名以确保微信小程序能正确识别
+            const safeFilename = filename;
 
             // 使用更安全的方式设置响应头
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
