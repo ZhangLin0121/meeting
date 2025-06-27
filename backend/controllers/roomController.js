@@ -478,30 +478,60 @@ class RoomController {
         // 生成时间点而不是时间槽
         // 用户选择开始时间点和结束时间点，预约从开始到结束的时间段
         const timePoints = [];
-        
-        // 生成所有时间点（每30分钟一个）
+
+        // 收集所有预约的边界时间（结束时间），这些可以作为新预约的开始时间
+        const boundaryTimes = new Set();
+        bookings.forEach(booking => {
+            const endMinutes = TimeHelper.timeToMinutes(booking.endTime);
+            boundaryTimes.add(endMinutes);
+        });
+
+        // 生成基础时间点（每30分钟一个）
+        const baseTimePoints = [];
         for (let minutes = TimeHelper.timeToMinutes('08:30'); minutes <= TimeHelper.timeToMinutes('22:00'); minutes += 30) {
+            baseTimePoints.push(minutes);
+        }
+
+        // 添加边界时间点（如果不在基础时间点中）
+        boundaryTimes.forEach(boundaryMinutes => {
+            if (!baseTimePoints.includes(boundaryMinutes) &&
+                boundaryMinutes >= TimeHelper.timeToMinutes('08:30') &&
+                boundaryMinutes <= TimeHelper.timeToMinutes('22:00')) {
+                baseTimePoints.push(boundaryMinutes);
+            }
+        });
+
+        // 排序所有时间点
+        baseTimePoints.sort((a, b) => a - b);
+
+        // 为每个时间点生成状态信息
+        baseTimePoints.forEach(minutes => {
             const timePoint = TimeHelper.minutesToTime(minutes);
-            
-            // 检查这个时间点是否可以作为开始时间
-            const canBeStartTime = !bookings.some(booking => {
+
+            // 检查是否在已预约的时间段内
+            const isInBookedRange = bookings.some(booking => {
                 const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
                 const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
-                // 如果时间点在已有预约的时间范围内（不包括结束时间），则不能作为开始时间
+                // 时间点在预约范围内（开始时间含，结束时间不含）
                 return minutes >= bookingStart && minutes < bookingEnd;
             });
-            
+
+            // 检查这个时间点是否可以作为开始时间
+            // 1. 不在已预约的时间段内
+            // 2. 或者是某个预约的结束时间（边界时间）
+            const canBeStartTime = !isInBookedRange || boundaryTimes.has(minutes);
+
             // 检查这个时间点是否可以作为结束时间
+            // 不能在已预约时间段的中间（不包括开始时间）
             const canBeEndTime = !bookings.some(booking => {
                 const bookingStart = TimeHelper.timeToMinutes(booking.startTime);
                 const bookingEnd = TimeHelper.timeToMinutes(booking.endTime);
-                // 如果时间点在已有预约的时间范围内（不包括开始时间），则不能作为结束时间
                 return minutes > bookingStart && minutes <= bookingEnd;
             });
-            
+
             // 检查是否为过去的时间
             const isPastTime = queryDate && TimeHelper.isPastTime(queryDate, timePoint);
-            
+
             // 检查是否临时关闭
             const isClosed = closures.some(closure => {
                 if (closure.isAllDay) return true;
@@ -509,22 +539,24 @@ class RoomController {
                 const closureEnd = TimeHelper.timeToMinutes(closure.endTime);
                 return minutes >= closureStart && minutes < closureEnd;
             });
-            
+
+            // 确定状态
             let status = 'available';
             if (isClosed) {
                 status = 'closed';
             } else if (isPastTime) {
                 status = 'past';
-            } else if (!canBeStartTime && !canBeEndTime) {
-                status = 'booked'; // 既不能作为开始时间也不能作为结束时间，说明被完全占用
+            } else if (isInBookedRange && !boundaryTimes.has(minutes)) {
+                // 在预约时间段内且不是边界时间，标记为已预约
+                status = 'booked';
             }
-            
+
             // 确定时间点属于哪个时段（用于前端分组显示）
             let period = 'afternoon'; // 默认下午
             if (minutes < TimeHelper.timeToMinutes('12:00')) {
                 period = 'morning';
             }
-            
+
             timePoints.push({
                 time: timePoint,
                 minutes: minutes,
@@ -532,12 +564,13 @@ class RoomController {
                 period: period,
                 canBeStartTime: (status === 'available') && canBeStartTime,
                 canBeEndTime: (status === 'available') && canBeEndTime,
+                isBoundaryTime: boundaryTimes.has(minutes), // 标记是否为边界时间
                 // 为了兼容前端，保留这些字段
                 startTime: timePoint,
                 endTime: TimeHelper.minutesToTime(minutes + 30)
             });
-        }
-        
+        });
+
         return timePoints;
     }
 
@@ -570,7 +603,7 @@ class RoomController {
             // 计算该月的第一天和最后一天
             const firstDay = new Date(yearNum, monthNum - 1, 1);
             const lastDay = new Date(yearNum, monthNum, 0);
-            
+
             console.log('📅 获取月度可用性:', {
                 roomId: id,
                 year: yearNum,
@@ -604,11 +637,11 @@ class RoomController {
             // 构建日期可用性数据
             const dates = {};
             const today = new Date();
-            
+
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const currentDate = new Date(yearNum, monthNum - 1, day);
                 const dateStr = day.toString();
-                
+
                 // 检查是否为过去的日期
                 if (currentDate < TimeHelper.getStartOfDay(today)) {
                     dates[dateStr] = {
@@ -621,7 +654,7 @@ class RoomController {
 
                 // 获取当天的可用性状态
                 const dayAvailability = await RoomController.getRoomAvailabilityStatus(id, currentDate);
-                
+
                 dates[dateStr] = {
                     availability: dayAvailability.availability,
                     availableSlots: dayAvailability.availableSlots || 0,

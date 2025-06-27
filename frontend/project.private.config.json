@@ -4,5 +4,18 @@
     "urlCheck": false,
     "ignoreHttpUrlCheck": true
   },
-  "libVersion": "3.8.9"
+  "libVersion": "3.8.9",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "pages/admin/admin",
+          "pathName": "pages/admin/admin",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        }
+      ]
+    }
+  }
 }

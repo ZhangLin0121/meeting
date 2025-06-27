@@ -189,7 +189,7 @@ Page({
         this.setData({
             selectedDate: todayString
         });
-        
+
         // 获取今天的时间段信息
         await this.fetchRoomAvailability(todayString);
     },
@@ -281,47 +281,29 @@ Page({
      * 获取会议室指定日期的可用性
      */
     async fetchRoomAvailability(date) {
-        console.log('🚀 开始获取房间可用性');
-        console.log('📝 请求参数:', {
-            roomId: this.data.roomId,
-            date: date,
-            timestamp: new Date().toISOString()
-        });
-        
-        if (!this.data.roomId) {
-            console.error('❌ 房间ID为空，无法获取可用性');
-            wx.showToast({ title: '房间ID缺失', icon: 'none' });
-            return;
-        }
-        
         try {
-            const url = `/api/rooms/${this.data.roomId}/availability?date=${date}`;
-            console.log('📡 API请求URL:', url);
-            
-            const result = await this.requestAPI('GET', url);
-            console.log('📦 API返回结果:', {
-                success: result.success,
-                hasData: !!result.data,
-                hasTimeSlots: !!(result.data && result.data.timeSlots),
-                slotsLength: result.data && result.data.timeSlots ? result.data.timeSlots.length : 0
-            });
-            
-            if (result.success && result.data && result.data.timeSlots) {
-                console.log('🔍 后端返回的时间槽详情:', result.data.timeSlots.slice(0, 3)); // 只显示前3个避免日志过长
+            const roomId = this.data.roomId;
+            if (!roomId) {
+                console.error('❌ 房间ID不存在');
+                return;
+            }
 
+            const url = `/api/rooms/${roomId}/availability?date=${date}`;
+            const result = await this.requestAPI('GET', url);
+
+            if (result.success && result.data && result.data.timeSlots) {
                 // 直接使用后端返回的时间槽数据，转换为前端需要的格式
                 const timeSlots = result.data.timeSlots.map((backendSlot, index) => ({
-                    time: backendSlot.startTime,
+                    time: backendSlot.startTime || backendSlot.time, // 兼容两种字段名
                     endTime: backendSlot.endTime,
                     status: backendSlot.status,
                     period: backendSlot.period,
+                    minutes: backendSlot.minutes, // 添加minutes字段用于时间比较
                     isSelected: false,
                     index: index,
-                    canBeStartTime: backendSlot.canBeStartTime || false,
-                    canBeEndTime: backendSlot.canBeEndTime || false
+                    canBeStartTime: backendSlot.canBeStartTime === true, // 确保布尔值正确
+                    canBeEndTime: backendSlot.canBeEndTime === true // 确保布尔值正确
                 }));
-
-                console.log('🕐 转换后的前端时间槽样例:', timeSlots.slice(0, 3));
 
                 // 生成时段分组
                 const timePeriods = this.generateTimePeriodsArray();
@@ -342,29 +324,14 @@ Page({
                     expandedPeriod: null
                 });
 
-                console.log('📊 时段状态统计:', timePeriods.map(p => ({
-                    name: p.name,
-                    status: p.status,
-                    available: p.availableCount,
-                    total: p.totalCount,
-                    canBook: p.canBookWhole
-                })));
-                
-                console.log('✅ 时间段数据更新完成，日期:', date);
             } else {
-                console.error('❌ API返回数据格式不正确:', {
-                    success: result.success,
-                    message: result.message,
-                    hasData: !!result.data
-                });
-                
-                // 显示用户友好的错误信息
-                wx.showToast({ 
-                    title: result.message || 'API返回数据异常', 
+                console.error('❌ API返回数据格式不正确');
+                wx.showToast({
+                    title: result.message || 'API返回数据异常',
                     icon: 'none',
                     duration: 2000
                 });
-                
+
                 // 显示默认的时段数据，避免界面空白
                 const timePeriods = this.generateTimePeriodsArray();
                 this.setData({
@@ -373,20 +340,14 @@ Page({
                 });
             }
         } catch (error) {
-            console.error('❌ 获取时间段失败详情:', {
-                error: error,
-                message: error.message,
-                stack: error.stack,
-                roomId: this.data.roomId,
-                date: date
-            });
-            
-            wx.showToast({ 
-                title: '网络连接异常', 
+            console.error('❌ 获取时间段失败:', error.message);
+
+            wx.showToast({
+                title: '网络连接异常',
                 icon: 'none',
                 duration: 2000
             });
-            
+
             // 显示默认的时段数据，避免界面空白
             const timePeriods = this.generateTimePeriodsArray();
             // 将所有时段标记为不可用
@@ -394,7 +355,7 @@ Page({
                 period.status = 'unavailable';
                 period.canBookWhole = false;
             });
-            
+
             this.setData({
                 timeSlots: [],
                 timePeriods: timePeriods
@@ -476,20 +437,12 @@ Page({
      */
     onCalendarDateChange(e) {
         const { date, availability, availableSlots } = e.detail;
-        console.log('📅 日历选择日期变更事件:', {
-            newDate: date,
-            oldDate: this.data.selectedDate,
-            availability,
-            availableSlots,
-            roomId: this.data.roomId
-        });
-        
+
         // 检查是否真的切换了日期，避免重复请求
         if (this.data.selectedDate === date) {
-            console.log('📅 日期未变化，跳过更新');
             return;
         }
-        
+
         // 先清空时段数据，显示加载状态
         this.setData({
             selectedDate: date,
@@ -500,15 +453,9 @@ Page({
             wholePeriodBooking: null,
             expandedPeriod: null
         });
-        
-        console.log('🔄 已清空时段数据，开始获取新日期的时段信息...');
-        
+
         // 获取该日期的时间段信息
-        this.fetchRoomAvailability(date).then(() => {
-            console.log('✅ 日期切换完成，时段数据已更新');
-        }).catch(error => {
-            console.error('❌ 日期切换时段更新失败:', error);
-        });
+        this.fetchRoomAvailability(date);
     },
 
     /**
@@ -548,14 +495,14 @@ Page({
                 wx.showToast({ title: '该时间点不能作为结束时间', icon: 'none' });
                 return;
             }
-            
+
             // 验证结束时间必须晚于开始时间
             const startTime = this.data.timeSlots[this.data.selectedStartIndex];
             if (timePoint.minutes <= startTime.minutes) {
                 wx.showToast({ title: '结束时间必须晚于开始时间', icon: 'none' });
                 return;
             }
-            
+
             this.setEndTime(this.data.selectedStartIndex, index);
         } else {
             // 重新选择开始时间点
@@ -580,6 +527,25 @@ Page({
         if (periodId === 'custom') {
             const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
             this.setData({ expandedPeriod });
+
+            // 展开自定义时段时显示时间槽状态
+            if (expandedPeriod === 'custom') {
+                console.log('🔍 自定义时段状态:');
+                const availableSlots = this.data.timeSlots.filter(slot => slot.status === 'available');
+                const canStartSlots = this.data.timeSlots.filter(slot => slot.canBeStartTime);
+                const canEndSlots = this.data.timeSlots.filter(slot => slot.canBeEndTime);
+
+                console.log(`总时间槽: ${this.data.timeSlots.length}, 可用: ${availableSlots.length}, 可开始: ${canStartSlots.length}, 可结束: ${canEndSlots.length}`);
+
+                if (availableSlots.length === 0) {
+                    console.log('❌ 没有可用时间槽');
+                } else if (canStartSlots.length === 0 || canEndSlots.length === 0) {
+                    console.log('⚠️ 缺少可开始或可结束的时间点');
+                    console.log('可开始的时间:', canStartSlots.map(s => s.time));
+                    console.log('可结束的时间:', canEndSlots.map(s => s.time));
+                }
+            }
+
             return;
         }
 
@@ -745,8 +711,6 @@ Page({
             selectedEndIndex: -1,
             wholePeriodBooking: null
         });
-
-        console.log('✅ 设置开始时间点:', timeSlots[startIndex].time);
     },
 
     /**
@@ -763,14 +727,17 @@ Page({
         // 检查时间范围内是否有不可用的时间点
         const startTime = timeSlots[startIndex].time;
         const endTime = timeSlots[endIndex].time;
-        
+
         // 验证从开始时间到结束时间的连续性（检查是否有被预约的时间段）
         const startMinutes = timeSlots[startIndex].minutes;
         const endMinutes = timeSlots[endIndex].minutes;
-        
-        // 检查时间范围内是否有冲突
+
+        // 检查时间范围内是否有冲突 - 修复边界时间重叠问题
+        // 只检查开始时间（含）到结束时间（不含）之间的时间点
         for (let i = 0; i < timeSlots.length; i++) {
             const slot = timeSlots[i];
+            // 修改判断条件：只检查 [startMinutes, endMinutes) 区间内的时间点
+            // 这样可以避免边界时间的冲突误判
             if (slot.minutes >= startMinutes && slot.minutes < endMinutes) {
                 if (slot.status === 'booked') {
                     wx.showToast({ title: `选中时间段包含已预约的时间（${slot.time}）`, icon: 'none' });
@@ -784,8 +751,6 @@ Page({
             selectedEndIndex: endIndex,
             wholePeriodBooking: null
         });
-
-        console.log('✅ 设置时间段:', `${startTime} - ${endTime}`);
     },
 
     /**

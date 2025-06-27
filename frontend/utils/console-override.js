@@ -16,9 +16,12 @@ class ConsoleManager {
             debug: console.debug
         };
 
-        // 在生产环境中重写console方法
+        // 根据调试模式决定是否重写console方法
         if (!this.isDebugMode) {
             this.overrideConsole();
+        } else {
+            // 调试模式下，确保console正常工作
+            this.restoreConsole();
         }
     }
 

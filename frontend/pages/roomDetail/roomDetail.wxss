@@ -283,7 +283,6 @@ page {
 /* 日期选择器已替换为日历组件 */
 
 
-
 /* 时间段选择 - 两层级设计 */
 
 .time-slots-container {
@@ -310,19 +309,21 @@ page {
 /* 时段卡片容器 */
 
 .period-cards-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
+
 /* 时段加载提示 */
+
 .loading-periods {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  color: #666666;
-  font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #666666;
+    font-size: 14px;
 }
 
 
@@ -420,7 +421,110 @@ page {
 }
 
 
-/* 可用性指示器样式已移除 - 精简版不需要 */
+/* 可用性指示器样式 */
+
+.availability-indicators {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: flex;
+    gap: 2px;
+}
+
+.indicator {
+    font-size: 8px;
+    font-weight: bold;
+    padding: 1px 3px;
+    border-radius: 3px;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.start-indicator {
+    background-color: #34c759;
+}
+
+.end-indicator {
+    background-color: #ff9500;
+}
+
+
+/* 已预约指示器样式 */
+
+.booked-indicator {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: #8e8e93;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+
+/* 移除不再需要的状态指示器 */
+
+
+/* 简化的图例样式 */
+
+.simple-legend {
+    display: flex;
+    gap: 16px;
+    margin: 12px 0;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.legend-dot.available {
+    background-color: #34c759;
+}
+
+.legend-dot.selected {
+    background-color: #007aff;
+}
+
+
+/* 移除已占用图例样式 */
+
+.legend-text {
+    font-size: 11px;
+    color: #666666;
+    font-weight: 500;
+}
+
+
+/* 选择状态显示 */
+
+.selection-status {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background-color: #e8f5e8;
+    border-radius: 6px;
+    border-left: 3px solid #34c759;
+}
+
+.status-text {
+    font-size: 12px;
+    color: #333333;
+    font-weight: 500;
+    line-height: 1.4;
+}
 
 
 /* 快速预约按钮 */
@@ -529,13 +633,34 @@ page {
 }
 
 .detail-slots-header {
-    margin-bottom: 12px;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 16px;
 }
 
 .detail-title {
+    display: block;
     font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.detail-subtitle {
+    display: block;
+    font-size: 12px;
     color: #666666;
-    font-weight: 500;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.detail-example {
+    display: block;
+    font-size: 11px;
+    color: #007AFF;
+    font-style: italic;
+    line-height: 1.3;
 }
 
 .time-slots-grid {
@@ -585,6 +710,36 @@ page {
 .time-slot.available:active {
     background-color: rgba(52, 199, 89, 0.05);
     transform: scale(0.97);
+}
+
+
+/* 可点击状态样式 - 简化设计 */
+
+.time-slot.clickable {
+    cursor: pointer;
+    border-width: 2px;
+}
+
+.time-slot.clickable.available {
+    background-color: #ffffff;
+    border-color: #34c759;
+    box-shadow: 0 2px 6px rgba(52, 199, 89, 0.15);
+    transform: scale(1);
+    transition: all 0.2s ease;
+}
+
+.time-slot.clickable.available:active {
+    background-color: rgba(52, 199, 89, 0.1);
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(52, 199, 89, 0.2);
+}
+
+
+/* 不可点击状态样式 */
+
+.time-slot.non-clickable {
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .time-slot.booked {
@@ -649,47 +804,18 @@ page {
 }
 
 
-/* 时间段图例 */
+/* 调试信息样式 */
 
-.time-slots-legend {
-    display: flex;
-    gap: 16px;
-    margin-top: 12px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.legend-color {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-}
-
-.legend-color.available {
-    background-color: #34c759;
-}
-
-.legend-color.booked {
-    background-color: #8e8e93;
-}
-
-.legend-color.closed {
-    background-color: #ff3b30;
-}
-
-.legend-color.past {
-    background-color: #8e8e93;
-    opacity: 0.5;
-}
-
-.legend-text {
-    font-size: 11px;
-    color: #8e8e93;
-    font-weight: 500;
+.debug-info {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 8px;
+    color: #007AFF;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 1px 3px;
+    border-radius: 3px;
 }
 
 
@@ -1076,3 +1202,42 @@ page {
         transform: translateY(0);
     }
 }
+
+
+/* 状态指示说明样式 */
+
+.status-indicators-legend {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.legend-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.indicators-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.indicator-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.indicator-desc {
+    font-size: 10px;
+    color: #666666;
+}
+
+
+/* 移除复杂的边界时间样式，采用简化设计 */

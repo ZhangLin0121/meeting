@@ -23,7 +23,7 @@ const CONFIG = {
     [ENV.PRODUCTION]: {
         apiBaseUrl: 'https://www.cacophonyem.me/meeting', // 使用HTTPS，现在配置正确了
         environment: 'production',
-        debug: false,
+        debug: true, // 临时启用调试模式
         timeout: 15000
     }
 };
