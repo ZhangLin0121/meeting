@@ -496,7 +496,7 @@ Page({
         const query = wx.createSelectorQuery().in(this);
         
         // 同时获取时间段容器和scroll-view的信息
-        query.select('.time-slots-container').boundingClientRect();
+        query.select('.period-cards-container').boundingClientRect();
         query.select('.main-content').boundingClientRect();
         query.selectViewport().scrollOffset();
         
@@ -510,16 +510,18 @@ Page({
                 const windowInfo = wx.getWindowInfo();
                 const screenHeight = windowInfo.windowHeight;
                 
-                // 计算时间段容器的底部位置
+                // 计算时间段容器的位置
+                const containerTop = timeSlotsRect.top;
+                const containerHeight = timeSlotsRect.height;
                 const containerBottom = timeSlotsRect.bottom;
                 
-                // 计算需要滚动的距离，让时间段区域显示在屏幕中下部
-                // 目标：让时间段选择区域的底部距离屏幕底部有一定间距
-                const targetScrollTop = containerBottom - screenHeight + 100; // 100px的底部间距
+                // 计算目标滚动位置
+                // 目标：让时间段选择区域显示在屏幕的中下部分，确保用户能看到完整的时间选择界面
+                const availableHeight = screenHeight - (this.data.statusBarHeight + 44 + 100); // 减去导航栏和底部间距
+                const targetScrollTop = containerBottom - availableHeight;
                 
-                // 确保滚动距离不会超出页面范围
-                const maxScrollTop = Math.max(0, timeSlotsRect.top - 50); // 至少滚动到时间段顶部
-                const finalScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop + 300));
+                // 确保不会滚动过头
+                const finalScrollTop = Math.max(0, targetScrollTop);
                 
                 // 平滑滚动到目标位置
                 this.setData({
@@ -527,12 +529,14 @@ Page({
                 });
                 
                 console.log('📍 自动滚动到时间段选择区域:', {
+                    containerTop: containerTop,
+                    containerHeight: containerHeight,
                     containerBottom: containerBottom,
                     screenHeight: screenHeight,
+                    availableHeight: availableHeight,
                     targetScrollTop: targetScrollTop,
                     finalScrollTop: finalScrollTop,
-                    timeSlotsTop: timeSlotsRect.top,
-                    timeSlotsHeight: timeSlotsRect.height
+                    statusBarHeight: this.data.statusBarHeight
                 });
             }
         });
