@@ -519,7 +519,9 @@ class RoomController {
             // 检查这个时间点是否可以作为开始时间
             // 1. 不在已预约的时间段内
             // 2. 或者是某个预约的结束时间（边界时间）
-            const canBeStartTime = !isInBookedRange || boundaryTimes.has(minutes);
+            // 3. 不能是最后一个时间点（22:00），因为无法找到结束时间
+            const isLastTimePoint = minutes === TimeHelper.timeToMinutes('22:00');
+            const canBeStartTime = (!isInBookedRange || boundaryTimes.has(minutes)) && !isLastTimePoint;
 
             // 检查这个时间点是否可以作为结束时间
             // 不能在已预约时间段的中间（不包括开始时间）
