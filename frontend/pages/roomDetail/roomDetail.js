@@ -489,6 +489,33 @@ Page({
     },
 
     /**
+     * 滚动到时间段选择区域
+     */
+    scrollToTimeSlots() {
+        // 使用微信小程序的createSelectorQuery API来获取元素位置
+        const query = wx.createSelectorQuery().in(this);
+        query.select('.time-slots-container').boundingClientRect((rect) => {
+            if (rect) {
+                // 计算需要滚动的距离
+                // rect.top是元素相对于页面顶部的距离
+                // 减去状态栏和导航栏的高度，再减去一些padding让用户看得更舒服
+                const targetScrollTop = rect.top - (this.data.statusBarHeight + 44 + 20);
+                
+                // 平滑滚动到目标位置
+                this.setData({
+                    scrollTop: Math.max(0, targetScrollTop)
+                });
+                
+                console.log('📍 自动滚动到时间段选择区域:', {
+                    elementTop: rect.top,
+                    targetScrollTop: targetScrollTop,
+                    statusBarHeight: this.data.statusBarHeight
+                });
+            }
+        }).exec();
+    },
+
+    /**
      * 时段点击事件 - 只有自选时间段才展开
      */
     onPeriodTap(e) {
@@ -501,6 +528,13 @@ Page({
 
         const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
         this.setData({ expandedPeriod });
+
+        // 如果是展开自定义时间段，自动滚动到时间选择区域
+        if (expandedPeriod === 'custom') {
+            this.safeSetTimeout(() => {
+                this.scrollToTimeSlots();
+            }, 300); // 等待展开动画完成
+        }
     },
 
     /**
@@ -574,6 +608,11 @@ Page({
                     console.log('可开始的时间:', canStartSlots.map(s => s.time));
                     console.log('可结束的时间:', canEndSlots.map(s => s.time));
                 }
+
+                // 自动滚动到时间选择区域
+                this.safeSetTimeout(() => {
+                    this.scrollToTimeSlots();
+                }, 300); // 等待展开动画完成
             }
 
             return;
