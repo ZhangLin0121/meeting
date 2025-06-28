@@ -507,8 +507,8 @@ Page({
             
             if (timeSlotsRect && scrollViewRect) {
                 // 获取当前屏幕高度
-                const systemInfo = wx.getSystemInfoSync();
-                const screenHeight = systemInfo.windowHeight;
+                const windowInfo = wx.getWindowInfo();
+                const screenHeight = windowInfo.windowHeight;
                 
                 // 计算时间段容器的底部位置
                 const containerBottom = timeSlotsRect.bottom;
