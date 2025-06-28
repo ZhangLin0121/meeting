@@ -521,7 +521,7 @@ Page({
                 // 计算目标滚动位置
                 // 目标：让整个时间段选择区域（包括时间网格）完全显示在屏幕内
                 // 预估展开后的高度增加（时间网格 + 图例 + 状态显示等）
-                const expandedContentHeight = 400; // 预估展开内容的高度
+                const expandedContentHeight = 600; // 预估展开内容的高度
                 const totalContentHeight = containerHeight + expandedContentHeight;
                 
                 // 计算需要滚动的距离，确保展开的内容能完全显示
@@ -573,9 +573,9 @@ Page({
                 
                 // 计算更精确的目标滚动位置
                 const containerTop = containerRect.top;
-                const expandedContentHeight = 450; // 稍微增加预估高度
+                const expandedContentHeight = 600; // 大幅增加预估高度，确保所有时间节点都能显示
                 const navigationHeight = this.data.statusBarHeight + 44;
-                const bottomPadding = 80; // 底部留出更多空间
+                const bottomPadding = 100; // 底部留出更多空间
                 
                 // 目标：让展开内容的底部距离屏幕底部有足够间距
                 const targetScrollTop = containerTop + expandedContentHeight - (screenHeight - navigationHeight - bottomPadding);
