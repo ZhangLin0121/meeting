@@ -56,6 +56,9 @@ Page({
         
         // 滚动位置管理
         scrollTop: 0,
+        
+        // 展开动画状态
+        isExpanding: false,
     },
 
     /**
@@ -550,6 +553,86 @@ Page({
     },
 
     /**
+     * 平滑滚动到时间段选择区域 - 增强版
+     */
+    scrollToTimeSlotsSmooth() {
+        const query = wx.createSelectorQuery().in(this);
+        
+        // 获取更精确的元素位置信息
+        query.select('.period-cards-container').boundingClientRect();
+        query.selectViewport().scrollOffset();
+        
+        query.exec((res) => {
+            const containerRect = res[0];
+            const scrollInfo = res[1];
+            
+            if (containerRect) {
+                const windowInfo = wx.getWindowInfo();
+                const screenHeight = windowInfo.windowHeight;
+                const currentScrollTop = this.data.scrollTop || 0;
+                
+                // 计算更精确的目标滚动位置
+                const containerTop = containerRect.top;
+                const expandedContentHeight = 450; // 稍微增加预估高度
+                const navigationHeight = this.data.statusBarHeight + 44;
+                const bottomPadding = 80; // 底部留出更多空间
+                
+                // 目标：让展开内容的底部距离屏幕底部有足够间距
+                const targetScrollTop = containerTop + expandedContentHeight - (screenHeight - navigationHeight - bottomPadding);
+                const finalScrollTop = Math.max(0, targetScrollTop);
+                
+                // 分阶段平滑滚动
+                this.animateScrollTo(currentScrollTop, finalScrollTop, 400);
+                
+                console.log('📍 平滑滚动到时间段选择区域:', {
+                    containerTop: containerTop,
+                    currentScrollTop: currentScrollTop,
+                    targetScrollTop: targetScrollTop,
+                    finalScrollTop: finalScrollTop,
+                    expandedContentHeight: expandedContentHeight,
+                    screenHeight: screenHeight,
+                    navigationHeight: navigationHeight
+                });
+            }
+        });
+    },
+
+    /**
+     * 动画滚动到指定位置
+     */
+    animateScrollTo(startScrollTop, endScrollTop, duration) {
+        const startTime = Date.now();
+        const distance = endScrollTop - startScrollTop;
+        
+        const animateStep = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // 使用缓动函数让滚动更自然
+            const easeProgress = this.easeOutCubic(progress);
+            const currentScrollTop = startScrollTop + (distance * easeProgress);
+            
+            this.setData({
+                scrollTop: currentScrollTop
+            });
+            
+            if (progress < 1) {
+                this.safeSetTimeout(animateStep, 16); // 约60fps
+            }
+        };
+        
+        animateStep();
+    },
+
+    /**
+     * 缓动函数 - 三次方缓出
+     */
+    easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    },
+
+    /**
      * 时段点击事件 - 只有自选时间段才展开
      */
     onPeriodTap(e) {
@@ -560,14 +643,31 @@ Page({
             return;
         }
 
-        const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
-        this.setData({ expandedPeriod });
+        // 添加触觉反馈
+        wx.vibrateShort && wx.vibrateShort();
 
-        // 如果是展开自定义时间段，自动滚动到时间选择区域
+        const expandedPeriod = this.data.expandedPeriod === periodId ? null : periodId;
+        
+        // 先设置展开状态和动画状态
+        this.setData({ 
+            expandedPeriod,
+            isExpanding: expandedPeriod === 'custom'
+        });
+
+        // 如果是展开自定义时间段，分阶段执行滚动动画
         if (expandedPeriod === 'custom') {
+            // 第一阶段：短暂延迟，让用户看到展开开始
             this.safeSetTimeout(() => {
-                this.scrollToTimeSlots();
-            }, 300); // 等待展开动画完成
+                this.scrollToTimeSlotsSmooth();
+            }, 150);
+            
+            // 展开动画完成后重置状态
+            this.safeSetTimeout(() => {
+                this.setData({ isExpanding: false });
+            }, 500);
+        } else {
+            // 收起时立即重置状态
+            this.setData({ isExpanding: false });
         }
     },
 
@@ -645,8 +745,8 @@ Page({
 
                 // 自动滚动到时间选择区域
                 this.safeSetTimeout(() => {
-                    this.scrollToTimeSlots();
-                }, 300); // 等待展开动画完成
+                    this.scrollToTimeSlotsSmooth();
+                }, 150);
             }
 
             return;
