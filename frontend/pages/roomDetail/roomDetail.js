@@ -516,11 +516,16 @@ Page({
                 const containerBottom = timeSlotsRect.bottom;
                 
                 // 计算目标滚动位置
-                // 目标：让时间段选择区域显示在屏幕的中下部分，确保用户能看到完整的时间选择界面
-                const availableHeight = screenHeight - (this.data.statusBarHeight + 44 + 100); // 减去导航栏和底部间距
-                const targetScrollTop = containerBottom - availableHeight;
+                // 目标：让整个时间段选择区域（包括时间网格）完全显示在屏幕内
+                // 预估展开后的高度增加（时间网格 + 图例 + 状态显示等）
+                const expandedContentHeight = 400; // 预估展开内容的高度
+                const totalContentHeight = containerHeight + expandedContentHeight;
                 
-                // 确保不会滚动过头
+                // 计算需要滚动的距离，确保展开的内容能完全显示
+                const availableHeight = screenHeight - (this.data.statusBarHeight + 44 + 50); // 减去导航栏和少量底部间距
+                const targetScrollTop = (containerTop + totalContentHeight) - availableHeight;
+                
+                // 确保不会滚动过头，但要保证足够的滚动距离
                 const finalScrollTop = Math.max(0, targetScrollTop);
                 
                 // 平滑滚动到目标位置
@@ -532,6 +537,8 @@ Page({
                     containerTop: containerTop,
                     containerHeight: containerHeight,
                     containerBottom: containerBottom,
+                    expandedContentHeight: expandedContentHeight,
+                    totalContentHeight: totalContentHeight,
                     screenHeight: screenHeight,
                     availableHeight: availableHeight,
                     targetScrollTop: targetScrollTop,
