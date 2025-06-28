@@ -492,27 +492,50 @@ Page({
      * 滚动到时间段选择区域
      */
     scrollToTimeSlots() {
-        // 使用微信小程序的createSelectorQuery API来获取元素位置
+        // 使用微信小程序的createSelectorQuery API来获取元素位置和页面信息
         const query = wx.createSelectorQuery().in(this);
-        query.select('.time-slots-container').boundingClientRect((rect) => {
-            if (rect) {
-                // 计算需要滚动的距离
-                // rect.top是元素相对于页面顶部的距离
-                // 减去状态栏和导航栏的高度，再减去一些padding让用户看得更舒服
-                const targetScrollTop = rect.top - (this.data.statusBarHeight + 44 + 20);
+        
+        // 同时获取时间段容器和scroll-view的信息
+        query.select('.time-slots-container').boundingClientRect();
+        query.select('.main-content').boundingClientRect();
+        query.selectViewport().scrollOffset();
+        
+        query.exec((res) => {
+            const timeSlotsRect = res[0];
+            const scrollViewRect = res[1];
+            const scrollInfo = res[2];
+            
+            if (timeSlotsRect && scrollViewRect) {
+                // 获取当前屏幕高度
+                const systemInfo = wx.getSystemInfoSync();
+                const screenHeight = systemInfo.windowHeight;
+                
+                // 计算时间段容器的底部位置
+                const containerBottom = timeSlotsRect.bottom;
+                
+                // 计算需要滚动的距离，让时间段区域显示在屏幕中下部
+                // 目标：让时间段选择区域的底部距离屏幕底部有一定间距
+                const targetScrollTop = containerBottom - screenHeight + 100; // 100px的底部间距
+                
+                // 确保滚动距离不会超出页面范围
+                const maxScrollTop = Math.max(0, timeSlotsRect.top - 50); // 至少滚动到时间段顶部
+                const finalScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop + 300));
                 
                 // 平滑滚动到目标位置
                 this.setData({
-                    scrollTop: Math.max(0, targetScrollTop)
+                    scrollTop: finalScrollTop
                 });
                 
                 console.log('📍 自动滚动到时间段选择区域:', {
-                    elementTop: rect.top,
+                    containerBottom: containerBottom,
+                    screenHeight: screenHeight,
                     targetScrollTop: targetScrollTop,
-                    statusBarHeight: this.data.statusBarHeight
+                    finalScrollTop: finalScrollTop,
+                    timeSlotsTop: timeSlotsRect.top,
+                    timeSlotsHeight: timeSlotsRect.height
                 });
             }
-        }).exec();
+        });
     },
 
     /**
