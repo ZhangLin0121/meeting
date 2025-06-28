@@ -693,6 +693,9 @@ page {
     font-weight: 500;
     line-height: 1.2;
     color: #1c1c1e;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 
@@ -773,24 +776,39 @@ page {
     color: #8e8e93;
 }
 
+
+/* 修复选中状态样式 - 确保时间文本始终显示 */
+
 .time-slot.selected-start {
-    background-color: #34c759;
-    border-color: #34c759;
+    background-color: #34c759 !important;
+    border-color: #34c759 !important;
+    box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+    transform: scale(1.02);
 }
 
 .time-slot.selected-start .time-slot-text {
-    color: #ffffff;
+    color: #ffffff !important;
     font-weight: 600;
+    font-size: 12px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .time-slot.selected-end {
-    background-color: #ff3b30;
-    border-color: #ff3b30;
+    background-color: #ff3b30 !important;
+    border-color: #ff3b30 !important;
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+    transform: scale(1.02);
 }
 
 .time-slot.selected-end .time-slot-text {
-    color: #ffffff;
+    color: #ffffff !important;
     font-weight: 600;
+    font-size: 12px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .time-point-label {

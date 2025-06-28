@@ -12,7 +12,7 @@
   </view>
 
   <!-- 主内容区域 -->
-  <scroll-view class="main-content" style="padding-top: {{statusBarHeight + 44}}px;" scroll-y wx:if="{{!loading && roomDetails.id}}">
+  <scroll-view class="main-content" style="padding-top: {{statusBarHeight + 44}}px;" scroll-y scroll-top="{{scrollTop}}" bindscroll="onScroll" wx:if="{{!loading && roomDetails.id}}">
     
     <!-- 会议室基本信息展示区 -->
     <view class="room-info-section">

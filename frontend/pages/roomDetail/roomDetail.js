@@ -50,6 +50,12 @@ Page({
         selectedTimeText: '',
         wholePeriodBooking: null, // 整时段预约信息
         isFullDayUnavailable: false, // 全天是否约满
+
+        // 添加定时器管理
+        timers: [],
+        
+        // 滚动位置管理
+        scrollTop: 0,
     },
 
     /**
@@ -78,7 +84,7 @@ Page({
         });
 
         // 延迟检查数据是否正确设置
-        setTimeout(() => {
+        this.safeSetTimeout(() => {
             console.log('✅ 页面数据中的状态栏高度:', this.data.statusBarHeight);
         }, 100);
 
@@ -159,7 +165,7 @@ Page({
                 });
 
                 // 延迟重试获取用户数据
-                setTimeout(() => {
+                this.safeSetTimeout(() => {
                     this.safeGetAppData();
                 }, 500);
             }
@@ -172,7 +178,7 @@ Page({
             });
 
             // 延迟重试
-            setTimeout(() => {
+            this.safeSetTimeout(() => {
                 this.safeGetAppData();
             }, 1000);
         }
@@ -443,6 +449,9 @@ Page({
             return;
         }
 
+        // 记录当前滚动位置
+        const currentScrollTop = this.data.scrollTop;
+
         // 先清空时段数据，显示加载状态
         this.setData({
             selectedDate: date,
@@ -455,7 +464,28 @@ Page({
         });
 
         // 获取该日期的时间段信息
-        this.fetchRoomAvailability(date);
+        this.fetchRoomAvailability(date).then(() => {
+            // 数据加载完成后，恢复滚动位置
+            this.setData({
+                scrollTop: currentScrollTop
+            });
+        });
+    },
+
+    /**
+     * 滚动事件处理 - 记录当前滚动位置
+     */
+    onScroll(e) {
+        // 防抖处理，避免频繁更新
+        if (this.scrollTimer) {
+            clearTimeout(this.scrollTimer);
+        }
+        
+        this.scrollTimer = setTimeout(() => {
+            this.setData({
+                scrollTop: e.detail.scrollTop
+            });
+        }, 100);
     },
 
     /**
@@ -696,35 +726,37 @@ Page({
      * 设置开始时间点
      */
     setStartTime(startIndex) {
-        const timeSlots = [...this.data.timeSlots];
-        timeSlots.forEach(slot => slot.isSelected = false);
-        timeSlots[startIndex].isSelected = 'start';
+        // 优化：只更新必要的时间槽，避免创建大型数组副本
+        const updates = {};
+
+        // 清除之前的选中状态
+        if (this.data.selectedStartIndex >= 0) {
+            updates[`timeSlots[${this.data.selectedStartIndex}].isSelected`] = false;
+        }
+        if (this.data.selectedEndIndex >= 0) {
+            updates[`timeSlots[${this.data.selectedEndIndex}].isSelected`] = false;
+        }
+
+        // 设置新的开始时间
+        updates[`timeSlots[${startIndex}].isSelected`] = 'start';
+        updates.selectedStartIndex = startIndex;
+        updates.selectedEndIndex = -1;
+        updates.wholePeriodBooking = null;
 
         // 如果之前有全天预约，现在选择具体时间段，需要恢复时段可用性
         if (this.data.wholePeriodBooking && this.data.wholePeriodBooking.periodId === 'fullday') {
             this.restorePeriodsAvailability();
         }
 
-        this.setData({
-            timeSlots,
-            selectedStartIndex: startIndex,
-            selectedEndIndex: -1,
-            wholePeriodBooking: null
-        });
+        this.setData(updates);
     },
 
     /**
      * 设置结束时间点并验证时间范围
      */
     setEndTime(startIndex, endIndex) {
-        const timeSlots = [...this.data.timeSlots];
-        timeSlots.forEach(slot => slot.isSelected = false);
-
-        // 标记开始和结束时间点
-        timeSlots[startIndex].isSelected = 'start';
-        timeSlots[endIndex].isSelected = 'end';
-
-        // 检查时间范围内是否有不可用的时间点
+        // 获取时间槽信息进行验证
+        const timeSlots = this.data.timeSlots;
         const startTime = timeSlots[startIndex].time;
         const endTime = timeSlots[endIndex].time;
 
@@ -746,11 +778,23 @@ Page({
             }
         }
 
-        this.setData({
-            timeSlots,
-            selectedEndIndex: endIndex,
-            wholePeriodBooking: null
-        });
+        // 优化：只更新必要的时间槽
+        const updates = {};
+
+        // 清除之前的选中状态
+        for (let i = 0; i < timeSlots.length; i++) {
+            if (timeSlots[i].isSelected) {
+                updates[`timeSlots[${i}].isSelected`] = false;
+            }
+        }
+
+        // 设置新的选中状态
+        updates[`timeSlots[${startIndex}].isSelected`] = 'start';
+        updates[`timeSlots[${endIndex}].isSelected`] = 'end';
+        updates.selectedEndIndex = endIndex;
+        updates.wholePeriodBooking = null;
+
+        this.setData(updates);
     },
 
     /**
@@ -1049,10 +1093,17 @@ Page({
             selectedEndIndex: -1
         });
 
-        // 清除时间段选择状态
-        const timeSlots = [...this.data.timeSlots];
-        timeSlots.forEach(slot => slot.isSelected = false);
-        this.setData({ timeSlots });
+        // 清除时间段选择状态 - 优化版本
+        const updates = {};
+        const timeSlots = this.data.timeSlots;
+        for (let i = 0; i < timeSlots.length; i++) {
+            if (timeSlots[i].isSelected) {
+                updates[`timeSlots[${i}].isSelected`] = false;
+            }
+        }
+        if (Object.keys(updates).length > 0) {
+            this.setData(updates);
+        }
     },
 
     /**
@@ -1148,10 +1199,17 @@ Page({
                     bookingForm: { topic: '', contactName: '', contactPhone: '', attendeesCount: 1 }
                 });
 
-                // 清除时间段选择状态
-                const timeSlots = [...this.data.timeSlots];
-                timeSlots.forEach(slot => slot.isSelected = false);
-                this.setData({ timeSlots });
+                // 清除时间段选择状态 - 优化版本
+                const updates = {};
+                const timeSlots = this.data.timeSlots;
+                for (let i = 0; i < timeSlots.length; i++) {
+                    if (timeSlots[i].isSelected) {
+                        updates[`timeSlots[${i}].isSelected`] = false;
+                    }
+                }
+                if (Object.keys(updates).length > 0) {
+                    this.setData(updates);
+                }
 
                 // 重新获取房间可用性
                 this.fetchRoomAvailability(this.data.selectedDate);
@@ -1193,12 +1251,71 @@ Page({
     },
 
     /**
-     * 页面卸载时保存缓存
+     * 页面卸载时保存缓存并清理资源
      */
     onUnload() {
+        console.log('🔄 页面卸载，开始清理资源...');
+
         // 如果有内容，保存缓存
         if (this.data.bookingForm.topic) {
             this.saveFormCache();
+        }
+
+        // 清理所有定时器
+        this.clearAllTimers();
+
+        // 清理大型数据对象
+        this.clearDataObjects();
+
+        console.log('✅ 资源清理完成');
+    },
+
+    /**
+     * 清理所有定时器
+     */
+    clearAllTimers() {
+        if (this.data.timers && this.data.timers.length > 0) {
+            console.log(`🧹 清理 ${this.data.timers.length} 个定时器`);
+            this.data.timers.forEach(timer => {
+                clearTimeout(timer);
+                clearInterval(timer);
+            });
+            this.data.timers = [];
+        }
+        
+        // 清理滚动定时器
+        if (this.scrollTimer) {
+            clearTimeout(this.scrollTimer);
+            this.scrollTimer = null;
+        }
+    },
+
+    /**
+     * 清理大型数据对象
+     */
+    clearDataObjects() {
+        try {
+            // 清理时间槽数据（可能很大）
+            if (this.data.timeSlots && this.data.timeSlots.length > 100) {
+                console.log('🧹 清理时间槽数据');
+                this.setData({ timeSlots: [] });
+            }
+
+            // 清理会议室详情中的大型图片数据
+            if (this.data.roomDetails && this.data.roomDetails.images) {
+                console.log('🧹 清理会议室图片缓存');
+                const cleanRoomDetails = {...this.data.roomDetails };
+                delete cleanRoomDetails.images;
+                this.setData({ roomDetails: cleanRoomDetails });
+            }
+
+            // 清理原始时段状态备份
+            if (this.originalPeriodStates) {
+                delete this.originalPeriodStates;
+            }
+
+        } catch (error) {
+            console.error('❌ 清理数据对象失败:', error);
         }
     },
 
@@ -1234,5 +1351,23 @@ Page({
                 }
             });
         });
-    }
+    },
+
+    /**
+     * 安全的setTimeout，页面卸载时自动清理
+     */
+    safeSetTimeout(callback, delay) {
+        const timer = setTimeout(() => {
+            // 从定时器数组中移除
+            const index = this.data.timers.indexOf(timer);
+            if (index > -1) {
+                this.data.timers.splice(index, 1);
+            }
+            callback();
+        }, delay);
+
+        // 添加到定时器数组
+        this.data.timers.push(timer);
+        return timer;
+    },
 });

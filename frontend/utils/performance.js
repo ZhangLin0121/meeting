@@ -181,10 +181,16 @@ class PerformanceManager {
                         jsHeapSizeLimit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024)
                     };
 
-                    // 内存使用超过50MB时发出警告
-                    if (memoryInfo.usedJSHeapSize > 50) {
+                    // 内存使用超过30MB时发出警告并清理
+                    if (memoryInfo.usedJSHeapSize > 30) {
                         this.warn('⚠️ 内存使用较高:', memoryInfo);
                         this.performCleanup();
+
+                        // 内存使用超过50MB时强制清理
+                        if (memoryInfo.usedJSHeapSize > 50) {
+                            this.warn('🚨 内存使用过高，执行强制清理');
+                            this.forceCleanup();
+                        }
                     }
                 }
             } catch (error) {
@@ -192,8 +198,8 @@ class PerformanceManager {
             }
         };
 
-        // 每30秒检查一次内存
-        this.setInterval(checkMemory, 30000);
+        // 每60秒检查一次内存（降低频率减少开销）
+        this.setInterval(checkMemory, 60000);
     }
 
     /**
@@ -227,16 +233,26 @@ class PerformanceManager {
      */
     cleanupStorage() {
         try {
-            // 清理过期的错误日志（只保留最近50条）
+            // 清理过期的错误日志（只保留最近30条）
             const errorLogs = wx.getStorageSync('errorLogs') || [];
-            if (errorLogs.length > 50) {
-                wx.setStorageSync('errorLogs', errorLogs.slice(0, 50));
+            if (errorLogs.length > 30) {
+                wx.setStorageSync('errorLogs', errorLogs.slice(0, 30));
             }
 
-            // 清理过期的普通日志（只保留最近100条）
+            // 清理过期的普通日志（只保留最近50条）
             const logs = wx.getStorageSync('logs') || [];
-            if (logs.length > 100) {
-                wx.setStorageSync('logs', logs.slice(0, 100));
+            if (logs.length > 50) {
+                wx.setStorageSync('logs', logs.slice(0, 50));
+            }
+
+            // 清理过期的表单缓存
+            const formCache = wx.getStorageSync('bookingFormCache');
+            if (formCache && formCache.timestamp) {
+                const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+                if (formCache.timestamp < twoHoursAgo) {
+                    wx.removeStorageSync('bookingFormCache');
+                    this.log('🧹 清理过期表单缓存');
+                }
             }
         } catch (error) {
             this.error('❌ 清理本地存储失败:', error);
@@ -244,13 +260,42 @@ class PerformanceManager {
     }
 
     /**
+     * 强制清理内存（在内存使用过高时调用）
+     */
+    forceCleanup() {
+        try {
+            // 清空所有缓存
+            this.imageCache.clear();
+            this.requestCache.clear();
+
+            // 触发垃圾回收（如果支持）
+            if (wx.triggerGC && typeof wx.triggerGC === 'function') {
+                wx.triggerGC();
+                this.log('🧹 已触发垃圾回收');
+            }
+
+            // 清理本地存储中的非必要数据
+            try {
+                wx.removeStorageSync('logs');
+                wx.removeStorageSync('bookingFormCache');
+                this.log('🧹 强制清理完成');
+            } catch (storageError) {
+                this.warn('⚠️ 清理本地存储时出错:', storageError);
+            }
+
+        } catch (error) {
+            this.error('❌ 强制清理失败:', error);
+        }
+    }
+
+    /**
      * 定期清理
      */
     scheduleCleanup() {
-        // 每10分钟清理一次
+        // 每3分钟清理一次（更频繁的清理以减少内存积累）
         this.setInterval(() => {
             this.performCleanup();
-        }, 10 * 60 * 1000);
+        }, 3 * 60 * 1000);
     }
 
     /**
@@ -307,6 +352,93 @@ class PerformanceManager {
                 setTimeout(() => inThrottle = false, limit);
             }
         };
+    }
+
+    /**
+     * 页面级别的内存优化初始化
+     * 在页面onLoad时调用
+     */
+    initPageOptimization(page) {
+        if (!page) return;
+
+        // 为页面添加安全的定时器管理
+        page._timers = [];
+        page._originalSetTimeout = page.setTimeout || setTimeout;
+        page._originalSetInterval = page.setInterval || setInterval;
+
+        // 重写页面的setTimeout和setInterval
+        page.safeSetTimeout = (callback, delay) => {
+            const timer = this.setTimeout(callback, delay);
+            page._timers.push(timer);
+            return timer;
+        };
+
+        page.safeSetInterval = (callback, interval) => {
+            const timer = this.setInterval(callback, interval);
+            page._timers.push(timer);
+            return timer;
+        };
+
+        // 页面卸载时自动清理
+        const originalOnUnload = page.onUnload || function() {};
+        page.onUnload = function() {
+            this.cleanupPageResources();
+            originalOnUnload.call(this);
+        };
+
+        // 添加页面资源清理方法
+        page.cleanupPageResources = () => {
+            // 清理定时器
+            if (page._timers && page._timers.length > 0) {
+                console.log(`🧹 清理页面 ${page._timers.length} 个定时器`);
+                page._timers.forEach(timer => {
+                    clearTimeout(timer);
+                    clearInterval(timer);
+                });
+                page._timers = [];
+            }
+
+            // 清理大型数据
+            if (page.data && page.setData) {
+                const cleanData = {};
+
+                // 清理可能的大型数组
+                if (page.data.timeSlots && page.data.timeSlots.length > 50) {
+                    cleanData.timeSlots = [];
+                }
+
+                if (page.data.bookingList && page.data.bookingList.length > 20) {
+                    cleanData.bookingList = [];
+                }
+
+                if (Object.keys(cleanData).length > 0) {
+                    page.setData(cleanData);
+                }
+            }
+
+            console.log('✅ 页面资源清理完成');
+        };
+
+        console.log('✅ 页面内存优化初始化完成');
+    }
+
+    /**
+     * 获取内存使用信息
+     */
+    getMemoryInfo() {
+        try {
+            const performance = wx.getPerformance();
+            if (performance && performance.memory) {
+                return {
+                    usedJSHeapSize: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024),
+                    totalJSHeapSize: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024),
+                    jsHeapSizeLimit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+                };
+            }
+        } catch (error) {
+            // 忽略不支持的设备
+        }
+        return null;
     }
 }
 
