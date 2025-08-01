@@ -42,11 +42,9 @@
   <view class="main-content" style="padding-top: {{statusBarHeight + 104}}px;">
     
     <!-- 加载状态 -->
-    <view wx:if="{{loading}}" class="loading-view">
-      <view class="ios-activity-indicator">
-        <view class="spinner"></view>
-        <text class="loading-label">正在加载...</text>
-      </view>
+    <view wx:if="{{loading}}" class="common-loading">
+      <view class="common-loading-spinner"></view>
+      <text class="common-loading-text">正在加载...</text>
     </view>
 
     <!-- 空状态 -->

@@ -16,9 +16,9 @@
   </view>
 
   <!-- 加载状态 -->
-  <view wx:if="{{loading}}" class="calendar-loading">
-    <view class="loading-spinner"></view>
-    <text class="loading-text">加载中...</text>
+  <view wx:if="{{loading}}" class="common-loading">
+    <view class="common-loading-spinner"></view>
+    <text class="common-loading-text">加载中...</text>
   </view>
 
   <!-- 日历主体 -->

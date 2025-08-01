@@ -1,5 +1,6 @@
 const app = getApp(); // 获取全局应用实例
 const request = require('../../utils/request.js'); // 导入网络请求工具
+const WechatAuth = require('../../utils/auth.js');
 
 Page({
     data: {
@@ -27,7 +28,13 @@ Page({
             }
         });
 
-        this.getUserOpenId();
+        // 获取用户openid
+        const userOpenId = WechatAuth.getUserOpenId();
+        this.setData({ userOpenId }, () => {
+            if (userOpenId) {
+                this.fetchMyBookings();
+            }
+        });
     },
 
     onShow() {
@@ -37,51 +44,7 @@ Page({
         }
     },
 
-    /**
-     * 获取用户openid
-     */
-    getUserOpenId() {
-        try {
-            // 先从全局数据获取
-            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
-                this.setData({
-                    userOpenId: app.globalData.userInfo.openid
-                }, () => {
-                    this.fetchMyBookings(); // 获取到openid后立即加载预约
-                });
-                console.log('✅ 从全局数据获取用户openid:', app.globalData.userInfo.openid);
-                return;
-            }
 
-            // 从本地存储获取
-            const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo && userInfo.openid) {
-                this.setData({
-                    userOpenId: userInfo.openid
-                }, () => {
-                    this.fetchMyBookings(); // 获取到openid后立即加载预约
-                });
-                console.log('✅ 从本地存储获取用户openid:', userInfo.openid);
-                return;
-            }
-
-            // 如果都没有，尝试重新登录
-            console.log('⚠️ 未找到用户openid，尝试重新登录');
-            if (app && app.forceLogin) {
-                app.forceLogin().then(() => {
-                    this.getUserOpenId(); // 登录成功后再次获取openid
-                }).catch(error => {
-                    console.error('强制登录失败:', error);
-                    this.setData({ error: '登录失败，请重试' });
-                });
-            } else {
-                this.setData({ error: '未登录，无法获取预约信息' });
-            }
-        } catch (error) {
-            console.error('❌ 获取用户openid失败:', error);
-            this.setData({ error: '获取用户信息失败' });
-        }
-    },
 
     /**
      * 获取我的预约记录

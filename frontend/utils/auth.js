@@ -260,6 +260,28 @@ class WechatAuth {
     }
 
     /**
+     * 获取用户openid - 统一的工具方法
+     */
+    static getUserOpenId() {
+        try {
+            const app = getSafeApp();
+            if (app && app.globalData && app.globalData.userInfo && app.globalData.userInfo.openid) {
+                return app.globalData.userInfo.openid;
+            }
+            
+            const userInfo = wx.getStorageSync('userInfo');
+            if (userInfo && userInfo.openid) {
+                return userInfo.openid;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('❌ 获取用户openid失败:', error);
+            return null;
+        }
+    }
+
+    /**
      * 智能登录 - 避免重复弹窗的优化登录方法
      */
     static async smartLogin() {

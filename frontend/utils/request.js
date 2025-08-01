@@ -85,8 +85,8 @@ class RequestUtil {
         return this.request({ url, method: 'PUT', data });
     }
 
-    delete(url) {
-        return this.request({ url, method: 'DELETE' });
+    delete(url, data = {}) {
+        return this.request({ url, method: 'DELETE', data });
     }
 }
 

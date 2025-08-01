@@ -22,9 +22,9 @@
     
     <!-- 加载状态 - iOS风格 -->
     <view wx:if="{{loading}}" class="loading-state">
-      <view class="ios-loading">
-        <view class="spinner"></view>
-        <text class="loading-label">正在加载...</text>
+      <view class="common-loading">
+        <view class="common-loading-spinner"></view>
+        <text class="common-loading-text">正在加载...</text>
       </view>
     </view>
 
@@ -58,7 +58,7 @@
       <view wx:if="{{upcomingBookings.length > 0}}" class="section">
         <view class="section-header">
           <text class="section-title">即将开始</text>
-          <view class="section-badge">{{upcomingBookings.length}}</view>
+          <view class="section-badge bg-primary">{{upcomingBookings.length}}</view>
         </view>
         
         <view class="card-list">
@@ -82,8 +82,8 @@
             <!-- 时间信息 -->
             <view class="time-section">
               <view class="time-row">
-                <text class="time-date">{{item.bookingDateWithWeekday}}</text>
-                <text class="time-range">{{item.startTime}} - {{item.endTime}}</text>
+                <text class="time-date text-primary">{{item.bookingDateWithWeekday}}</text>
+                <text class="time-range text-primary">{{item.startTime}} - {{item.endTime}}</text>
               </view>
             </view>
 
@@ -139,8 +139,8 @@
             <!-- 时间信息 -->
             <view class="time-section">
               <view class="time-row">
-                <text class="time-date">{{item.bookingDateWithWeekday}}</text>
-                <text class="time-range">{{item.startTime}} - {{item.endTime}}</text>
+                <text class="time-date text-primary">{{item.bookingDateWithWeekday}}</text>
+                <text class="time-range text-primary">{{item.startTime}} - {{item.endTime}}</text>
               </view>
             </view>
 

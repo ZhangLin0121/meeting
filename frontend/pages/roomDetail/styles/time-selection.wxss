@@ -1,0 +1,474 @@
+/* 时间选择相关样式模块 */
+
+/* 预约功能区域 */
+.booking-section {
+    background-color: #ffffff;
+    margin: 16px 20px;
+    /* border-radius: 16rpx; 使用公共类 border-radius-lg */
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.booking-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+    padding: 20px 20px 0;
+    margin-bottom: 16px;
+}
+
+/* 时间段选择 - 两层级设计 */
+.time-selection {
+    padding: 0 20px 20px;
+}
+
+.time-selection-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 12px;
+}
+
+/* 时段卡片容器 */
+.period-cards-container {
+    margin-bottom: 20px;
+}
+
+.period-cards-title {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+/* 时段加载提示 */
+.period-loading {
+    text-align: center;
+    padding: 20px;
+    color: #999999;
+    font-size: 14px;
+}
+
+/* 时段卡片样式 */
+.period-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    border: 2px solid #f0f0f0;
+    /* border-radius: 16rpx; 使用公共类 border-radius-lg */
+    margin-bottom: 12px;
+    padding: 16px;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+}
+
+.period-card.available {
+    border-color: #007AFF;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.02) 0%, rgba(0, 122, 255, 0.01) 100%);
+    box-shadow: 0 2px 12px rgba(0, 122, 255, 0.1);
+}
+
+.period-card.partial {
+    border-color: #FF9500;
+    background: linear-gradient(135deg, rgba(255, 149, 0, 0.02) 0%, rgba(255, 149, 0, 0.01) 100%);
+    box-shadow: 0 2px 12px rgba(255, 149, 0, 0.1);
+}
+
+.period-card.unavailable {
+    border-color: #f0f0f0;
+    background: linear-gradient(135deg, #f8f8f8 0%, #f0f0f0 100%);
+    opacity: 0.6;
+}
+
+.period-card.expanded {
+    border-color: #007AFF;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.05) 0%, rgba(0, 122, 255, 0.02) 100%);
+    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
+    transform: scale(1.02);
+}
+
+/* 时段卡片头部 */
+.period-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.period-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.period-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.period-info {
+    flex: 1;
+}
+
+.period-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.period-time {
+    font-size: 12px;
+    color: #666666;
+    font-weight: 500;
+}
+
+.period-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 可用性指示器样式 */
+.availability-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.availability-indicator.available {
+    background-color: rgba(52, 199, 89, 0.1);
+    color: #34C759;
+}
+
+.availability-indicator.partial {
+    background-color: rgba(255, 149, 0, 0.1);
+    color: #FF9500;
+}
+
+.availability-indicator.unavailable {
+    background-color: rgba(255, 69, 58, 0.1);
+    color: #FF453A;
+}
+
+/* 已预约指示器样式 */
+.booked-indicator {
+    background-color: rgba(255, 69, 58, 0.1);
+    color: #FF453A;
+    padding: 4px 8px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* 简化的图例样式 */
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 16px;
+    background-color: rgba(248, 248, 248, 0.5);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666666;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.legend-dot.available {
+    background-color: #34C759;
+}
+
+.legend-dot.partial {
+    background-color: #FF9500;
+}
+
+.legend-dot.unavailable {
+    background-color: #FF453A;
+}
+
+/* 选择状态显示 */
+.selection-status {
+    background-color: #f8f9fa;
+    padding: 12px 16px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    margin-top: 16px;
+    border: 1px solid #e9ecef;
+}
+
+.selection-text {
+    font-size: 14px;
+    color: #333333;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* 快速预约按钮 */
+.quick-book-button {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    color: #ffffff;
+    padding: 8px 16px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+    transition: all 0.2s ease;
+    border: none;
+    min-width: 80px;
+    text-align: center;
+}
+
+.quick-book-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
+}
+
+.quick-book-button.disabled {
+    background: #f0f0f0;
+    color: #999999;
+    box-shadow: none;
+}
+
+.quick-book-button.disabled:active {
+    transform: none;
+}
+
+/* 展开图标 */
+.expand-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+    opacity: 0.6;
+}
+
+.period-card.expanded .expand-icon {
+    transform: rotate(180deg);
+}
+
+.expand-text {
+    font-size: 12px;
+    color: #666666;
+    font-weight: 500;
+}
+
+/* 展开箭头文本样式 */
+.expand-arrow-text {
+    font-size: 12px;
+    color: #007AFF;
+    font-weight: 500;
+}
+
+/* 详细时间段区域 - 优化动画效果 */
+.detailed-time-slots {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.detailed-time-slots.expanded {
+    max-height: 800px;
+    opacity: 1;
+    transform: translateY(0);
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 122, 255, 0.1);
+    margin-top: 16px;
+}
+
+.time-slots-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time-slots-subtitle {
+    font-size: 12px;
+    color: #666666;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+/* 详细时间段区域内的时间段网格 */
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.time-slot {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 时间段状态样式 */
+.time-slot.available {
+    background-color: #ffffff;
+    border-color: #34C759;
+    color: #34C759;
+}
+
+.time-slot.booked {
+    background-color: #fff5f5;
+    border-color: #FF453A;
+    color: #FF453A;
+}
+
+.time-slot.expired {
+    background-color: #f8f8f8;
+    border-color: #d1d5db;
+    color: #9ca3af;
+}
+
+/* 可点击状态样式 - 简化设计 */
+.time-slot.available:active {
+    transform: scale(0.95);
+    background-color: rgba(52, 199, 89, 0.1);
+}
+
+.time-slot.selected-start {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    border-color: #007AFF;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.time-slot.selected-end {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    border-color: #007AFF;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.time-slot.selected-range {
+    background-color: rgba(0, 122, 255, 0.1);
+    border-color: #007AFF;
+    color: #007AFF;
+}
+
+/* 不可点击状态样式 */
+.time-slot.booked,
+.time-slot.expired {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.time-slot.booked:active,
+.time-slot.expired:active {
+    transform: none;
+}
+
+/* 时间段文本 */
+.time-slot-text {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 修复选中状态样式 - 确保时间文本始终显示 */
+.time-slot.selected-start .time-slot-text,
+.time-slot.selected-end .time-slot-text {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.time-slot.selected-range .time-slot-text {
+    color: #007AFF;
+    font-weight: 600;
+}
+
+.time-slot.available .time-slot-text {
+    color: #34C759;
+}
+
+.time-slot.booked .time-slot-text {
+    color: #FF453A;
+}
+
+.time-slot.expired .time-slot-text {
+    color: #9ca3af;
+}
+
+/* 调试信息样式 */
+.debug-info {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    padding: 12px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #856404;
+    line-height: 1.4;
+}
+
+/* 状态指示说明样式 */
+.status-legend {
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 16px;
+    background-color: rgba(248, 248, 248, 0.5);
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666666;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.status-dot.available {
+    background-color: #34C759;
+}
+
+.status-dot.booked {
+    background-color: #FF453A;
+}
+
+.status-dot.selected {
+    background-color: #007AFF;
+} 

@@ -4,7 +4,7 @@
   <view class="page-header">
     <view class="navbar-content">
       <view class="header-left">
-        <view class="back-button" bindtap="goBackToRoomList">
+        <view class="back-button border-radius-15" bindtap="goBackToRoomList">
           <image class="back-icon" src="/images/icons/back.png" mode="aspectFit"></image>
           <text class="back-text">列表</text>
         </view>
@@ -48,7 +48,7 @@
       wx:if="{{!roomsLoading && rooms.length > 0}}"
       bindscrolltolower="loadMoreRooms"
     >
-      <view wx:for="{{rooms}}" wx:key="id" class="room-management-card">
+      <view wx:for="{{rooms}}" wx:key="id" class="room-management-card margin-bottom-20">
         <!-- 会议室图片展示区域 -->
         <view class="room-image-container">
           <image 
@@ -79,13 +79,13 @@
         <!-- 会议室信息区域 -->
         <view class="room-content">
           <!-- 标题区域 -->
-          <view class="room-title-section">
+          <view class="room-title-section margin-bottom-20">
             <text class="room-name-new">{{item.name}}</text>
             <text class="room-id-new">{{item.roomId}}</text>
           </view>
           
           <!-- 快速信息栏 -->
-          <view class="room-quick-info">
+                      <view class="room-quick-info margin-bottom-20">
             <view class="quick-info-item">
               <view class="info-icon">📍</view>
               <text class="info-text">{{item.location}}</text>
@@ -106,7 +106,7 @@
           </view>
           
           <!-- 可用状态指示器 -->
-          <view class="room-status">
+                        <view class="room-status border-radius-lg">
             <view class="status-indicator {{item.availability}}"></view>
             <text class="status-text">{{item.availabilityText}}</text>
           </view>
@@ -115,9 +115,9 @@
     </scroll-view>
 
     <!-- 会议室列表加载状态 -->
-    <view wx:if="{{roomsLoading}}" class="loading-container">
-      <image class="loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
-      <text class="loading-text">加载中...</text>
+    <view wx:if="{{roomsLoading}}" class="common-loading">
+      <view class="common-loading-spinner"></view>
+      <text class="common-loading-text">加载中...</text>
     </view>
 
     <!-- 无会议室数据 -->
@@ -133,7 +133,7 @@
   <!-- 预约记录页面 -->
   <view wx:if="{{currentTab === 1}}" class="tab-content">
     <!-- 筛选器和导出功能 -->
-    <view class="booking-filter">
+          <view class="booking-filter margin-bottom-20">
       <view class="filter-row">
         <picker 
           mode="date" 
@@ -168,7 +168,7 @@
         <view class="export-info">
           <text class="export-text">共 {{totalBookingsCount || bookings.length}} 条记录</text>
         </view>
-        <view class="export-button" bindtap="exportBookings">
+        <view class="export-button bg-primary" bindtap="exportBookings">
           <image class="export-icon" src="/images/icons/export.png" mode="aspectFit"></image>
           <text class="export-text">导出数据</text>
         </view>
@@ -182,13 +182,13 @@
       wx:if="{{!bookingsLoading && bookings.length > 0}}"
       bindscrolltolower="loadMoreBookings"
     >
-      <view wx:for="{{bookings}}" wx:key="id" class="booking-card">
+      <view wx:for="{{bookings}}" wx:key="id" class="booking-card border-radius-lg">
         <view class="booking-header">
           <view class="booking-room-info">
             <text class="booking-room-name">{{item.conferenceRoomName}}</text>
             <text class="booking-date-time">{{item.bookingDate}} {{item.startTime}}-{{item.endTime}}</text>
           </view>
-          <view class="booking-status {{item.status}}">
+          <view class="booking-status {{item.status}} {{item.status === 'completed' ? 'text-primary' : ''}}">
             {{item.status === 'booked' ? '已预约' : 
               item.status === 'completed' ? '已完成' : 
               item.status === 'cancelled' ? '已取消' : '未知状态'}}
@@ -219,9 +219,9 @@
     </scroll-view>
 
     <!-- 预约记录加载状态 -->
-    <view wx:if="{{bookingsLoading}}" class="loading-container">
-      <image class="loading-spinner" src="/images/loading.png" mode="aspectFit"></image>
-      <text class="loading-text">加载中...</text>
+    <view wx:if="{{bookingsLoading}}" class="common-loading">
+      <view class="common-loading-spinner"></view>
+      <text class="common-loading-text">加载中...</text>
     </view>
 
     <!-- 无预约记录 -->
@@ -233,7 +233,7 @@
 
   <!-- 添加/编辑会议室弹窗 -->
   <view wx:if="{{showRoomModal}}" class="modal-overlay" bindtap="hideRoomModal">
-    <view class="room-modal" catchtap="stopPropagation">
+    <view class="room-modal border-radius-lg" catchtap="stopPropagation">
       <view class="modal-header">
         <text class="modal-title">{{isEditMode ? '编辑会议室' : '添加会议室'}}</text>
         <view class="modal-close" bindtap="hideRoomModal">

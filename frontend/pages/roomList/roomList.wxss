@@ -206,7 +206,6 @@
 
 /* ==================== 状态页面 ==================== */
 
-.loading-view,
 .empty-view {
     display: flex;
     align-items: center;
@@ -214,36 +213,11 @@
     min-height: 400px;
 }
 
-.ios-activity-indicator,
 .empty-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-}
-
-.spinner {
-    width: 28px;
-    height: 28px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #007AFF;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-label {
-    margin-top: 12px;
-    font-size: 16px;
-    color: #8e8e93;
 }
 
 .empty-content {
@@ -275,25 +249,7 @@
     margin-bottom: 20px;
 }
 
-.ios-button {
-    background: #007AFF;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 600;
-    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.ios-button.secondary {
-    background: rgba(0, 122, 255, 0.1);
-    color: #007AFF;
-}
-
-.ios-button:active {
-    transform: scale(0.95);
-}
+/* iOS按钮样式已移动到app.wxss的公共样式中 */
 
 
 /* ==================== 会议室列表 ==================== */
@@ -323,7 +279,7 @@
 .room-card {
     background: white;
     /* 减少圆角，看起来不那么"盒子化" */
-    border-radius: 16px;
+    border-radius: 32rpx; /* 使用rpx单位，相当于16px */
     overflow: hidden;
     /* 减少阴影效果，让卡片更自然 */
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -358,11 +314,11 @@
 
 .status-chip {
     position: absolute;
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 12rpx 24rpx;
+    border-radius: 40rpx; /* 使用rpx单位，相当于20px */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    font-size: 12px;
+    font-size: 24rpx;
     font-weight: 600;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -405,10 +361,10 @@
 .capacity-badge {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8rpx;
     background: rgba(0, 122, 255, 0.1);
-    padding: 6px 10px;
-    border-radius: 12px;
+    padding: 12rpx 20rpx;
+    border-radius: 24rpx; /* 使用rpx单位，相当于12px */
     flex-shrink: 0;
 }
 
@@ -475,24 +431,6 @@
     color: #6c6c70;
     font-weight: 500;
 }
-
-
-/* 可用性状态条样式已移除 - 精简版不需要 */
-
-
-/* 会议室特色标签样式已移除 - 精简版不需要 */
-
-
-/* 预约统计信息样式已移除 - 精简版不需要 */
-
-
-/* 时间信息样式已移除 - 精简版不需要 */
-
-
-/* 操作按钮样式已移除 - 精简版不需要 */
-
-
-/* 快速操作样式已移除 - 精简版不需要 */
 
 .loading-more {
     display: flex;

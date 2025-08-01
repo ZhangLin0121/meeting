@@ -1,0 +1,164 @@
+/* 房间信息相关样式模块 */
+
+/* 会议室信息区域 */
+.room-info-section {
+    background-color: #ffffff;
+    margin: 16px 20px;
+    /* border-radius: 16rpx; 使用公共类 border-radius-lg */
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 会议室图片容器 */
+.room-image-container {
+    width: 100%;
+    height: 220px;
+    position: relative;
+    background-color: #f8f8f8;
+    overflow: hidden;
+}
+
+.room-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: #f8f8f8;
+    transition: transform 0.3s ease;
+}
+
+.room-image:active {
+    transform: scale(1.02);
+}
+
+.room-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f8f8 0%, #eeeeee 100%);
+}
+
+.room-default-image {
+    width: 80px;
+    height: 80px;
+    opacity: 0.4;
+}
+
+.image-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(248, 248, 248, 0.95);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.image-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007AFF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* 会议室基本信息 */
+.room-basic-info {
+    padding: 20px;
+}
+
+.room-name {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333333;
+    line-height: 1.3;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.room-meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meta-label {
+    font-size: 14px;
+    color: #666666;
+    font-weight: 500;
+}
+
+.meta-value {
+    font-size: 14px;
+    color: #333333;
+    font-weight: 600;
+}
+
+/* 设备区域 */
+.equipment-section {
+    background-color: #f8f9fa;
+    padding: 16px 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.equipment-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 12px;
+}
+
+.equipment-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.equipment-tag {
+    background-color: #e8f4ff;
+    color: #007AFF;
+    padding: 6px 12px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(0, 122, 255, 0.2);
+}
+
+/* 描述区域 */
+.description-section {
+    padding: 16px 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.description-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.description-text {
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+} 
