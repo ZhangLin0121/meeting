@@ -1,0 +1,40 @@
+<view class="page">
+  <view class="nav" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-inner">
+      <view class="nav-left" bindtap="goBack">
+        <image class="nav-back" src="/images/icons/back.png" mode="aspectFit"></image>
+      </view>
+      <view class="nav-title-wrap">
+        <text class="nav-title">用户服务协议</text>
+      </view>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+
+  <scroll-view class="content" scroll-y style="padding-top: {{statusBarHeight + 60}}px;">
+    <view class="section">
+      <text class="title">1. 协议范围</text>
+      <text class="text">本协议适用于您使用本会议室预约小程序的相关服务。</text>
+    </view>
+    <view class="section">
+      <text class="title">2. 账号与身份</text>
+      <text class="text">您需使用微信账号登录，我们将以微信 OpenID 作为身份标识。</text>
+    </view>
+    <view class="section">
+      <text class="title">3. 预约与使用</text>
+      <text class="text">预约需遵守公司管理规则，请填写真实的联系人姓名与手机号，确保可联系。</text>
+    </view>
+    <view class="section">
+      <text class="title">4. 责任与限制</text>
+      <text class="text">因网络、设备或第三方原因导致的服务不可用、数据延迟或丢失，我们将尽力修复但不承诺完全避免。</text>
+    </view>
+    <view class="section">
+      <text class="title">5. 变更与终止</text>
+      <text class="text">我们可能更新功能或条款，重要变更会通过小程序通知；如您不同意，可停止使用并申请删除数据。</text>
+    </view>
+    <view class="section">
+      <text class="title">6. 联系方式</text>
+      <text class="text">如需协助或投诉，请联系管理员或客服邮箱：support@example.com。</text>
+    </view>
+  </scroll-view>
+</view>

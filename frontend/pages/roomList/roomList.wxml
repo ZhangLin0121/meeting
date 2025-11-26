@@ -1,0 +1,145 @@
+<!-- 🎨 Apple iOS Design - 会议室列表页面 -->
+<view class="ios-app-container">
+  <!-- iOS 风格导航栏 -->
+  <view class="ios-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="nav-left"></view>
+      <text class="nav-title">会议室预订</text>
+      <view class="nav-right" bindtap="goToAdminPanel" wx:if="{{isAdmin}}">
+        <view class="nav-button">
+          <image class="nav-icon" src="/images/icons/admin.png" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view class="nav-right" wx:else></view>
+    </view>
+  </view>
+
+  <!-- 搜索栏 - 调整位置 -->
+  <view class="search-section" style="top: {{statusBarHeight + 44}}px;">
+    <view class="search-bar">
+      <image class="search-icon" src="/images/icons/search.png" mode="aspectFit"></image>
+      <input
+        class="search-input"
+        placeholder="搜索会议室"
+        placeholder-class="search-placeholder"
+        confirm-type="search"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+        value="{{searchKeyword}}"
+      />
+      <view wx:if="{{searchKeyword}}" class="clear-button" bindtap="clearSearch">
+        <image class="clear-icon" src="/images/icons/close.png" mode="aspectFit"></image>
+      </view>
+    </view>
+    
+    <!-- 筛选按钮 -->
+    <view class="filter-button" bindtap="showFilterOptions">
+      <image class="filter-icon" src="/images/icons/filter.png" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 主要内容区域 -->
+  <view class="main-content" style="padding-top: {{statusBarHeight + 104}}px;">
+    
+    <!-- 加载状态 -->
+    <view wx:if="{{loading}}" class="common-loading">
+      <view class="common-loading-spinner"></view>
+      <text class="common-loading-text">正在加载...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:elif="{{!loading && rooms.length === 0}}" class="empty-view">
+      <view class="empty-content">
+        <view class="empty-icon">
+          <image class="empty-image" src="/images/icons/empty.png" mode="aspectFit"></image>
+        </view>
+        <text class="empty-title">{{searchKeyword ? '未找到相关会议室' : '暂无会议室'}}</text>
+        <text class="empty-subtitle">{{searchKeyword ? '请尝试其他关键词' : '下拉刷新或联系管理员'}}</text>
+        <button wx:if="{{searchKeyword}}" class="ios-button secondary" bindtap="clearSearch">
+          清除搜索
+        </button>
+      </view>
+    </view>
+
+    <!-- 会议室列表 -->
+    <view wx:else class="content-wrapper">
+      <!-- 会议室列表标题 -->
+      <view class="section-header">
+        <text class="section-title">会议室列表</text>
+      </view>
+
+      <!-- 会议室列表 - 移除scroll-view限制，让列表自然展开 -->
+      <view class="room-list">
+        <view class="room-grid">
+          <view wx:for="{{rooms}}" wx:key="_id" 
+                class="room-card-wrapper" 
+                data-room="{{item}}"
+                bindtap="goToRoomDetail">
+            
+            <view class="room-card">
+              <!-- 房间图片 -->
+              <view class="room-image-container">
+                <image 
+                  wx:if="{{!item.imageError}}"
+                  class="room-image" 
+                  src="{{item.displayImage}}" 
+                  mode="aspectFill" 
+                  lazy-load
+                  binderror="onImageError"
+                  bindload="onImageLoad"
+                  data-room-id="{{item._id}}"
+                />
+                <view wx:else class="room-image-placeholder">
+                  <image class="placeholder-icon" src="/images/icons/image-placeholder.png" mode="aspectFit"></image>
+                </view>
+                
+                <!-- 状态标签 -->
+                <view class="status-chip image-status-chip {{item.status === 'available' ? 'available' : (item.status === 'closed' ? 'closed' : 'occupied')}}">
+                  <text class="status-text">{{item.status === 'available' ? '可预约' : (item.status === 'closed' ? '已关闭' : '已占用')}}</text>
+                </view>
+              </view>
+
+              <!-- 房间信息 - 精简版 -->
+              <view class="room-info">
+                <view class="room-header">
+                  <text class="room-name">{{item.name}}</text>
+                  <view class="capacity-badge">
+                    <image class="capacity-icon" src="/images/icons/people.png" mode="aspectFit"></image>
+                    <text class="capacity-text">{{item.capacity}}人</text>
+                  </view>
+                </view>
+                
+                <view class="room-location">
+                  <image class="location-icon" src="/images/icons/location.png" mode="aspectFit"></image>
+                  <text class="location-text">{{item.location}}</text>
+                </view>
+                
+                <text class="room-description">{{item.description || '现代化会议室，配备完善设施'}}</text>
+                
+                <!-- 设备标签 - 保留设备信息，这个有用 -->
+                <view wx:if="{{item.equipment && item.equipment.length > 0}}" class="equipment-tags">
+                  <view wx:for="{{item.equipment}}" wx:key="*this" 
+                        wx:for-item="equipment"
+                        class="equipment-tag">
+                    <text class="equipment-text">{{equipment}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 加载更多 -->
+        <view wx:if="{{loadingMore}}" class="loading-more">
+          <view class="mini-spinner"></view>
+          <text class="loading-more-text">正在加载更多...</text>
+        </view>
+
+        <!-- 底部间距 -->
+        <view class="bottom-spacing"></view>
+      </view>
+    </view>
+
+  </view>
+
+</view> 

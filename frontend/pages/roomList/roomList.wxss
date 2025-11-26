@@ -1,0 +1,479 @@
+/* 🎨 Apple iOS Design System - 会议室列表页面 */
+
+.ios-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(248, 248, 248, 0.8);
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
+}
+
+.navbar-content {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20rpx;
+}
+
+.nav-left,
+.nav-right {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.nav-button:active {
+    background: rgba(0, 0, 0, 0.15);
+    transform: scale(0.9);
+}
+
+.nav-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.nav-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1c1c1e;
+    letter-spacing: -0.4px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .ios-navbar {
+        background: rgba(28, 28, 30, 0.8);
+        border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
+    }
+    .nav-title {
+        color: #ffffff;
+    }
+    .nav-button {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-button:active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+
+/* ==================== 基础容器 ==================== */
+
+.ios-app-container {
+    min-height: 100vh;
+    /* 使用更简洁的纯色背景，减少"容器感" */
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+}
+
+.content-wrapper {
+    /* 减少底部padding */
+    padding-bottom: 40px;
+}
+
+
+/* ==================== 搜索区域 ==================== */
+
+.search-section {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    /* 使用与主背景一致的颜色，减少分层感 */
+    background: rgba(248, 249, 250, 0.95);
+    /* 移除边框，让搜索区域更融入页面 */
+    border-bottom: none;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-bar {
+    flex: 1;
+    background: rgba(118, 118, 128, 0.12);
+    border-radius: 12px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+}
+
+.search-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.search-input {
+    flex: 1;
+    font-size: 16px;
+    color: #1c1c1e;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.search-placeholder {
+    color: #8e8e93;
+}
+
+.clear-button {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #8e8e93;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clear-button .sf-icon {
+    font-size: 12px;
+    color: white;
+}
+
+.filter-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(0, 122, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.filter-button:active {
+    background: rgba(0, 122, 255, 0.2);
+    transform: scale(0.9);
+}
+
+/* 筛选图标尺寸，避免超出背景容器 */
+.filter-icon {
+    width: 25px;
+    height: 25px;
+    display: block;
+}
+
+
+/* ==================== 主要内容区域 ==================== */
+
+.main-content {
+    min-height: 100vh;
+    /* 减少左右padding，让内容更贴近屏幕边缘 */
+    padding: 0 4px 20px;
+}
+
+@media screen and (max-width: 768px) {
+    .main-content {
+        padding: 0 2px 20px;
+    }
+}
+
+
+/* ==================== 会议室列表样式 ==================== */
+
+.section-header {
+    /* 减少上下边距，让内容更紧凑 */
+    margin: 16px 12px 12px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1c1c1e;
+    margin-bottom: 4px;
+}
+
+.section-subtitle {
+    font-size: 14px;
+    color: #8e8e93;
+}
+
+
+/* ==================== 状态页面 ==================== */
+
+.empty-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.empty-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.empty-content {
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-image {
+    width: 100%;
+    height: 100%;
+}
+
+.empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1c1c1e;
+    margin-bottom: 8px;
+}
+
+.empty-subtitle {
+    font-size: 14px;
+    color: #8e8e93;
+    margin-bottom: 20px;
+}
+
+/* iOS按钮样式已移动到app.wxss的公共样式中 */
+
+
+/* ==================== 会议室列表 ==================== */
+
+.room-list {
+    /* 移除固定高度限制，让列表自然展开 */
+    min-height: calc(100vh - 200px);
+    margin-top: 16px;
+}
+
+.room-grid {
+    display: grid;
+    gap: 16rpx; /* 统一间距 */
+    padding: 0 24rpx; /* 统一左右留白 */
+}
+
+.room-card-wrapper {
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.room-card-wrapper:active {
+    transform: scale(0.98);
+}
+
+.room-card {
+    background: #fff;
+    border-radius: 20rpx; /* 统一圆角 */
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: none;
+}
+
+.room-image-container {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+}
+
+.room-image,
+.room-image-placeholder {
+    width: 100%;
+    height: 100%;
+}
+
+.room-image-placeholder {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-icon {
+    width: 40px;
+    height: 40px;
+    opacity: 0.4;
+}
+
+.status-chip {
+    position: absolute;
+    padding: 12rpx 24rpx;
+    border-radius: 40rpx; /* 使用rpx单位，相当于20px */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    font-size: 24rpx;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.image-status-chip {
+    top: 12px;
+    right: 12px;
+}
+
+.status-chip.available {
+    background: linear-gradient(135deg, #34C759, #64D96E);
+    color: #ffffff;
+    box-shadow: 0 6rpx 16rpx rgba(52, 199, 89, 0.25);
+}
+
+.status-chip.occupied {
+    background: linear-gradient(135deg, #FF9F0A, #FFC96B);
+    color: #fff;
+    box-shadow: 0 6rpx 16rpx rgba(255, 159, 10, 0.25);
+}
+
+.status-chip.closed {
+    background: linear-gradient(135deg, #FF453A, #FF6961);
+    color: #fff;
+    box-shadow: 0 6rpx 16rpx rgba(255, 69, 58, 0.25);
+}
+
+.room-info {
+    padding: 20px;
+}
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.room-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1c1c1e;
+    line-height: 1.3;
+    flex: 1;
+    margin-right: 12px;
+}
+
+.capacity-badge {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    background: rgba(0, 122, 255, 0.1);
+    padding: 12rpx 20rpx;
+    border-radius: 24rpx; /* 使用rpx单位，相当于12px */
+    flex-shrink: 0;
+}
+
+.capacity-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.capacity-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #007AFF;
+}
+
+.room-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.location-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.location-text {
+    font-size: 14px;
+    color: #8e8e93;
+}
+
+.room-description {
+    font-size: 14px;
+    color: #6c6c70;
+    line-height: 1.4;
+    /* 精简版：减少底部边距 */
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+
+/* 设备标签 */
+
+.equipment-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    /* 精简版：减少底部边距 */
+    margin-bottom: 8px;
+}
+
+.equipment-tag {
+    background: rgba(116, 116, 128, 0.08);
+    border: 1px solid rgba(116, 116, 128, 0.16);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+.equipment-text {
+    font-size: 11px;
+    color: #6c6c70;
+    font-weight: 500;
+}
+
+.loading-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 12px;
+}
+
+.mini-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007AFF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-more-text {
+    font-size: 14px;
+    color: #8e8e93;
+}
+
+.bottom-spacing {
+    height: 40px;
+}
+
+@media screen and (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+    .room-grid {
+        padding: 0 8px;
+        gap: 12px;
+    }
+}

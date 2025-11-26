@@ -1,0 +1,345 @@
+/* 预约弹窗全新设计 */
+
+.booking-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(13, 18, 30, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1200;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.booking-modal-sheet {
+    width: 100%;
+    background: #ffffff;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    box-shadow: 0 -18px 36px rgba(15, 38, 67, 0.18);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    height: auto;
+    min-height: 40vh;
+    /* 确保键盘弹出时不会异常 */
+    transition: transform 0.3s ease;
+}
+
+.sheet-handle {
+    width: 52px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(60, 60, 67, 0.36);
+    margin: 12px auto 6px auto;
+}
+
+.sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 24px 16px 24px;
+}
+
+.header-left {
+    flex: 1;
+    padding-right: 16px;
+}
+
+.sheet-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1c1c1e;
+    letter-spacing: 0.4px;
+}
+
+.sheet-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: rgba(118, 118, 128, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.sheet-close:active {
+    transform: scale(0.92);
+    background: rgba(118, 118, 128, 0.2);
+}
+
+.close-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
+.sheet-scroll {
+    flex: 1;
+    min-height: 0;
+    padding: 0 24px 100px 24px; /* 为固定按钮预留空间 */
+    margin-bottom: 80px; /* 确保内容不会被底部按钮遮挡 */
+    box-sizing: border-box;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.12) 0%, rgba(10, 132, 255, 0.08) 100%);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 12px 24px rgba(0, 122, 255, 0.08);
+}
+
+.summary-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 0;
+}
+
+.summary-icon {
+    width: 28px;
+    height: 28px;
+    opacity: 0.9;
+}
+
+.summary-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-label {
+    font-size: 12px;
+    color: #6c6c70;
+    letter-spacing: 0.3px;
+}
+
+.summary-value {
+    margin-top: 2px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0a84ff;
+}
+
+.summary-subvalue {
+    margin-top: 2px;
+    font-size: 13px;
+    color: #3a3a3c;
+}
+
+.summary-divider {
+    height: 1px;
+    background: rgba(0, 122, 255, 0.1);
+    margin: 10px 0;
+}
+
+.auto-fill-banner {
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 16px;
+}
+
+.auto-fill-banner.success {
+    background: rgba(52, 199, 89, 0.12);
+    color: #1f7d41;
+}
+
+.auto-fill-banner.loading {
+    background: rgba(0, 122, 255, 0.12);
+    color: #0a84ff;
+}
+
+.auto-fill-banner.warning {
+    background: rgba(255, 149, 0, 0.12);
+    color: #c96a00;
+}
+
+.banner-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.loading-spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 122, 255, 0.3);
+    border-top-color: #0a84ff;
+    animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.auto-fill-text {
+    flex: 1;
+    color: inherit;
+}
+
+.form-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 14px 32px rgba(17, 24, 39, 0.06);
+    padding: 6px 0 12px 0;
+    margin-bottom: 24px;
+}
+
+.form-field {
+    padding: 16px 20px 12px 20px;
+}
+
+.form-field + .form-field {
+    border-top: 1px solid #f0f0f5;
+}
+
+
+.field-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.field-icon {
+    width: 24px;
+    height: 24px;
+    opacity: 0.9;
+}
+
+.field-texts {
+    flex: 1;
+}
+
+.field-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d1d1f;
+}
+
+.field-hint {
+    margin-top: 2px;
+    font-size: 12px;
+    color: #8e8e93;
+}
+
+
+.field-input,
+.field-textarea {
+    width: 100%;
+    background: #f5f5f7;
+    border-radius: 12px;
+    border: 1px solid #e3e3ea;
+    font-size: 15px;
+    color: #1c1c1e;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    /* 修复光标和placeholder位置 */
+    line-height: normal;
+    vertical-align: middle;
+}
+
+.field-input {
+    padding: 12px 16px;
+    height: 48px;
+    line-height: 24px; /* 确保文本垂直居中 */
+    display: flex;
+    align-items: center;
+}
+
+.field-textarea {
+    padding: 12px 16px;
+    min-height: 96px;
+    line-height: 1.5;
+    resize: none;
+    /* 修复textarea的placeholder位置 */
+    vertical-align: top;
+    display: flex;
+    align-items: flex-start;
+}
+
+.field-input:focus,
+.field-textarea:focus {
+    border-color: #0a84ff;
+    background: #ffffff;
+    /* 修复聚焦状态下的表现 */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2);
+}
+
+/* 修复placeholder位置 */
+.field-input::placeholder,
+.field-textarea::placeholder {
+    color: #8e8e93;
+    opacity: 1;
+    line-height: normal;
+    vertical-align: middle;
+}
+
+.sheet-footer {
+    display: flex;
+    gap: 12px;
+    padding: 12px 24px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 -12px 24px rgba(0, 0, 0, 0.06);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+}
+
+.footer-button {
+    flex: 1;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+}
+
+.footer-button.secondary {
+    background: rgba(118, 118, 128, 0.12);
+    color: #1c1c1e;
+}
+
+.footer-button.secondary:active {
+    transform: scale(0.97);
+}
+
+.footer-button.primary {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    color: #ffffff;
+    box-shadow: 0 12px 24px rgba(0, 122, 255, 0.28);
+}
+
+.footer-button.primary:active {
+    transform: scale(0.98);
+}
+
+.footer-button.primary.disabled {
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.footer-text {
+    font-size: 16px;
+}

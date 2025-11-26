@@ -1,0 +1,20 @@
+{
+    "light": {
+        "navBarBackgroundColor": "#F8F8F8",
+        "navBarTextStyle": "black",
+        "navBarTitleText": "会议室预约",
+        "backgroundColor": "#F2F2F7",
+        "backgroundTextStyle": "dark",
+        "backgroundColorTop": "#F2F2F7",
+        "backgroundColorBottom": "#FFFFFF"
+    },
+    "dark": {
+        "navBarBackgroundColor": "#1C1C1E",
+        "navBarTextStyle": "white",
+        "navBarTitleText": "会议室预约",
+        "backgroundColor": "#1C1C1E",
+        "backgroundTextStyle": "light",
+        "backgroundColorTop": "#1C1C1E",
+        "backgroundColorBottom": "#000000"
+    }
+}

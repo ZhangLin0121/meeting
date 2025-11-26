@@ -1,0 +1,663 @@
+/* frontend/pages/profile/profile.wxss */
+
+
+/* 🎨 Apple iOS Design System - 个人资料页面 */
+
+
+/* ==================== 基础容器 ==================== */
+
+.ios-app-container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f2f2f7 0%, #ffffff 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+}
+
+
+/* ==================== iOS 导航栏 ==================== */
+
+.ios-nav-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(248, 248, 248, 0.8);
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
+}
+
+.nav-bar-content {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.nav-bar-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #1c1c1e;
+    letter-spacing: -1px;
+}
+
+
+/* ==================== 主要内容区域 ==================== */
+
+.main-content {
+    padding: 16px;
+    min-height: 100vh;
+}
+
+
+/* ==================== 用户资料卡片 ==================== */
+
+.user-profile-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.user-profile-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 45px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.user-avatar:active {
+    transform: scale(0.95);
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+}
+
+.default-avatar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-initial {
+    color: #ffffff;
+    font-size: 36px;
+    font-weight: 600;
+}
+
+.edit-avatar-overlay {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 28px;
+    height: 28px;
+    background: #007AFF;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.camera-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* 覆盖层按钮：用于 open-type="chooseAvatar" */
+.choose-avatar-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.upload-spinner {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    border-top: 1.5px solid #ffffff;
+    border-radius: 50%;
+    animation: avatarSpinning 0.8s linear infinite;
+}
+
+.edit-avatar-overlay.uploading {
+    background: #ff9500;
+}
+
+@keyframes avatarSpinning {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+    /* 允许内容收缩 */
+}
+
+.user-name-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    min-width: 0;
+    /* 允许内容收缩 */
+}
+
+.user-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1c1c1e;
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    letter-spacing: -0.5px;
+}
+
+.edit-indicator {
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.edit-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.role-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.admin-role { background: linear-gradient(135deg, #FF453A, #FF6961); color: #ffffff; box-shadow: 0 4rpx 12rpx rgba(255,69,58,.25); }
+.user-role { background: linear-gradient(135deg, #0A84FF, #64D2FF); color: #ffffff; box-shadow: 0 4rpx 12rpx rgba(10,132,255,.25); }
+
+.role-text {
+    font-size: 14px;
+}
+
+.contact-info {
+    margin-top: 4px;
+}
+
+.contact-text {
+    font-size: 15px;
+    color: #8E8E93;
+    line-height: 1.4;
+    max-width: 220px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* ==================== 统计区域 ==================== */
+
+.stats-section {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+}
+
+.title-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1c1c1e;
+}
+
+.stats-grid {
+    display: flex;
+    gap: 12px;
+}
+
+.stat-card {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #007AFF;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #8E8E93;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.stat-icon {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 20px;
+    opacity: 0.3;
+}
+
+
+/* ==================== 功能区域 ==================== */
+
+.function-section {
+    margin-bottom: 24px;
+}
+
+.ios-list-group {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+}
+
+.ios-list-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.ios-list-item:last-child {
+    border-bottom: none;
+}
+
+.ios-list-item:active {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.policy-row {
+    margin-top: 6px;
+    padding: 0 20px 8px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    color: #666;
+    font-size: 12px;
+}
+.policy-checkbox {
+    transform: scale(0.8);
+}
+.policy-link {
+    color: #007AFF;
+}
+
+.item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+}
+
+.item-icon.primary {
+    background: rgba(0, 122, 255, 0.1);
+    color: #007AFF;
+}
+
+.item-icon.admin {
+    background: rgba(255, 59, 48, 0.1);
+    color: #FF3B30;
+}
+
+.item-icon.contact {
+    background: rgba(52, 199, 89, 0.1);
+    color: #34C759;
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-title {
+    font-size: 17px;
+    font-weight: 500;
+    color: #1c1c1e;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.item-subtitle {
+    font-size: 15px;
+    color: #8E8E93;
+    display: block;
+}
+
+.item-badge {
+    background: #FF3B30;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 10px;
+    margin-right: 12px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.badge-text {
+    font-size: 12px;
+}
+
+.item-arrow {
+    color: #C7C7CC;
+    font-size: 16px;
+}
+
+
+/* ==================== iOS 弹窗样式 ==================== */
+
+.ios-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.ios-modal-container {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow: hidden;
+    animation: modalSlideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+    background: rgba(248, 248, 248, 0.8);
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1c1c1e;
+    white-space: nowrap;
+    text-align: center;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modal-cancel-btn,
+.modal-save-btn {
+    background: none;
+    border: none;
+    font-size: 17px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.modal-cancel-btn {
+    color: #8E8E93;
+}
+
+.modal-save-btn {
+    color: #007AFF;
+    font-weight: 600;
+}
+
+.modal-content {
+    padding: 0;
+}
+
+.ios-form-group {
+    background: #ffffff;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    gap: 16px;
+}
+
+.form-divider {
+    height: 0.5px;
+    background: rgba(0, 0, 0, 0.1);
+    margin-left: 20px;
+}
+
+.form-label {
+    font-size: 17px;
+    color: #1c1c1e;
+    min-width: 60px;
+}
+
+.form-input {
+    flex: 1;
+    font-size: 17px;
+    color: #1c1c1e;
+    background: none;
+    border: none;
+    outline: none;
+}
+
+.input-placeholder {
+    color: #C7C7CC;
+}
+
+
+/* ==================== 加载状态 ==================== */
+
+.ios-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-content {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #F3F3F3;
+    border-top: 3px solid #007AFF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 16px;
+    color: #1c1c1e;
+    font-weight: 500;
+}
+
+
+/* ==================== SF Symbols ==================== */
+
+.role-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.stats-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.stat-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.item-icon-img {
+    width: 20px;
+    height: 20px;
+}
+
+.arrow-icon {
+    width: 16px;
+    height: 16px;
+}
+
+
+/* ==================== 响应式设计 ==================== */
+
+@media (max-width: 375px) {
+    .main-content {
+        padding: 12px;
+    }
+    .profile-header {
+        gap: 12px;
+    }
+    .user-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 32px;
+    }
+    .avatar-initial {
+        font-size: 24px;
+    }
+    .user-name {
+        font-size: 24px;
+    }
+}
+
+
+/* ==================== 暗模式支持 ==================== */
+
+@media (prefers-color-scheme: dark) {
+    .ios-app-container {
+        background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+    }
+    .ios-nav-bar {
+        background: rgba(28, 28, 30, 0.8);
+        border-bottom-color: rgba(255, 255, 255, 0.12);
+    }
+    .nav-bar-title {
+        color: #ffffff;
+    }
+    .user-profile-card,
+    .stat-card,
+    .ios-list-group {
+        background: #2c2c2e;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+    .user-name,
+    .title-text,
+    .item-title {
+        color: #ffffff;
+    }
+    .stat-label,
+    .item-subtitle {
+        color: #8E8E93;
+    }
+}

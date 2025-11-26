@@ -1,0 +1,325 @@
+/* 日历组件样式 */
+.calendar-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 8px 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 嵌入模式：去掉外层卡片视觉，融入父容器 */
+.calendar-container.plain {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+}
+
+/* 日历头部 - 月份切换 */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.month-nav:active {
+  background-color: #e9ecef;
+}
+
+.nav-arrow {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.month-display {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.month-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+}
+
+/* 日期范围提示 */
+.date-range-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  padding: 6px 12px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #666;
+}
+
+.hint-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  opacity: 0.7;
+}
+
+.hint-text {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 星期标题 */
+.weekdays-header {
+  display: flex;
+  margin-bottom: 4px;
+}
+
+.weekday-item {
+  flex: 1;
+  text-align: center;
+  padding: 4px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666666;
+}
+
+.weekday-item.weekend {
+  color: #ff6b6b;
+}
+
+/* 日期网格 */
+.calendar-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.calendar-day {
+  width: calc(100% / 7);
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  transition: all 0.2s ease;
+}
+
+/* 日期数字 */
+.day-number {
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 2;
+}
+
+/* 不同状态的日期样式 */
+.calendar-day.other-month {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.calendar-day.other-month .day-number {
+  color: #e0e0e0;
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.calendar-day.past-date {
+  opacity: 0.5;
+}
+
+.calendar-day.past-date .day-number {
+  color: #999999;
+}
+
+.calendar-day.available-date {
+  cursor: pointer;
+}
+
+.calendar-day.available-date .day-number {
+  color: #333333;
+}
+
+.calendar-day.available-date:active {
+  background-color: #f0f9ff;
+  transform: scale(0.95);
+}
+
+.calendar-day.full-date .day-number {
+  color: #999999;
+}
+
+.calendar-day.unavailable-date .day-number {
+  color: #cccccc;
+}
+
+/* 今天标记 */
+.calendar-day.today {
+  background-color: #e3f2fd;
+}
+
+.calendar-day.today .day-number {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.today-marker {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 8px;
+  padding: 1px 3px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+/* 选中状态 */
+.calendar-day.selected {
+  background-color: #007aff;
+  transform: scale(1.1);
+  box-shadow: 0 3px 12px rgba(0, 122, 255, 0.4);
+  border: 2px solid #007aff;
+  z-index: 10;
+}
+
+.calendar-day.selected .day-number {
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.calendar-day.selected .today-marker {
+  background-color: white;
+  color: #007aff;
+}
+
+/* 选中状态动画 */
+.calendar-day.selected {
+  animation: pulse-selected 0.3s ease-out;
+}
+
+@keyframes pulse-selected {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 122, 255, 0);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.6);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(0, 122, 255, 0.4);
+  }
+}
+
+/* 可用性指示器 */
+.availability-indicator {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.indicator-dot {
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.indicator-dot.available {
+  background-color: #30D158; /* Apple green */
+}
+
+.indicator-dot.full {
+  background-color: #FF3B30; /* Apple red */
+}
+
+.indicator-dot.unavailable {
+  background-color: #C7C7CC; /* System gray */
+}
+
+/* 选中状态下隐藏指示器 */
+.calendar-day.selected .indicator-dot {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* 图例说明 */
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  padding: 16px 0 14px;
+  border-top: 1px solid #f0f0f0;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.available {
+  background-color: #52c41a;
+}
+
+.legend-dot.full {
+  background-color: #ff4d4f;
+}
+
+.legend-dot.unavailable {
+  background-color: #d9d9d9;
+}
+
+.legend-text {
+  font-size: 12px;
+  color: #666666;
+}
+
+/* 响应式设计 */
+@media (max-width: 320px) {
+  .calendar-day {
+    height: 45px;
+  }
+  
+  .day-number {
+    font-size: 14px;
+  }
+  
+  .calendar-legend {
+    gap: 15px;
+  }
+  
+  .legend-text {
+    font-size: 11px;
+  }
+} 

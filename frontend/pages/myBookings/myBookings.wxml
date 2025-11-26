@@ -1,0 +1,114 @@
+<view class="bookings-root">
+  <view class="ios-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="nav-left" bindtap="goBack">
+        <view class="nav-button"><image class="nav-icon" src="/images/icons/back.png" mode="aspectFit"/></view>
+      </view>
+      <text class="nav-title">我的预约</text>
+      <view class="nav-right" bindtap="refreshData">
+        <view class="nav-button {{refreshing ? 'rotating' : ''}}"><image class="nav-icon" src="/images/icons/refresh.png" mode="aspectFit"/></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="main-content" style="padding-top: {{statusBarHeight + 44}}px;">
+    <view class="filter-bar">
+      <view class="filter-tab {{filterStatus==='all'?'active':''}}" data-status="all" bindtap="onFilterChange">全部</view>
+      <view class="filter-tab {{filterStatus==='active'?'active':''}}" data-status="active" bindtap="onFilterChange">进行中/已预约</view>
+      <view class="filter-tab {{filterStatus==='cancelled'?'active':''}}" data-status="cancelled" bindtap="onFilterChange">已取消</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="state">
+      <view class="common-loading"><view class="common-loading-spinner"></view><text class="common-loading-text">正在加载...</text></view>
+    </view>
+
+    <view wx:elif="{{error}}" class="state">
+      <view class="state-card">
+        <image class="state-icon" src="/images/icons/error.png"/>
+        <text class="state-title">无法加载预约</text>
+        <text class="state-sub">{{error}}</text>
+        <button class="ios-button primary" bindtap="retryLoad">重试</button>
+      </view>
+    </view>
+
+    <view wx:elif="{{isEmpty}}" class="state">
+      <view class="state-card">
+        <image class="state-icon" src="/images/icons/booking.png"/>
+        <text class="state-title">暂无预约</text>
+        <text class="state-sub">去挑一个合适的会议室吧</text>
+        <button class="ios-button primary" bindtap="goToRoomList">浏览会议室</button>
+      </view>
+    </view>
+
+    <scroll-view wx:else scroll-y class="scroll" refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh" bindscrolltolower="onReachBottom" scroll-into-view="{{scrollIntoView}}">
+      <view wx:if="{{displayUpcoming.length}}" class="section {{highlightUpcoming ? 'highlight' : ''}}" id="upcomingSection">
+        <view class="section-header">
+          <text class="section-title">即将开始</text>
+          <view class="section-badge">{{displayUpcoming.length}}</view>
+        </view>
+        <view class="cards">
+          <view wx:for="{{displayUpcoming}}" wx:key="id" class="card" data-booking="{{item}}" bindtap="onBookingCardTap">
+            <view class="card-top">
+              <view class="room-meta">
+                <text class="room-name">{{item.conferenceRoomName}}</text>
+                <text wx:if="{{item.roomLocation}}" class="room-loc">{{item.roomLocation}}</text>
+              </view>
+              <view class="chip ok">{{item.displayStatus}}</view>
+            </view>
+            <view class="media-row">
+              <image class="thumb" src="{{item.roomImageUrl}}" mode="aspectFill" />
+              <view class="media-info">
+                <view class="time-row">
+                  <text class="time-date">{{item.bookingDateWithWeekday}}</text>
+                  <text class="time-range">{{item.startTime}} - {{item.endTime}}</text>
+                </view>
+                <view class="details">
+                  <text wx:if="{{item.topic}}" class="detail">主题：{{item.topic}}</text>
+                  <text wx:if="{{item.attendeesCount}}" class="detail">参会：{{item.attendeesCount}}人</text>
+                  <text class="detail">联系人：{{item.contactName}} {{item.contactPhone}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="card-actions" wx:if="{{item.displayStatus === '已预约' || item.displayStatus === '进行中'}}">
+              <button class="mini danger" data-id="{{item.id}}" data-b="{{item}}" catchtap="cancelBooking">取消预约</button>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{displayPast.length}}" class="section {{highlightPast ? 'highlight' : ''}}" id="pastSection">
+        <view class="section-header">
+          <text class="section-title">历史记录</text>
+          <view class="section-badge secondary">{{displayPast.length}}</view>
+        </view>
+        <view class="cards">
+          <view wx:for="{{displayPast}}" wx:key="id" class="card dim" data-booking="{{item}}" bindtap="onBookingCardTap">
+            <view class="card-top">
+              <view class="room-meta">
+                <text class="room-name">{{item.conferenceRoomName}}</text>
+                <text wx:if="{{item.roomLocation}}" class="room-loc">{{item.roomLocation}}</text>
+              </view>
+              <view class="chip {{item.displayStatus === '已取消' ? 'warn' : 'muted'}}">{{item.displayStatus}}</view>
+            </view>
+            <view class="media-row">
+              <image class="thumb" src="{{item.roomImageUrl}}" mode="aspectFill" />
+              <view class="media-info">
+                <view class="time-row">
+                  <text class="time-date">{{item.bookingDateWithWeekday}}</text>
+                  <text class="time-range">{{item.startTime}} - {{item.endTime}}</text>
+                </view>
+                <view class="details">
+                  <text wx:if="{{item.topic}}" class="detail">主题：{{item.topic}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="card-foot"><text class="foot-time">创建于 {{item.createdAtFmt}}</text></view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{loadingMore && hasMore}}" class="loading-more"><view class="mini-spinner"></view><text class="loading-more-text">加载中...</text></view>
+      <view class="bottom-space"></view>
+    </scroll-view>
+  </view>
+</view> 

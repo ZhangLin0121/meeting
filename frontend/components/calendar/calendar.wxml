@@ -1,0 +1,103 @@
+<!-- 日历组件 -->
+<view class="calendar-container {{plain ? 'plain' : ''}}">
+  <!-- 月份切换头部 -->
+  <view class="calendar-header">
+    <view class="month-nav" bindtap="goToPrevMonth">
+      <image class="nav-arrow" src="/images/icons/arrow-left.png" mode="aspectFit"></image>
+    </view>
+
+    <view class="month-display">
+      <text class="month-text">{{currentYear}}年{{monthNames[currentMonth-1]}}</text>
+
+      <!-- 自定义提示（优先显示）或回退到范围提示 -->
+      <view wx:if="{{hintText}}" class="date-range-hint">
+        <image class="hint-icon" src="/images/icons/info.png" mode="aspectFit" />
+        <text class="hint-text">{{hintText}}</text>
+      </view>
+      <view wx:elif="{{showDateRangeHint && minDate && maxDate}}" class="date-range-hint">
+        <image class="hint-icon" src="/images/icons/info.png" mode="aspectFit" />
+        <text class="hint-text">可约范围：{{minDate}} 至 {{maxDate}}</text>
+      </view>
+    </view>
+
+    <view class="month-nav" bindtap="goToNextMonth">
+      <image class="nav-arrow" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="common-loading">
+    <view class="common-loading-spinner"></view>
+    <text class="common-loading-text">加载中...</text>
+  </view>
+
+  <!-- 日历主体 -->
+  <view wx:else class="calendar-body">
+    <!-- 星期标题 -->
+    <view class="weekdays-header">
+      <view 
+        wx:for="{{weekdays}}" 
+        wx:key="*this" 
+        class="weekday-item {{index === 0 || index === 6 ? 'weekend' : ''}}"
+      >
+        {{item}}
+      </view>
+    </view>
+
+    <!-- 日期网格 -->
+    <view class="calendar-grid">
+      <view 
+        wx:for="{{calendarDays}}" 
+        wx:key="date"
+        class="calendar-day {{utils.getDateStatusClass(item.availability, item.isPast, item.isCurrentMonth)}} {{item.isToday ? 'today' : ''}} {{item.isSelected ? 'selected' : ''}}"
+        data-index="{{index}}"
+        bindtap="onDateTap"
+      >
+        <!-- 日期数字 -->
+        <view class="day-number">{{item.day}}</view>
+        
+        <!-- 可用性指示器 -->
+        <view wx:if="{{item.isCurrentMonth && !item.isPast}}" class="availability-indicator">
+          <view wx:if="{{item.availability === 'available'}}" class="indicator-dot available"></view>
+          <view wx:elif="{{item.availability === 'full'}}" class="indicator-dot full"></view>
+          <view wx:elif="{{item.availability === 'unavailable'}}" class="indicator-dot unavailable"></view>
+        </view>
+
+        <!-- 今天标记 -->
+        <view wx:if="{{item.isToday}}" class="today-marker">今</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 图例说明 -->
+  <view class="calendar-legend">
+    <view class="legend-item">
+      <view class="legend-dot available"></view>
+      <text class="legend-text">可预约</text>
+    </view>
+    <view class="legend-item">
+      <view class="legend-dot full"></view>
+      <text class="legend-text">已约满</text>
+    </view>
+    <view class="legend-item">
+      <view class="legend-dot unavailable"></view>
+      <text class="legend-text">不可用</text>
+    </view>
+  </view>
+</view>
+
+<wxs module="utils">
+  var getDateStatusClass = function(availability, isPast, isCurrentMonth) {
+    if (!isCurrentMonth) return 'other-month';
+    if (isPast) return 'past-date';
+    
+    if (availability === 'available') return 'available-date';
+    if (availability === 'full') return 'full-date';
+    if (availability === 'unavailable') return 'unavailable-date';
+    return 'unknown-date';
+  };
+  
+  module.exports = {
+    getDateStatusClass: getDateStatusClass
+  };
+</wxs> 

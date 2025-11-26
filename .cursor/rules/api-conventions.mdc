@@ -1,0 +1,263 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Backend API Conventions and Patterns
+
+## API Structure and Conventions
+
+### Base Configuration
+- **Base URL**: `https://www.cacophonyem.me/meeting/api/`
+- **Local Development**: `http://localhost:3000/api/`
+- **Content Type**: `application/json`
+- **Authentication**: Based on WeChat openid
+
+### Standard API Response Format
+```javascript
+// Success Response
+{
+  success: true,
+  data: { /* response data */ },
+  message: "Operation successful"
+}
+
+// Error Response
+{
+  success: false,
+  error: "Error description",
+  details: { /* additional error info */ }
+}
+```
+
+## Key API Endpoints
+
+### Authentication Endpoints
+- `POST /api/user/wechat-login` - WeChat code to openid exchange
+- `GET /api/user/profile` - Get user profile information
+
+### Room Management
+- `GET /api/rooms` - List all rooms with filtering support
+- `GET /api/rooms/:id` - Get room details
+- `POST /api/rooms` - Create new room (admin only)
+- `PUT /api/rooms/:id` - Update room (admin only)
+- `DELETE /api/rooms/:id` - Delete room (admin only)
+
+### Booking Management  
+- `GET /api/bookings` - List user bookings
+- `POST /api/bookings` - Create new booking
+- `PUT /api/bookings/:id` - Update booking
+- `DELETE /api/bookings/:id` - Cancel booking
+
+### Filter Parameters
+Room listing supports these query parameters:
+- `capacityMin` / `capacityMax` - Room capacity range
+- `equipment` - Required equipment (comma-separated)
+- `date` - Availability date
+- `startTime` / `endTime` - Time range
+
+## Backend Architecture
+
+### File Structure Reference
+- [server.js](mdc:backend/server.js) - Express server setup and middleware
+- [database.js](mdc:backend/database.js) - MongoDB connection management
+- [config.js](mdc:backend/config.js) - Environment configuration
+- [routes/](mdc:backend/routes) - API route definitions
+- [controllers/](mdc:backend/controllers) - Business logic handlers
+- [models/](mdc:backend/models) - MongoDB schemas and models
+- [middleware/](mdc:backend/middleware) - Custom middleware functions
+
+### Standard Controller Pattern
+```javascript
+// controllers/roomController.js
+const Room = require('../models/Room');
+
+exports.getRooms = async (req, res) => {
+  try {
+    const { capacityMin, capacityMax, equipment } = req.query;
+    
+    let filter = {};
+    
+    // Apply capacity filter
+    if (capacityMin || capacityMax) {
+      filter.capacity = {};
+      if (capacityMin) filter.capacity.$gte = parseInt(capacityMin);
+      if (capacityMax) filter.capacity.$lte = parseInt(capacityMax);
+    }
+    
+    // Apply equipment filter
+    if (equipment) {
+      const equipmentList = equipment.split(',');
+      filter.equipment = { $all: equipmentList };
+    }
+    
+    const rooms = await Room.find(filter);
+    
+    res.json({
+      success: true,
+      data: rooms
+    });
+  } catch (error) {
+    console.error('Error fetching rooms:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch rooms'
+    });
+  }
+};
+```
+
+### Authentication Middleware Pattern
+```javascript
+// middleware/auth.js
+const authenticateUser = async (req, res, next) => {
+  try {
+    const { openid } = req.headers;
+    
+    if (!openid) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentication required'
+      });
+    }
+    
+    // Verify user exists
+    const user = await User.findOne({ openid });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid user'
+      });
+    }
+    
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Authentication error'
+    });
+  }
+};
+```
+
+## Database Patterns
+
+### MongoDB Connection Setup
+Referenced in [database.js](mdc:backend/database.js):
+```javascript
+const mongoose = require('mongoose');
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
+```
+
+### Standard Model Schema Pattern
+```javascript
+// models/Room.js
+const mongoose = require('mongoose');
+
+const roomSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  capacity: {
+    type: Number,
+    required: true
+  },
+  equipment: [{
+    type: String
+  }],
+  description: String,
+  imageUrl: String,
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
+
+module.exports = mongoose.model('Room', roomSchema);
+```
+
+## Error Handling Best Practices
+
+### Structured Error Responses
+```javascript
+// Centralized error handler
+const handleError = (res, error, statusCode = 500) => {
+  console.error('API Error:', error);
+  
+  res.status(statusCode).json({
+    success: false,
+    error: error.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+  });
+};
+```
+
+### Validation Pattern
+```javascript
+// Input validation using express-validator
+const { body, validationResult } = require('express-validator');
+
+const validateBooking = [
+  body('roomId').notEmpty().withMessage('Room ID is required'),
+  body('date').isISO8601().withMessage('Valid date is required'),
+  body('startTime').notEmpty().withMessage('Start time is required'),
+  body('endTime').notEmpty().withMessage('End time is required'),
+  body('attendeesCount').isInt({ min: 1 }).withMessage('At least 1 attendee required'),
+  
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: errors.array()
+      });
+    }
+    next();
+  }
+];
+```
+
+## Deployment Configuration
+
+### PM2 Process Management
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'meeting-backend',
+    script: './server.js',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    }
+  }]
+};
+```
+
+### Nginx Configuration
+Referenced in [meeting-nginx-fixed.conf](mdc:meeting-nginx-fixed.conf):
+- Reverse proxy setup for API endpoints
+- Static file serving
+- SSL/HTTPS configuration
+- CORS handling for WeChat mini-program requests

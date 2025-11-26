@@ -1,0 +1,159 @@
+<!-- 高级风格 · 会议室管理（全新重构） -->
+<view class="admin-root">
+  <!-- 浮动返回（无系统导航） -->
+  <view class="floating-back" style="top: {{statusBarHeight + 6}}px;" bindtap="goBack">
+    <image class="nav-back" src="/images/icons/back.png" mode="aspectFit"></image>
+  </view>
+
+  <!-- 顶部搜索区 -->
+  <view class="search-bar" style="top: {{statusBarHeight + 48}}px;">
+    <image class="search-icon" src="/images/icons/search.png" mode="aspectFit"></image>
+    <input class="search-input" placeholder="搜索名称/位置/ID" value="{{keyword}}" bindinput="onSearch"/>
+    <view wx:if="{{keyword}}" class="search-clear" bindtap="clearSearch">
+      <image class="clear-icon" src="/images/icons/close.png" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <scroll-view class="content" scroll-y style="padding-top: {{statusBarHeight + 84}}px;" refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullDownRefresh">
+    <!-- 统计与操作 -->
+    <view class="stats-row">
+      <text class="stats-text">共 {{rooms.length}} 间会议室</text>
+    </view>
+
+    <!-- 骨架屏 -->
+    <view wx:if="{{loading}}" class="skeleton-grid">
+      <view class="skeleton-card" wx:for="{{[1,2,3,4,5,6]}}" wx:key="*this">
+        <view class="sk-img"></view>
+        <view class="sk-line w70"></view>
+        <view class="sk-line w40"></view>
+      </view>
+    </view>
+
+    <!-- 空态 -->
+    <view wx:elif="{{!loading && filteredRooms.length === 0}}" class="empty">
+      <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"/>
+      <text class="empty-title">暂无会议室</text>
+      <text class="empty-sub">点击右下角按钮添加</text>
+    </view>
+
+    <!-- 房间网格 -->
+    <view wx:elif="{{!loading}}" class="grid {{filteredRooms.length === 1 ? 'single' : ''}}">
+      <view wx:for="{{filteredRooms}}" wx:key="_id" class="card {{filteredRooms.length === 1 ? 'single' : ''}}" bindtap="openEdit" data-id="{{item._id}}" bindlongpress="openActions" data-id2="{{item._id}}">
+        <view class="card-img-wrap">
+          <image class="card-img" src="{{item.displayImage}}" mode="aspectFill"></image>
+          <view class="img-overlay"></view>
+          <view class="chip {{item.availability === 'available' ? 'ok' : (item.availability === 'closed' ? 'closed' : 'busy')}}">
+            {{ item.availability === 'available' ? '可预约' : (item.availability === 'closed' ? '已关闭' : '已约满') }}
+          </view>
+        </view>
+        <view class="card-body">
+          <text class="name">{{item.name}}</text>
+          <view class="meta-row">
+            <view class="meta">
+              <image class="icon" src="/images/icons/people.png"></image>
+              <text>{{item.capacity}}人</text>
+            </view>
+            <view class="meta">
+              <image class="icon loc" src="/images/icons/location.png"></image>
+              <text class="loc">{{item.location}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="bottom-space"></view>
+  </scroll-view>
+
+  <!-- 浮动新增按钮 -->
+  <view class="fab" bindtap="openCreate">
+    <image class="fab-icon" src="/images/icons/add.png" mode="aspectFit"></image>
+  </view>
+
+  <!-- 编辑/新增 Bottom Sheet -->
+  <view wx:if="{{showSheet}}" class="sheet-mask" catchtouchmove="prevent">
+    <view class="sheet {{sheetVisible ? 'visible' : ''}}" catchtap="noop">
+      <view class="sheet-header">
+        <view class="sheet-grabber"></view>
+        <text class="sheet-title">{{ editing ? '编辑会议室' : '新增会议室' }}</text>
+        <view class="sheet-close" bindtap="closeSheet">
+          <image src="/images/icons/close.png" class="close-icon"/>
+        </view>
+      </view>
+
+      <scroll-view class="sheet-body" scroll-y>
+        <view class="form-section">
+          <view class="section-header">
+            <text class="section-title">基础信息</text>
+            <text class="section-caption">名称 / 容量 / 位置</text>
+          </view>
+          <view class="form-grid">
+            <view class="form-item span-2">
+              <text class="label">名称</text>
+              <input class="input" placeholder="请输入会议室名称" value="{{form.name}}" data-field="name" bindinput="onFormInput" />
+            </view>
+            <view class="form-item">
+              <text class="label">容量</text>
+              <input class="input" type="number" placeholder="人数" value="{{form.capacity}}" data-field="capacity" bindinput="onFormInput" />
+            </view>
+            <view class="form-item">
+              <text class="label">位置</text>
+              <input class="input" placeholder="如 A 栋 5F" value="{{form.location}}" data-field="location" bindinput="onFormInput" />
+            </view>
+          </view>
+        </view>
+
+        <view class="form-section">
+          <view class="section-header">
+            <text class="section-title">配置与视觉</text>
+            <text class="section-caption">设备与封面图</text>
+          </view>
+          <view class="form-grid">
+            <view class="form-item span-2 tag-card">
+              <text class="label">设备</text>
+              <view class="tags">
+                <view wx:for="{{equipmentOptionsDisplay}}" wx:key="name" data-eq="{{item.name}}" bindtap="toggleEq" hover-class="tag-hover" class="tag {{item.selected ? 'sel' : ''}}">
+                  <text wx:if="{{item.selected}}" class="tag-check">✓</text>
+                  <text class="tag-text">{{item.name}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="form-item span-2 media-card">
+              <view class="label-row">
+                <text class="label">图片</text>
+                <text class="label-hint">展示给预订用户的封面</text>
+              </view>
+              <view class="img-uploader" bindtap="chooseImage">
+                <image wx:if="{{form.imagePreview}}" class="preview" src="{{form.imagePreview}}" mode="aspectFill" />
+                <view wx:else class="upload-hint">
+                  <image class="up-icon" src="/images/icons/camera.png"/>
+                  <text>上传封面图</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="form-section">
+          <view class="section-header">
+            <text class="section-title">更多描述</text>
+            <text class="section-caption">可选补充</text>
+          </view>
+          <view class="form-grid">
+            <view class="form-item span-2">
+              <text class="label">描述</text>
+              <textarea class="textarea" placeholder="补充说明（可选）" value="{{form.description}}" data-field="description" bindinput="onFormInput"/>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="sheet-footer">
+        <view class="btn ghost" bindtap="closeSheet">取消</view>
+        <view wx:if="{{editing}}" class="btn danger" bindtap="confirmDelete">删除</view>
+        <view class="btn primary" bindtap="submit">{{ editing ? '保存' : '创建' }}</view>
+      </view>
+    </view>
+  </view>
+</view>

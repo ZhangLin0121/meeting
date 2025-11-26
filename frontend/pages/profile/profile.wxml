@@ -1,0 +1,152 @@
+<!-- frontend/pages/profile/profile.wxml -->
+<view class="ios-app-container">
+  <!-- 主要内容区域 - 无导航栏设计 -->
+  <view class="main-content" style="padding-top: {{statusBarHeight + 20}}px;">
+    
+    <!-- 用户信息卡片 - 可编辑设计 -->
+    <view class="user-profile-card" bindtap="editProfile">
+      <view class="profile-header">
+        <!-- 当支持 chooseAvatar 时：使用原生按钮 + 拦截冒泡，避免触发卡片的 editProfile -->
+        <view wx:if="{{supportsChooseAvatar}}" class="user-avatar" catchtap="stopPropagation">
+          <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" class="avatar-image" binderror="onAvatarError"></image>
+          <view wx:else class="default-avatar">
+            <text class="avatar-initial">{{userInfo.company ? userInfo.company.charAt(0) : '用'}}</text>
+          </view>
+          <!-- 原生 open-type 入口（基础库>=2.21） -->
+          <button class="choose-avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar"></button>
+        </view>
+
+        <!-- 当不支持 chooseAvatar 时：使用自定义动作面板选择头像来源 -->
+        <view wx:else class="user-avatar" catchtap="chooseAvatarMethod">
+          <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" class="avatar-image" binderror="onAvatarError"></image>
+          <view wx:else class="default-avatar">
+            <text class="avatar-initial">{{userInfo.company ? userInfo.company.charAt(0) : '用'}}</text>
+          </view>
+        </view>
+        <view class="user-info">
+          <view class="user-name-section">
+            <text class="user-name">{{userInfo.company || '光谷人'}}</text>
+            <view class="edit-indicator">
+              <image class="edit-icon" src="/images/icons/edit.png" mode="aspectFit"></image>
+            </view>
+          </view>
+          <view class="role-chip {{userInfo.role === 'admin' ? 'admin-role' : 'user-role'}}">
+            <image class="role-icon" src="/images/icons/{{userInfo.role === 'admin' ? 'admin' : 'user'}}.png" mode="aspectFit"></image>
+            <text class="role-text">{{userInfo.role === 'admin' ? '管理员' : '员工'}}</text>
+          </view>
+          <view class="contact-info">
+            <text class="contact-text">{{userInfo.contactName ? userInfo.contactName + ' · ' + userInfo.contactPhone : '点击设置联系信息'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 统计卡片 -->
+    <view class="stats-section">
+      <view class="section-title">
+        <image class="stats-icon" src="/images/icons/stats.png" mode="aspectFit"></image>
+        <text class="title-text">统计信息</text>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-card" bindtap="goToUpcomingBookings">
+          <text class="stat-number">{{upcomingBookingsCount || 0}}</text>
+          <text class="stat-label">即将到来</text>
+        </view>
+        <view class="stat-card" bindtap="goToAllBookings">
+          <text class="stat-number">{{totalBookings || 0}}</text>
+          <text class="stat-label">总预约数</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 功能列表 - 简化设计 -->
+    <view class="function-section">
+      <view class="ios-list-group">
+        <!-- 管理员功能 -->
+        <view wx:if="{{userInfo.role === 'admin'}}" class="ios-list-item" bindtap="goToAdmin">
+          <view class="item-icon admin">
+            <image class="item-icon-img" src="/images/icons/admin.png" mode="aspectFit"></image>
+          </view>
+          <view class="item-content">
+            <text class="item-title">会议室管理</text>
+            <text class="item-subtitle">管理会议室和预约信息</text>
+          </view>
+        </view>
+        <view wx:if="{{userInfo.role === 'admin'}}" class="ios-list-item" bindtap="goToAdminBookings">
+          <view class="item-icon admin">
+            <image class="item-icon-img" src="/images/icons/calendar.png" mode="aspectFit"></image>
+          </view>
+          <view class="item-content">
+            <text class="item-title">预约管理</text>
+            <text class="item-subtitle">查看与筛选预约列表</text>
+          </view>
+        </view>
+
+        <!-- 设置 -->
+        <!-- 设置入口已隐藏，待功能完善后恢复 -->
+      </view>
+    </view>
+  </view>
+
+  <!-- iOS风格弹窗 - 个人信息编辑 -->
+  <view wx:if="{{showProfileEdit}}" class="ios-modal-overlay" bindtap="hideProfileModal">
+    <view class="ios-modal-container" catchtap="stopPropagation">
+      <view class="modal-header">
+        <button class="modal-cancel-btn" bindtap="hideProfileModal">取消</button>
+        <text class="modal-title">编辑个人信息</text>
+        <button class="modal-save-btn" bindtap="saveProfileInfo">保存</button>
+      </view>
+      
+      <view class="modal-content">
+        <view class="ios-form-group">
+          <view class="form-row">
+            <text class="form-label">公司</text>
+            <input
+              class="form-input"
+              value="{{profileForm.company}}"
+              bindinput="onCompanyInput"
+              placeholder="请输入公司名称"
+              placeholder-class="input-placeholder"
+            />
+          </view>
+          <view class="form-divider"></view>
+          <view class="form-row">
+            <text class="form-label">姓名</text>
+            <input 
+              class="form-input" 
+              value="{{profileForm.contactName}}" 
+              bindinput="onContactNameInput" 
+              placeholder="请输入真实姓名"
+              placeholder-class="input-placeholder"
+            />
+          </view>
+          <view class="form-divider"></view>
+          <view class="form-row">
+            <text class="form-label">手机号</text>
+            <input 
+              class="form-input" 
+              value="{{profileForm.contactPhone}}" 
+              bindinput="onContactPhoneInput" 
+              placeholder="请输入手机号" 
+              type="number"
+              placeholder-class="input-placeholder"
+            />
+          </view>
+          <checkbox-group class="policy-row" bindchange="onPolicyCheck">
+            <checkbox class="policy-checkbox" value="agree" checked="{{profileForm.policyAgreed}}"></checkbox>
+            <text class="policy-text">同意</text>
+            <text class="policy-link" bindtap="openLegal">《用户协议与隐私政策》</text>
+          </checkbox-group>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 - iOS风格 -->
+  <view wx:if="{{loading}}" class="ios-loading-overlay">
+    <view class="loading-content">
+      <view class="spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view> 

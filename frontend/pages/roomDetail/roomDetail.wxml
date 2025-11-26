@@ -1,0 +1,339 @@
+<!--会议室详情页面 - Apple Design风格-->
+<view class="container fade-in">
+  <!-- 自定义导航栏 - 固定定位 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="navbar-left" bindtap="goBack">
+        <image class="back-icon" src="/images/icons/back.png" mode="aspectFit"></image>
+      </view>
+      <text class="navbar-title">会议室详情</text>
+      <view class="navbar-right"></view>
+    </view>
+  </view>
+
+  <!-- 高级时间选择底部面板 -->
+  <view class="time-sheet-overlay" wx:if="{{showTimeSheet}}" bindtap="closeTimeSheet">
+    <view class="time-sheet" catchtap="preventClose">
+      <view class="time-sheet-header">
+        <text class="time-sheet-title">选择预约时间</text>
+        <view class="time-sheet-close" bindtap="closeTimeSheet">
+          <image class="close-icon" src="/images/icons/close.png" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view class="time-sheet-tabs">
+        <view 
+          class="time-sheet-tab {{activePeriod === 'morning' ? 'active' : ''}}"
+          data-period-id="morning"
+          bindtap="onPeriodTabTap"
+        >上午</view>
+        <view 
+          class="time-sheet-tab {{activePeriod === 'noon' ? 'active' : ''}}"
+          data-period-id="noon"
+          bindtap="onPeriodTabTap"
+        >中午</view>
+        <view 
+          class="time-sheet-tab {{activePeriod === 'afternoon' ? 'active' : ''}}"
+          data-period-id="afternoon"
+          bindtap="onPeriodTabTap"
+        >下午</view>
+      </view>
+
+      <view class="time-sheet-body">
+        <view class="time-slots-grid">
+          <view 
+            wx:for="{{filteredTimePoints}}" 
+            wx:key="index"
+            wx:for-item="point"
+            class="time-slot {{point.isInSelectedRange ? 'selected-range' : ''}} {{point.isSelectedStart ? 'selected-start' : ''}} {{point.isSelectedEnd ? 'selected-end' : ''}} {{point.status === 'booked' ? 'booked' : point.isDisabled ? 'disabled' : 'available'}} {{point.isTerminal ? 'terminal' : ''}}"
+            data-index="{{point.index}}"
+            catchtap="onTimeSlotTap"
+          >
+            <text class="time-slot-text">{{point.time}}</text>
+          </view>
+        </view>
+
+        <view class="time-presets" wx:if="{{timePresets.length > 0}}">
+          <text class="presets-title">快速选择</text>
+          <view class="preset-buttons">
+            <view
+              wx:for="{{timePresets}}"
+              wx:key="id"
+              class="preset-button {{item.disabled ? 'disabled' : ''}}"
+              data-start="{{item.startTime}}"
+              data-end="{{item.endTime}}"
+              catchtap="onPresetTap"
+            >
+              <text class="preset-text">{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{selectedStartIndex >= 0 || selectedEndIndex >= 0}}" class="selection-status">
+          <text wx:if="{{selectedStartIndex >= 0 && selectedEndIndex === -1}}" class="selection-text">
+            ✅ 已选开始时间：{{timePoints[selectedStartIndex].time}}，请选择结束时间
+          </text>
+          <text wx:if="{{selectedStartIndex >= 0 && selectedEndIndex >= 0}}" class="selection-text">
+            ✅ 已选时间段：{{timePoints[selectedStartIndex].time}} - {{timePoints[selectedEndIndex].time}}
+          </text>
+        </view>
+
+      </view>
+
+      <view class="sheet-footer">
+        <view class="sheet-confirm {{(selectedStartIndex >= 0 && selectedEndIndex >= 0) ? '' : 'disabled'}}" bindtap="onTimeConfirm">
+          <text class="confirm-text">确定</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主内容区域 -->
+  <scroll-view class="main-content" style="padding-top: {{statusBarHeight + 44}}px;" scroll-y scroll-top="{{scrollTop}}" bindscroll="onScroll" wx:if="{{!loading && roomDetails.id}}">
+    
+    <!-- 会议室基本信息展示区 -->
+    <view class="room-info-section">
+      <!-- 会议室图片 -->
+      <view class="room-image-container">
+        <image 
+          wx:if="{{!imageError}}"
+          class="room-image" 
+          src="{{roomDetails.displayImage}}" 
+          mode="aspectFill" 
+          lazy-load
+          binderror="onImageError"
+          bindload="onImageLoad"
+        ></image>
+        <view wx:else class="room-image-placeholder">
+          <image 
+            class="room-default-image" 
+            src="/images/icons/meeting-room.png" 
+            mode="aspectFit"
+          ></image>
+        </view>
+        <!-- 加载状态 -->
+        <view wx:if="{{imageLoading}}" class="image-loading-overlay">
+          <view class="image-loading-spinner"></view>
+        </view>
+        <!-- 顶部状态徽章和渐变遮罩 -->
+        <view class="image-gradient"></view>
+        <view wx:if="{{roomDetails.availability}}" class="image-status-badge {{roomDetails.availability}}">
+          <text class="badge-text">{{roomDetails.availabilityText}}</text>
+        </view>
+      </view>
+
+      <!-- 会议室基本信息 -->
+      <view class="room-basic-info">
+        <text class="room-name">{{roomDetails.name}}</text>
+        <view class="meta-chips">
+          <view class="meta-chip">
+            <image class="chip-icon" src="/images/icons/people.png" mode="aspectFit"></image>
+            <text class="chip-text">{{roomDetails.capacity}}人</text>
+          </view>
+          <view class="meta-chip">
+            <image class="chip-icon" src="/images/icons/location.png" mode="aspectFit"></image>
+            <text class="chip-text">{{roomDetails.location}}</text>
+          </view>
+        </view>
+        
+        <!-- 会议室描述（支持展开/收起） -->
+        <view class="description-section" wx:if="{{roomDetails.description}}">
+          <text class="description-title">会议室描述</text>
+          <text class="description-text {{descExpanded ? '' : 'clamp-3'}}">{{roomDetails.description}}</text>
+          <view class="toggle-desc" wx:if="{{roomDetails.description && roomDetails.description.length > 120}}" bindtap="toggleDescription">
+            <text class="toggle-text">{{descExpanded ? '收起' : '展开更多'}}</text>
+          </view>
+        </view>
+
+        <!-- 设备列表（默认展示前N个，可展开查看全部） -->
+        <view class="equipment-section" wx:if="{{roomDetails.equipment && roomDetails.equipment.length > 0}}">
+          <text class="equipment-title">配备设备</text>
+          <view class="equipment-tags">
+            <view 
+              class="equipment-tag" 
+              wx:for="{{roomDetails.equipment}}" 
+              wx:key="index"
+              wx:for-index="idx"
+              wx:for-item="eq"
+              wx:if="{{equipmentExpanded || idx < equipmentPreviewCount}}"
+            >
+              <text class="equipment-text">{{eq}}</text>
+            </view>
+            <view 
+              wx:if="{{!equipmentExpanded && roomDetails.equipment.length > equipmentPreviewCount}}" 
+              class="equipment-tag more-tag" 
+              bindtap="toggleEquipment"
+            >
+              <text class="equipment-text">+{{roomDetails.equipment.length - equipmentPreviewCount}}</text>
+            </view>
+          </view>
+          <view wx:if="{{roomDetails.equipment.length > equipmentPreviewCount}}" class="toggle-eq" bindtap="toggleEquipment">
+            <text class="toggle-text">{{equipmentExpanded ? '收起设备' : '展开全部设备'}}</text>
+            <image class="toggle-icon {{equipmentExpanded ? 'expanded' : ''}}" src="/images/icons/arrow-down.png" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+  <!-- 预约功能区 -->
+  <view class="booking-section">      
+      <!-- 日历组件 -->
+      <calendar
+        id="bookingCalendar"
+        roomId="{{id}}"
+        plain="true"
+        selectedDate="{{selectedDate}}"
+        minDate="{{minDate}}"
+        maxDate="{{maxAdvanceDate}}"
+        showDateRangeHint="{{false}}"
+        hintText="仅支持提前15天内预约"
+        binddatechange="onCalendarDateChange"
+      ></calendar>
+
+
+
+      <!-- 时间选择改为点击日历后弹出底部面板展示 -->
+    </view>
+  </scroll-view>
+
+  
+
+  <!-- 页面加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay common-loading" style="padding-top: {{statusBarHeight + 44}}px;">
+    <view class="common-loading-spinner"></view>
+    <text class="common-loading-text">加载中，请稍候...</text>
+  </view>
+
+  <!-- 无数据状态 -->
+  <view wx:elif="{{!loading && !roomDetails.id}}" class="no-data-placeholder" style="padding-top: {{statusBarHeight + 44}}px;">
+    <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
+    <text class="empty-text">未找到会议室信息</text>
+    <text class="empty-subtext">请检查会议室ID是否正确</text>
+    <view class="back-button" bindtap="goBack">
+      <text class="back-text">返回列表</text>
+    </view>
+  </view>
+
+  <!-- 预约信息弹窗 -->
+  <view class="booking-modal-overlay" wx:if="{{showBookingModal}}" bindtap="hideBookingModal">
+    <view class="booking-modal-sheet" catchtap="preventClose">
+      <view class="sheet-handle"></view>
+
+      <view class="sheet-header">
+        <view class="header-left">
+          <text class="sheet-title">确认预约信息</text>
+        </view>
+        <view class="sheet-close" bindtap="hideBookingModal">
+          <image class="close-icon" src="/images/icons/close.png" mode="aspectFit"></image>
+        </view>
+      </view>
+
+      <scroll-view class="sheet-scroll" scroll-y>
+        <view class="summary-card">
+          <view class="summary-row">
+            <image class="summary-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+            <view class="summary-text">
+              <text class="summary-label">预约日期</text>
+              <text class="summary-value">{{selectedDate}}</text>
+            </view>
+          </view>
+          <view class="summary-divider"></view>
+          <view class="summary-row">
+            <image class="summary-icon" src="/images/icons/booking.png" mode="aspectFit"></image>
+            <view class="summary-text">
+              <text class="summary-label">使用时间</text>
+              <text class="summary-value">{{selectedTimeText}}</text>
+            </view>
+          </view>
+          <view class="summary-divider"></view>
+          <view class="summary-row">
+            <image class="summary-icon" src="/images/icons/location.png" mode="aspectFit"></image>
+            <view class="summary-text">
+              <text class="summary-label">会议室</text>
+              <text class="summary-value">{{roomDetails.name}}</text>
+              <text wx:if="{{roomDetails.location}}" class="summary-subvalue">{{roomDetails.location}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{autoFillStatus === 'loading'}}" class="auto-fill-banner loading">
+          <view class="loading-spinner"></view>
+          <text class="auto-fill-text">正在为你获取常用联系人…</text>
+        </view>
+        <view wx:elif="{{autoFillStatus === 'success' || autoFillStatus === 'cached'}}" class="auto-fill-banner success">
+          <image class="banner-icon" src="/images/icons/user.png" mode="aspectFit"></image>
+          <text class="auto-fill-text">{{autoFillMessage}}</text>
+        </view>
+        <view class="form-card">
+          <view class="form-field">
+            <view class="field-header">
+              <image class="field-icon" src="/images/icons/topic.png" mode="aspectFit"></image>
+              <text class="field-title">会议主题 *</text>
+            </view>
+            <input
+              class="field-input"
+              placeholder="例如：产品月度复盘会"
+              bindinput="onFormInput"
+              data-field="topic"
+              value="{{bookingForm.topic || ''}}"
+              maxlength="50"
+            />
+          </view>
+
+          <view class="form-field">
+            <view class="field-header">
+              <image class="field-icon" src="/images/icons/user.png" mode="aspectFit"></image>
+              <text class="field-title">联系人 *</text>
+            </view>
+            <input
+              class="field-input"
+              placeholder="请输入联系人姓名"
+              bindinput="onFormInput"
+              data-field="contactName"
+              value="{{bookingForm.contactName || ''}}"
+              maxlength="20"
+            />
+          </view>
+
+          <view class="form-field">
+            <view class="field-header">
+              <image class="field-icon" src="/images/icons/contact.png" mode="aspectFit"></image>
+              <text class="field-title">联系电话 *</text>
+            </view>
+            <input
+              class="field-input"
+              placeholder="请输入手机号码"
+              bindinput="onFormInput"
+              data-field="contactPhone"
+              value="{{bookingForm.contactPhone || ''}}"
+              type="number"
+              maxlength="11"
+            />
+          </view>
+
+                      <view class="form-field">
+                        <view class="field-header">
+                          <image class="field-icon" src="/images/icons/people.png" mode="aspectFit"></image>
+                          <text class="field-title">参会人数 *</text>
+                        </view>
+                        <input
+                          class="field-input"
+                          placeholder="请输入大致人数"
+                          bindinput="onFormInput"
+                          data-field="attendeesCount"
+                          value="{{bookingForm.attendeesCount || ''}}"
+                          type="number"
+                        />
+                      </view>        </view>
+      </scroll-view>
+
+      <view class="sheet-footer">
+        <view class="footer-button secondary" bindtap="hideBookingModal">
+          <text class="footer-text">稍后再填</text>
+        </view>
+        <view class="footer-button primary {{submittingBooking ? 'disabled' : ''}}" bindtap="submitBooking">
+          <text class="footer-text">{{submittingBooking ? '提交中…' : '确认预约'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,99 @@
+/* 会议室详情页面样式 - 模块化重构版 */
+
+/* 引入模块化样式文件 */
+@import "styles/room-info.wxss";
+@import "styles/time-selection.wxss";
+@import "styles/booking-modal.wxss";
+
+/* 全局样式 */
+page {
+    background: linear-gradient(180deg, #f2f4f7 0%, #ffffff 60%);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: #333333;
+}
+
+/* 页面容器 */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f7f7f7;
+}
+
+/* 自定义导航栏 */
+.custom-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(248, 248, 248, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 44px;
+    padding: 0 20px;
+}
+
+.navbar-left {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.navbar-left:active {
+    background-color: #f0f0f0;
+}
+
+.back-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+}
+
+.navbar-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+    letter-spacing: -0.5px;
+}
+
+.navbar-right {
+    width: 30px;
+}
+
+/* 主内容区域 */
+.main-content {
+    flex: 1;
+    padding-bottom: 80px; /* 为底部按钮留出空间 */
+}
+
+/* 底部提交按钮容器（从备份样式迁移） */
+.submit-button-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+}
+
+.submit-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+}

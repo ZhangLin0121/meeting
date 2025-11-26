@@ -1,0 +1,666 @@
+/* 时间选择相关样式模块 */
+
+/* 预约功能区域 */
+.booking-section {
+    background-color: #ffffff;
+    margin: 16rpx 24rpx; /* 统一左右留白 */
+    border-radius: 20rpx; /* 统一圆角 */
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.booking-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+    padding: 20px 20px 0;
+    margin-bottom: 16px;
+}
+
+/* 时间段选择 - 两层级设计 */
+.time-selection {
+    padding: 0 20px 20px;
+}
+
+/* 可预约范围提示 */
+.range-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin: 4px 0 10px 0;
+    background: rgba(0, 122, 255, 0.06);
+    border: 1px solid rgba(0, 122, 255, 0.12);
+    border-radius: 10px;
+}
+.range-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+}
+.range-text {
+    font-size: 12px;
+    color: #0a84ff;
+    font-weight: 600;
+}
+
+/* 日期选择阶段的简短提示 */
+/* .date-advance-hint 已由日历头部 hintText 替代，不再使用 */
+
+.time-selection-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 12px;
+}
+
+/* 时段卡片容器 */
+.period-cards-container {
+    margin-bottom: 20px;
+}
+
+.period-cards-title {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+/* 时段加载提示 */
+.period-loading {
+    text-align: center;
+    padding: 20px;
+    color: #999999;
+    font-size: 14px;
+}
+
+/* 时段卡片样式 */
+.period-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    border: 2px solid #f0f0f0;
+    /* border-radius: 16rpx; 使用公共类 border-radius-lg */
+    margin-bottom: 12px;
+    padding: 16px;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+}
+
+.period-card.available {
+    border-color: #007AFF;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.02) 0%, rgba(0, 122, 255, 0.01) 100%);
+    box-shadow: 0 2px 12px rgba(0, 122, 255, 0.1);
+}
+
+.period-card.partial {
+    border-color: #FF9500;
+    background: linear-gradient(135deg, rgba(255, 149, 0, 0.02) 0%, rgba(255, 149, 0, 0.01) 100%);
+    box-shadow: 0 2px 12px rgba(255, 149, 0, 0.1);
+}
+
+.period-card.unavailable {
+    border-color: #f0f0f0;
+    background: linear-gradient(135deg, #f8f8f8 0%, #f0f0f0 100%);
+    opacity: 0.6;
+}
+
+.period-card.expanded {
+    border-color: #007AFF;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.05) 0%, rgba(0, 122, 255, 0.02) 100%);
+    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
+    transform: scale(1.02);
+}
+
+/* 时段卡片头部 */
+.period-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.period-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.period-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.period-info {
+    flex: 1;
+}
+
+.period-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.period-time {
+    font-size: 12px;
+    color: #666666;
+    font-weight: 500;
+}
+
+.period-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 可用性指示器样式 */
+.availability-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.availability-indicator.available {
+    background-color: rgba(52, 199, 89, 0.1);
+    color: #34C759;
+}
+
+.availability-indicator.partial {
+    background-color: rgba(255, 149, 0, 0.1);
+    color: #FF9500;
+}
+
+.availability-indicator.unavailable {
+    background-color: rgba(255, 69, 58, 0.1);
+    color: #FF453A;
+}
+
+/* 已预约指示器样式 */
+.booked-indicator {
+    background-color: rgba(255, 69, 58, 0.1);
+    color: #FF453A;
+    padding: 4px 8px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* 简化的图例样式 */
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 16px;
+    background-color: rgba(248, 248, 248, 0.5);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666666;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.legend-dot.available {
+    background-color: #34C759;
+}
+
+.legend-dot.partial {
+    background-color: #FF9500;
+}
+
+.legend-dot.unavailable {
+    background-color: #FF453A;
+}
+
+/* 选择状态显示 */
+.selection-status {
+    background-color: #f8f9fa;
+    padding: 12px 16px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    margin-top: 16px;
+    border: 1px solid #e9ecef;
+}
+
+.selection-text {
+    font-size: 14px;
+    color: #333333;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* 快速预约按钮 */
+.quick-book-button {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    color: #ffffff;
+    padding: 8px 16px;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+    transition: all 0.2s ease;
+    border: none;
+    min-width: 80px;
+    text-align: center;
+}
+
+.quick-book-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
+}
+
+.quick-book-button.disabled {
+    background: #f0f0f0;
+    color: #999999;
+    box-shadow: none;
+}
+
+.quick-book-button.disabled:active {
+    transform: none;
+}
+
+/* 展开图标 */
+.expand-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+    opacity: 0.6;
+}
+
+.period-card.expanded .expand-icon {
+    transform: rotate(180deg);
+}
+
+.expand-text {
+    font-size: 12px;
+    color: #666666;
+    font-weight: 500;
+}
+
+/* 展开箭头文本样式 */
+.expand-arrow-text {
+    font-size: 12px;
+    color: #007AFF;
+    font-weight: 500;
+}
+
+/* 详细时间段区域 - 优化动画效果 */
+.detailed-time-slots {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.detailed-time-slots.expanded {
+    max-height: 800px;
+    opacity: 1;
+    transform: translateY(0);
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 122, 255, 0.1);
+    margin-top: 16px;
+}
+
+.time-slots-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time-slots-subtitle {
+    font-size: 12px;
+    color: #666666;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+/* 详细时间段区域内的时间段网格 */
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.time-slot {
+    background-color: #ffffff;
+    border: 1px solid #e1e6ef;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-slot.available {
+    color: #1c1c1e;
+}
+
+.time-slot.available:active {
+    transform: scale(0.97);
+    background-color: rgba(0, 122, 255, 0.08);
+}
+
+.time-slot.selected-range {
+    background-color: rgba(0, 122, 255, 0.10);
+    border-color: rgba(0, 122, 255, 0.25);
+    color: #007AFF;
+}
+
+.time-slot.selected-start {
+    background: #ffffff;
+    border-color: #007AFF;
+    color: #007AFF;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.15) inset;
+    position: relative;
+}
+.time-slot.selected-start::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: #007AFF;
+    transform: translateY(-50%);
+}
+
+.time-slot.selected-end {
+    background: #ffffff;
+    border-color: #007AFF;
+    color: #007AFF;
+    box-shadow: 0 0 0 1px rgba(0, 122, 255, 0.25) inset;
+    border-left: 3px solid #007AFF;
+}
+
+/* 不可点击状态样式 */
+.time-slot.disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    color: #9ca3af;
+    border-color: #d5d9e0;
+}
+
+.time-slot.disabled:active {
+    transform: none;
+}
+
+.time-slot.selected-end::after {
+    content: '';
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #007AFF;
+}
+
+/* 高级时间选择底部面板 */
+.time-sheet-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1100;
+    display: flex;
+    align-items: flex-end;
+}
+
+.time-sheet {
+    background: #fff;
+    width: 100%;
+    max-height: 80vh; /* 增加高度确保快速选择按钮可见 */
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.12);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.time-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.time-sheet-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1c1c1e;
+}
+
+.time-sheet-close {
+    width: 28px; height: 28px;
+    border-radius: 14px;
+    background: #f2f2f7;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.time-sheet-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 0 16px;
+}
+
+.time-sheet-tab {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #f2f2f7;
+    color: #8e8e93;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.time-sheet-tab.active {
+    background: rgba(0,122,255,0.12);
+    color: #007AFF;
+}
+
+.time-sheet-body {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 100px; /* 增加底部内边距，为快速选择按钮和确定按钮预留更多空间 */
+}
+
+.sheet-footer {
+    padding: 12px 16px 20px 16px;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    margin-top: auto; /* 将按钮推到底部 */
+    position: relative;
+    z-index: 5;
+}
+
+.sheet-confirm {
+    width: 100%;
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25);
+}
+
+.sheet-confirm.disabled {
+    background: #e0e0e0;
+    box-shadow: none;
+}
+
+.confirm-text {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* 禁用态通用 */
+.time-slot.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* 时间段文本 */
+.time-slot-text {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 修复选中状态样式 - 确保时间文本始终显示 */
+.time-slot.selected-start .time-slot-text {
+    color: #007AFF;
+    font-weight: 700;
+}
+
+.time-slot.selected-end .time-slot-text,
+.time-slot.selected-range .time-slot-text {
+    color: #007AFF;
+    font-weight: 600;
+}
+
+.time-slot.available .time-slot-text {
+    color: inherit;
+}
+
+.time-slot.booked {
+    background-color: rgba(255, 69, 58, 0.1);
+    border-color: rgba(255, 69, 58, 0.3);
+}
+
+.time-slot.booked .time-slot-text {
+    color: #FF453A;
+}
+
+.time-slot.expired .time-slot-text {
+    color: #9ca3af;
+}
+
+.time-slot.selected-end .time-slot-text,
+.time-slot.selected-range .time-slot-text {
+    color: #007AFF;
+}
+
+/* 调试信息样式 */
+.debug-info {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    /* border-radius: 15rpx; 使用公共类 border-radius-15 */
+    padding: 12px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #856404;
+    line-height: 1.4;
+}
+
+/* 状态指示说明样式 */
+.status-legend {
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 16px;
+    background-color: rgba(248, 248, 248, 0.5);
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666666;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.status-dot.available {
+    background-color: #34C759;
+}
+
+.status-dot.booked {
+    background-color: #FF453A;
+}
+
+.status-dot.selected {
+    background-color: #007AFF;
+} 
+
+/* 快速模板选择 */
+.time-presets {
+    padding: 16px 0 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    margin-top: 16px;
+    position: relative;
+    z-index: 10;
+}
+
+.presets-title {
+    font-size: 12px;
+    color: #8e8e93;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.preset-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.preset-button {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(0, 122, 255, 0.1);
+    color: #007AFF;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.preset-button:active {
+    transform: scale(0.97);
+    background: rgba(0, 122, 255, 0.2);
+}
+
+.preset-button.disabled {
+    background: #f1f2f6;
+    color: #b0b3ba;
+    pointer-events: none;
+}

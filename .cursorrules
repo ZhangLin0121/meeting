@@ -1,0 +1,359 @@
+# Cursor Rules for Meeting Room Booking System
+
+## 🎯 项目概述 (Project Overview)
+
+这是一个微信小程序会议室预订系统，采用前后端分离架构：
+- **前端**: 微信小程序 (WXML, WXSS, JavaScript)
+- **后端**: Node.js + Express + MongoDB
+- **部署**: PM2 + Nginx + HTTPS
+- **服务器**: 47.122.68.192 (www.cacophonyem.me)
+
+## 💎 核心开发原则 (Core Development Principles)
+
+### 1. Context 上下文理解 (Context Understanding)
+在开始任何任务前，必须：
+- 📖 **充分理解业务背景**：仔细阅读 README.md 和相关文档
+- 🔍 **分析现有代码结构**：理解项目架构、数据流和依赖关系
+- 🎯 **明确用户需求**：站在用户角度思考功能目标和使用场景
+- 🔗 **理解技术上下文**：掌握微信小程序生命周期、API限制和最佳实践
+
+### 2. 分步解决 (Step-by-Step Problem Solving)
+遇到复杂问题时：
+- 🧩 **问题拆解**：将大问题分解为多个小的、可管理的子问题
+- 📋 **制定计划**：列出解决步骤，明确每步的目标和验证方法
+- 🔄 **迭代优化**：先实现基本功能，再逐步完善和优化
+- ✅ **逐步验证**：每完成一步都要测试验证，确保正确性
+
+### 3. 任务拆分 (Task Breakdown)
+将大任务拆分为小任务：
+- 🎯 **功能模块化**：按功能将代码组织成独立模块
+- 📦 **组件化开发**：创建可复用的组件和工具函数
+- 🔧 **单一职责**：每个函数/类只负责一个明确的功能
+- 🧪 **独立测试**：每个模块都应该可以独立测试和验证
+
+### 4. 深度思考 (Deep Thinking)
+在编码前进行深度思考：
+- 🤔 **需求分析**：真正理解用户需要什么，而不是表面需求，包括当前进行了什么修改，可能会牵扯到什么元素，是否要做对应的修改。
+- 🏗️ **架构设计**：考虑扩展性、维护性和性能，包括当前的架构是否合理，是否需要优化，是否需要添加新的功能，是否需要修改现有的功能。
+- 🔮 **前瞻性思考**：考虑未来可能的变化和扩展需求，包括当前的代码是否需要优化，是否需要添加新的功能，是否需要修改现有的功能。
+- 🛡️ **风险评估**：识别潜在问题和边界情况，包括当前的代码是否存在潜在问题，是否需要优化，是否需要添加新的功能，是否需要修改现有的功能。
+
+## 🚀 自动部署流程 (Auto Deployment Process)
+
+### 后端代码修改后必须执行的步骤：
+
+```bash
+# 1. 提交代码到Git仓库
+git add .
+git commit -m "feat: 描述具体修改内容"
+git push origin main
+
+# 2. 连接服务器
+ssh root@47.122.68.192
+
+# 3. 进入项目目录并更新代码
+cd /root/meeting-backend
+git pull origin main
+
+# 4. 安装新依赖（如果有package.json变化）
+npm install
+
+# 5. 重启服务
+pm2 restart meeting-backend
+
+# 6. 检查服务状态
+pm2 status
+pm2 logs meeting-backend --lines 20
+
+# 7. 验证部署
+curl https://www.cacophonyem.me/meeting/api/health
+```
+
+### 自动化部署脚本建议：
+创建 `deploy.sh` 脚本自动化上述流程：
+
+```bash
+#!/bin/bash
+echo "🚀 开始部署后端代码..."
+
+# 提交代码
+git add .
+read -p "请输入提交信息: " commit_msg
+git commit -m "$commit_msg"
+git push origin main
+
+# 部署到服务器
+ssh root@47.122.68.192 << 'EOF'
+cd /root/meeting-backend
+git pull origin main
+npm install
+pm2 restart meeting-backend
+pm2 status
+echo "✅ 部署完成"
+EOF
+
+echo "🎉 部署流程完成，请验证服务状态"
+```
+
+## 📁 项目结构规范 (Project Structure)
+
+```
+meeting/
+├── frontend/                 # 微信小程序前端
+│   ├── pages/               # 页面文件
+│   │   ├── roomList/       # 会议室列表页
+│   │   ├── roomDetail/     # 会议室详情页
+│   │   ├── admin/          # 管理员页面
+│   │   └── test/           # 测试页面
+│   ├── utils/              # 工具函数
+│   │   ├── auth.js         # 认证工具
+│   │   ├── request.js      # 网络请求
+│   │   └── common.js       # 通用工具
+│   ├── images/             # 图片资源
+│   ├── app.js              # 应用入口
+│   ├── app.json            # 应用配置
+│   └── app.wxss            # 全局样式
+├── backend/                 # Node.js后端
+│   ├── controllers/        # 控制器
+│   ├── models/             # 数据模型
+│   ├── routes/             # 路由配置
+│   ├── middleware/         # 中间件
+│   ├── utils/              # 工具函数
+│   ├── uploads/            # 文件上传
+│   └── server.js           # 服务器入口
+└── docs/                   # 项目文档
+```
+
+## 🔧 代码规范 (Coding Standards)
+
+### JavaScript/Node.js 规范：
+```javascript
+// ✅ 好的实践
+async function getUserInfo(userId) {
+    try {
+        // 详细的注释说明函数用途
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new Error('用户不存在');
+        }
+        return user;
+    } catch (error) {
+        console.error('获取用户信息失败:', error);
+        throw error;
+    }
+}
+
+// ❌ 避免的写法
+function getUser(id) {
+    return User.findById(id); // 缺少错误处理和注释
+}
+```
+
+### 微信小程序规范：
+```javascript
+// ✅ 页面生命周期规范
+Page({
+    data: {
+        // 明确的数据结构注释
+        userInfo: null,     // 用户信息对象
+        loading: false,     // 加载状态
+        rooms: []          // 会议室列表
+    },
+
+    onLoad(options) {
+        console.log('📱 页面加载:', options);
+        this.initializePage();
+    },
+
+    async initializePage() {
+        try {
+            await this.loginUser();
+            await this.fetchData();
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+});
+```
+
+## 🛠️ 开发优化指导 (Development Optimization)
+
+### 1. 使用 Context 理解代码
+```
+// 在修改代码前，先运行这些命令理解上下文：
+@codebase 分析这个项目的整体架构
+@codebase 这个函数的作用是什么？
+@codebase 找到所有调用这个API的地方
+```
+
+### 2. 任务拆分提示词
+```
+请帮我将这个复杂功能拆分成多个小任务，每个任务都要：
+1. 有明确的输入和输出
+2. 可以独立测试
+3. 符合单一职责原则
+4. 考虑错误处理
+```
+
+### 3. 代码审查提示词
+```
+请审查这段代码，重点关注：
+1. 是否遵循了项目的编码规范
+2. 错误处理是否完善
+3. 是否有潜在的性能问题
+4. 是否考虑了边界情况
+5. 注释是否清晰易懂
+```
+
+### 4. 问题诊断提示词
+```
+我遇到了这个问题：[描述问题]
+请帮我：
+1. 分析可能的根本原因
+2. 提供分步的诊断方法
+3. 给出多种解决方案
+4. 考虑如何预防类似问题
+```
+
+## 🧪 测试策略 (Testing Strategy)
+
+### 前端测试：
+- 在 `pages/test/test.js` 中添加功能测试
+- 测试用户登录流程
+- 测试API连接
+- 测试页面跳转和数据传递
+
+### 后端测试：
+```bash
+# API健康检查
+curl https://www.cacophonyem.me/meeting/api/health
+
+# 测试用户登录
+curl -X POST https://www.cacophonyem.me/meeting/api/user/wechat-login \
+  -H "Content-Type: application/json" \
+  -d '{"code":"test_code"}'
+
+# 测试会议室列表
+curl https://www.cacophonyem.me/meeting/api/rooms \
+  -H "x-user-openid: test_openid"
+```
+
+## 🔍 调试技巧 (Debugging Tips)
+
+### 1. 日志规范：
+```javascript
+// 使用表情符号和结构化日志
+console.log('🔐 开始用户登录流程...');
+console.log('✅ 登录成功:', { userId: user.id, timestamp: Date.now() });
+console.error('❌ 登录失败:', error);
+console.warn('⚠️ 检测到潜在问题:', warning);
+```
+
+### 2. 错误处理模式：
+```javascript
+try {
+    // 业务逻辑
+} catch (error) {
+    console.error('❌ 操作失败:', error);
+    
+    // 用户友好的错误提示
+    wx.showModal({
+        title: '操作失败',
+        content: '请检查网络连接后重试',
+        showCancel: true,
+        confirmText: '重试',
+        success: (res) => {
+            if (res.confirm) {
+                // 重试逻辑
+            }
+        }
+    });
+}
+```
+
+## 📚 常用命令和快捷方式 (Common Commands)
+
+### Git 工作流：
+```bash
+# 创建功能分支
+git checkout -b feature/new-feature
+
+# 提交代码
+git add .
+git commit -m "feat: 添加新功能"
+
+# 推送并创建PR
+git push origin feature/new-feature
+```
+
+### 服务器管理：
+```bash
+# 查看服务状态
+pm2 status
+
+# 查看日志
+pm2 logs meeting-backend --lines 50
+
+# 重启服务
+pm2 restart meeting-backend
+
+# 查看系统资源
+htop
+df -h
+```
+
+### 微信开发者工具：
+- `Ctrl/Cmd + Shift + I`: 打开调试器
+- `Ctrl/Cmd + R`: 重新编译
+- `Ctrl/Cmd + Shift + R`: 清缓存重新编译
+
+## 🚨 注意事项 (Important Notes)
+
+### 1. 安全考虑：
+- 永远不要在前端存储敏感信息
+- 所有API请求都要验证用户身份
+- 使用HTTPS进行数据传输
+- 定期更新依赖包
+
+### 2. 性能优化：
+- 合理使用 `setData`，避免频繁更新
+- 图片使用适当的格式和大小
+- 实现懒加载和分页
+- 缓存常用数据
+
+### 3. 用户体验：
+- 提供清晰的加载状态
+- 友好的错误提示
+- 支持下拉刷新
+- 考虑网络异常情况
+
+## 🎯 开发目标 (Development Goals)
+
+每次开发都要追求：
+1. **代码质量**：清晰、可维护、可扩展
+2. **用户体验**：流畅、直观、可靠
+3. **系统稳定性**：健壮的错误处理和恢复机制
+4. **开发效率**：复用代码、自动化流程
+5. **团队协作**：清晰的文档和代码注释
+
+记住：**好的代码不仅要能工作，还要让其他人（包括未来的自己）能够轻松理解和维护。** 
+
+## 1. 代码提交到 GitHub  
+- **每次修改后端代码后**，必须通过 Git 提交并推送到远程仓库：  
+  - 添加更改：`git add .`  
+  - 提交描述：`git commit -m "描述变更内容"`  
+  - 推送到分支：`git push origin [分支名]`  
+- 确保提交信息清晰，便于追踪变更历史。  
+
+## 2. 服务器部署  
+- **代码推送后**，需通过 SSH 连接到服务器并手动触发部署：  
+  - 进入项目目录，拉取最新代码：`git pull`  
+  - 根据项目需求执行部署命令（如重启服务、构建容器等）。  
+
+## 3. 安全注意事项  
+服务器地址是47.122.68.192，用户名是root。
+
+## 4. 确认流程  
+- 部署完成后，检查服务状态并记录：  
+  - 部署时间、Git 提交哈希值  
+  - 服务健康状态（如 `curl` 测试或日志验证）。  

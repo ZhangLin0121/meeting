@@ -1,0 +1,429 @@
+/* 全局样式文件 - Apple Design风格 */
+
+
+/* 字体设置 */
+
+page {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+    color: #333;
+    background-color: #f7f7f7;
+}
+
+
+/* 全局通用样式 - 由于小程序不支持CSS变量，直接使用具体颜色值 */
+
+view,
+text,
+image,
+input,
+button {
+    box-sizing: border-box;
+}
+
+
+/* 通用类 */
+
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-multiline-ellipsis {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* 通用动画 */
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.slide-in-up {
+    animation: slideInUp 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 公共Loading样式 */
+.common-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40rpx;
+    color: #999;
+}
+
+.common-loading-spinner {
+    width: 40rpx;
+    height: 40rpx;
+    border: 3rpx solid #f3f3f3;
+    border-top: 3rpx solid #007aff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20rpx;
+}
+
+.common-loading-text {
+    font-size: 28rpx;
+    color: #999;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 公共间距类 */
+.margin-xs { margin: 8rpx; }
+.margin-sm { margin: 16rpx; }
+.margin-20 { margin: 20rpx; }
+.margin-md { margin: 24rpx; }
+.margin-lg { margin: 32rpx; }
+.margin-xl { margin: 40rpx; }
+
+.margin-top-xs { margin-top: 8rpx; }
+.margin-top-sm { margin-top: 16rpx; }
+.margin-top-20 { margin-top: 20rpx; }
+.margin-top-md { margin-top: 24rpx; }
+.margin-top-lg { margin-top: 32rpx; }
+.margin-top-xl { margin-top: 40rpx; }
+
+.margin-bottom-xs { margin-bottom: 8rpx; }
+.margin-bottom-sm { margin-bottom: 16rpx; }
+.margin-bottom-20 { margin-bottom: 20rpx; }
+.margin-bottom-md { margin-bottom: 24rpx; }
+.margin-bottom-lg { margin-bottom: 32rpx; }
+.margin-bottom-xl { margin-bottom: 40rpx; }
+
+.margin-right-xs { margin-right: 8rpx; }
+.margin-right-sm { margin-right: 16rpx; }
+.margin-right-20 { margin-right: 20rpx; }
+.margin-right-md { margin-right: 24rpx; }
+.margin-right-lg { margin-right: 32rpx; }
+
+.padding-xs { padding: 8rpx; }
+.padding-sm { padding: 16rpx; }
+.padding-20 { padding: 20rpx; }
+.padding-md { padding: 24rpx; }
+.padding-lg { padding: 32rpx; }
+.padding-xl { padding: 40rpx; }
+
+.padding-horizontal-xs { padding-left: 8rpx; padding-right: 8rpx; }
+.padding-horizontal-sm { padding-left: 16rpx; padding-right: 16rpx; }
+.padding-horizontal-20 { padding-left: 20rpx; padding-right: 20rpx; }
+.padding-horizontal-md { padding-left: 24rpx; padding-right: 24rpx; }
+.padding-horizontal-lg { padding-left: 32rpx; padding-right: 32rpx; }
+
+.padding-vertical-xs { padding-top: 8rpx; padding-bottom: 8rpx; }
+.padding-vertical-sm { padding-top: 16rpx; padding-bottom: 16rpx; }
+.padding-vertical-20 { padding-top: 20rpx; padding-bottom: 20rpx; }
+.padding-vertical-md { padding-top: 24rpx; padding-bottom: 24rpx; }
+.padding-vertical-lg { padding-top: 32rpx; padding-bottom: 32rpx; }
+
+/* 公共圆角类 */
+.border-radius-xs { border-radius: 6rpx; }
+.border-radius-sm { border-radius: 12rpx; }
+.border-radius-15 { border-radius: 15rpx; }
+.border-radius-md { border-radius: 16rpx; }
+.border-radius-lg { border-radius: 20rpx; }
+.border-radius-xl { border-radius: 24rpx; }
+
+/* 公共卡片样式 */
+.common-card {
+    background: #fff;
+    border-radius: 16rpx;
+    padding: 24rpx;
+    margin-bottom: 24rpx;
+}
+
+.common-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16rpx;
+    padding-bottom: 16rpx;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+
+.common-card-title {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #333;
+}
+
+.common-card-content {
+    font-size: 28rpx;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* 公共背景颜色类 */
+.bg-primary {
+    background: #007AFF !important;
+}
+
+.bg-primary-light {
+    background: rgba(0, 122, 255, 0.1) !important;
+}
+
+.bg-success {
+    background: #34C759 !important;
+}
+
+.bg-success-light {
+    background: rgba(52, 199, 89, 0.1) !important;
+}
+
+.bg-warning {
+    background: #FF9500 !important;
+}
+
+.bg-warning-light {
+    background: rgba(255, 149, 0, 0.1) !important;
+}
+
+.bg-danger {
+    background: #FF3B30 !important;
+}
+
+.bg-danger-light {
+    background: rgba(255, 59, 48, 0.1) !important;
+}
+
+.bg-gray {
+    background: #8E8E93 !important;
+}
+
+.bg-gray-light {
+    background: rgba(142, 142, 147, 0.1) !important;
+}
+
+/* 公共文字颜色类 */
+.text-primary {
+    color: #007AFF !important;
+}
+
+.text-success {
+    color: #34C759 !important;
+}
+
+.text-warning {
+    color: #FF9500 !important;
+}
+
+.text-danger {
+    color: #FF3B30 !important;
+}
+
+.text-gray {
+    color: #8E8E93 !important;
+}
+
+.text-dark {
+    color: #1C1C1E !important;
+}
+
+.text-light {
+    color: #FFFFFF !important;
+}
+
+/* 公共字体大小类 */
+.font-xs {
+    font-size: 20rpx !important;
+}
+
+.font-sm {
+    font-size: 24rpx !important;
+}
+
+.font-md {
+    font-size: 28rpx !important;
+}
+
+.font-lg {
+    font-size: 32rpx !important;
+}
+
+.font-xl {
+    font-size: 36rpx !important;
+}
+
+.font-xxl {
+    font-size: 40rpx !important;
+}
+
+/* 公共字体粗细类 */
+.font-light {
+    font-weight: 300 !important;
+}
+
+.font-normal {
+    font-weight: 400 !important;
+}
+
+.font-medium {
+    font-weight: 500 !important;
+}
+
+.font-semibold {
+    font-weight: 600 !important;
+}
+
+.font-bold {
+    font-weight: 700 !important;
+}
+
+/* 公共阴影类 */
+.shadow-xs {
+    box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1) !important;
+}
+
+.shadow-md {
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2) !important;
+}
+
+.shadow-xl {
+    box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.25) !important;
+}
+
+.shadow-none {
+    box-shadow: none !important;
+}
+
+/* iOS风格阴影 */
+.shadow-ios-card {
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06) !important;
+}
+
+.shadow-ios-button {
+    box-shadow: 0 2rpx 8rpx rgba(0, 122, 255, 0.25) !important;
+}
+
+.shadow-ios-modal {
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 公共按钮样式 - iOS风格 */
+.common-button {
+    border-radius: 12rpx;
+    padding: 24rpx 48rpx;
+    font-size: 32rpx;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.common-button-primary {
+    background: #007AFF;
+    color: #fff;
+}
+
+.common-button-primary:active {
+    background: #0051D5;
+    transform: scale(0.98);
+}
+
+.common-button-secondary {
+    background: rgba(0, 122, 255, 0.1);
+    color: #007AFF;
+}
+
+.common-button-secondary:active {
+    background: rgba(0, 122, 255, 0.2);
+    transform: scale(0.98);
+}
+
+.common-button-small {
+    padding: 20rpx 40rpx;
+    font-size: 28rpx;
+    border-radius: 10rpx;
+}
+
+.common-button-medium {
+    padding: 22rpx 44rpx;
+    font-size: 30rpx;
+    border-radius: 11rpx;
+}
+
+/* iOS风格的ios-button别名 */
+.ios-button {
+    border-radius: 12rpx;
+    padding: 24rpx 48rpx;
+    font-size: 32rpx;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    background: #007AFF;
+    color: #fff;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ios-button:active {
+    background: #0051D5;
+    transform: scale(0.98);
+}
+
+.ios-button.secondary {
+    background: rgba(0, 122, 255, 0.1);
+    color: #007AFF;
+}
+
+.ios-button.secondary:active {
+    background: rgba(0, 122, 255, 0.2);
+}

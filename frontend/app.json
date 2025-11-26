@@ -1,0 +1,56 @@
+{
+    "pages": [
+        "pages/roomList/roomList",
+        "pages/roomDetail/roomDetail",
+        "pages/admin/admin",
+        "pages/adminBookings/adminBookings",
+        "pages/myBookings/myBookings",
+        "pages/profile/profile",
+        "pages/legal/service",
+        "pages/legal/privacy"
+    ],
+    "tabBar": {
+        "color": "#8E8E93",
+        "selectedColor": "#007AFF",
+        "backgroundColor": "#F8F8F8",
+        "borderStyle": "white",
+        "position": "bottom",
+        "custom": false,
+        "list": [{
+                "pagePath": "pages/roomList/roomList",
+                "iconPath": "images/icons/meeting-room.png",
+                "selectedIconPath": "images/icons/meeting-room.png",
+                "text": "会议室"
+            },
+            {
+                "pagePath": "pages/myBookings/myBookings",
+                "iconPath": "images/icons/calendar.png",
+                "selectedIconPath": "images/icons/calendar.png",
+                "text": "我的预约"
+            },
+            {
+                "pagePath": "pages/profile/profile",
+                "iconPath": "images/icons/user.png",
+                "selectedIconPath": "images/icons/user.png",
+                "text": "我的"
+            }
+        ]
+    },
+    "window": {
+        "backgroundTextStyle": "dark",
+        "navigationBarBackgroundColor": "#F8F8F8",
+        "navigationBarTitleText": "会议室预约",
+        "navigationBarTextStyle": "black",
+        "navigationStyle": "custom",
+        "backgroundColor": "#F2F2F7",
+        "backgroundColorTop": "#F2F2F7",
+        "backgroundColorBottom": "#FFFFFF",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 50
+    },
+    "style": "v2",
+    "sitemapLocation": "sitemap.json",
+    "lazyCodeLoading": "requiredComponents",
+    "darkmode": true,
+    "themeLocation": "theme.json"
+}

@@ -1,0 +1,378 @@
+/* 会议室管理样式模块 */
+
+/* 会议室管理卡片 - 简化版 */
+.room-management-list {
+    /* 简单列表，不设置固定高度 */
+    padding: 0;
+}
+
+.room-management-card {
+    background: white;
+    border-radius: 32rpx;
+    /* margin-bottom: 20rpx; 使用公共类 margin-bottom-20 */
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: none;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.room-management-card:active {
+    transform: scale(0.98);
+}
+
+/* 会议室图片容器 */
+.room-image-container {
+    position: relative;
+    height: 260rpx;
+    width: 100%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #F5F7FA 0%, #E8EBF0 100%);
+}
+
+.room-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.room-image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);
+}
+
+.placeholder-icon {
+    font-size: 80rpx;
+    margin-bottom: 16rpx;
+    opacity: 0.6;
+}
+
+.placeholder-text {
+    font-size: 28rpx;
+    color: #999999;
+    font-weight: 500;
+}
+
+/* 悬浮操作按钮 */
+.room-actions-overlay {
+    position: absolute;
+    top: 16rpx;
+    right: 16rpx;
+    display: flex;
+    gap: 12rpx;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+
+.action-button-new {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 28rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(40rpx);
+    -webkit-backdrop-filter: blur(40rpx);
+    background: rgba(255, 255, 255, 0.95);
+    border: 0.5rpx solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.action-button-new.edit {
+    background: rgba(0, 122, 255, 0.9);
+}
+
+.action-button-new.delete {
+    background: rgba(255, 59, 48, 0.9);
+}
+
+.action-button-new:active {
+    transform: scale(0.9);
+}
+
+.action-icon-new {
+    width: 32rpx;
+    height: 32rpx;
+    filter: brightness(0) invert(1);
+}
+
+/* 会议室内容区域 */
+.room-content {
+    padding: 32rpx;
+    background: white;
+}
+
+.room-name-new {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #1D1D1F;
+    display: block;
+    margin-bottom: 6rpx;
+    line-height: 1.3;
+    letter-spacing: 0.5rpx;
+}
+
+.room-id-new {
+    font-size: 22rpx;
+    color: #8E8E93;
+    font-weight: 400;
+    letter-spacing: 0.5rpx;
+}
+
+/* 快速信息栏 */
+.room-quick-info {
+    display: flex;
+    justify-content: space-between;
+    /* margin-bottom: 20rpx; 使用公共类 margin-bottom-20 */
+    background: rgba(0, 102, 204, 0.03);
+    border-radius: 12rpx;
+    padding: 16rpx 20rpx;
+    border: 0.5rpx solid rgba(0, 102, 204, 0.08);
+    margin: 20rpx 0;
+}
+
+.quick-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    flex: 1;
+    justify-content: center;
+}
+
+.info-icon {
+    font-size: 24rpx;
+    opacity: 0.8;
+}
+
+.info-text {
+    font-size: 22rpx;
+    color: #007AFF;
+    font-weight: 500;
+    letter-spacing: 0.2rpx;
+}
+
+/* 描述信息 */
+.room-description {
+    font-size: 26rpx;
+    color: #666666;
+    line-height: 1.4;
+    margin-bottom: 16rpx;
+    opacity: 0.9;
+}
+
+.room-equipment {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8rpx;
+    margin-bottom: 16rpx;
+}
+
+.equipment-tag {
+    padding: 6rpx 12rpx;
+    background: rgba(0, 122, 255, 0.08);
+    border-radius: 12rpx;
+    font-size: 20rpx;
+    color: #007AFF;
+    font-weight: 500;
+    border: 0.5rpx solid rgba(0, 122, 255, 0.15);
+}
+
+/* 状态指示器 */
+.room-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12rpx 20rpx;
+    background: rgba(52, 199, 89, 0.08);
+    /* border-radius: 20rpx; 使用公共类 border-radius-lg */
+    border: 0.5rpx solid rgba(52, 199, 89, 0.15);
+}
+
+.status-indicator {
+    width: 12rpx;
+    height: 12rpx;
+    border-radius: 6rpx;
+    margin-right: 8rpx;
+}
+
+.status-indicator.available {
+    background-color: #30D158;
+    box-shadow: 0 0 6rpx rgba(48, 209, 88, 0.3);
+}
+
+.status-indicator.unavailable {
+    background-color: #FF453A;
+    box-shadow: 0 0 6rpx rgba(255, 69, 58, 0.3);
+}
+
+.status-text {
+    font-size: 22rpx;
+    color: #30D158;
+    font-weight: 500;
+    letter-spacing: 0.5rpx;
+}
+
+/* 卡片加载动画 */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(40rpx);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 添加会议室按钮 */
+.add-room-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    color: #ffffff;
+    padding: 28rpx 48rpx;
+    border-radius: 24rpx;
+    box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin: 32rpx;
+}
+
+.add-room-button:active {
+    transform: scale(0.96);
+    box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+}
+
+.add-icon {
+    width: 36rpx;
+    height: 36rpx;
+    margin-right: 20rpx;
+    filter: brightness(0) invert(1);
+}
+
+.add-text {
+    font-size: 32rpx;
+    font-weight: 600;
+    letter-spacing: 1rpx;
+}
+
+/* 浮动添加按钮 */
+.floating-add-button {
+    position: fixed;
+    bottom: 120rpx;
+    right: 40rpx;
+    width: 112rpx;
+    height: 112rpx;
+    border-radius: 56rpx;
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8rpx 32rpx rgba(0, 122, 255, 0.4), 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    backdrop-filter: blur(20rpx);
+    -webkit-backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(255, 255, 255, 0.2);
+    animation: floatingPulse 3s ease-in-out infinite;
+}
+
+.floating-add-button:active {
+    transform: scale(0.9);
+    box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3), 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.floating-add-icon {
+    width: 48rpx;
+    height: 48rpx;
+    filter: brightness(0) invert(1);
+    transition: transform 0.3s ease;
+}
+
+.floating-add-button:active .floating-add-icon {
+    transform: rotate(45deg);
+}
+
+/* 浮动按钮动画 */
+@keyframes floatingPulse {
+    0%, 100% {
+        transform: translateY(0);
+        box-shadow: 0 8rpx 32rpx rgba(0, 122, 255, 0.4), 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        transform: translateY(-8rpx);
+        box-shadow: 0 12rpx 40rpx rgba(0, 122, 255, 0.5), 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* 会议室空状态样式 */
+.room-empty-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120rpx 40rpx;
+    min-height: 60vh;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 248, 248, 0.6) 100%);
+    border-radius: 24rpx;
+    margin: 40rpx 20rpx;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.room-empty-icon {
+    width: 140rpx;
+    height: 140rpx;
+    margin-bottom: 32rpx;
+    opacity: 0.7;
+    filter: grayscale(30%) brightness(0.9);
+}
+
+.room-empty-text {
+    font-size: 34rpx;
+    color: #515154;
+    font-weight: 600;
+    margin-bottom: 16rpx;
+    text-align: center;
+    letter-spacing: 0.3rpx;
+}
+
+.room-empty-subtext {
+    font-size: 28rpx;
+    color: #8E8E93;
+    text-align: center;
+    line-height: 1.5;
+    max-width: 420rpx;
+    margin-bottom: 40rpx;
+    font-weight: 400;
+}
+
+.add-first-room-button {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    color: #ffffff;
+    padding: 24rpx 48rpx;
+    border-radius: 20rpx;
+    font-size: 30rpx;
+    font-weight: 600;
+    box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: none;
+    cursor: pointer;
+}
+
+.add-first-room-button:active {
+    transform: scale(0.96);
+    box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+}
+
+.add-first-text {
+    font-size: 30rpx;
+    font-weight: 600;
+    letter-spacing: 0.5rpx;
+} 
