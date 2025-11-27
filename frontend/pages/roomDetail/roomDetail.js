@@ -538,6 +538,18 @@ Page({
                 // 边界点在两侧分栏都展示，但在下一时段用 boundaryEnd 将其显示为可选
                 .filter(point => point && point.minutes >= startMinutes && point.minutes <= endMinutes)
                 .map(point => {
+                    const naturalPeriod = this.getPeriodIdByTime(point.time);
+                    // 非所属分栏的镜像点：仅在作为下一分栏起点且 boundaryEnd 时可选，其余置为中性/禁用以避免双重高亮
+                    if (periodId !== naturalPeriod) {
+                        const nextPeriod = boundaryNextPeriod[point.time];
+                        const isNext = nextPeriod && nextPeriod === periodId && point.boundaryEnd;
+                        return {
+                            ...point,
+                            status: isNext ? 'available' : 'boundary',
+                            isDisabled: !isNext || point.isPastClient
+                        };
+                    }
+
                     let displayStatus = point.status;
                     const nextPeriod = boundaryNextPeriod[point.time];
                     if (nextPeriod && nextPeriod === periodId && point.boundaryEnd) {
