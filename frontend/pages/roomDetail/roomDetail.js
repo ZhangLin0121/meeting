@@ -542,12 +542,10 @@ Page({
                     // 非所属分栏的镜像点：保持可选（起始/结束），但如果是关闭点则禁用
                     if (periodId !== naturalPeriod) {
                         const isClosed = point.status === 'closed';
-                        const nextPeriod = boundaryNextPeriod[point.time];
-                        const isNext = nextPeriod && nextPeriod === periodId && point.boundaryEnd;
                         return {
                             ...point,
                             status: isClosed ? 'closed' : 'available',
-                            isDisabled: isClosed || point.isPastClient || (!isNext && point.status === 'booked' && !isClosed)
+                            isDisabled: isClosed || point.isPastClient
                         };
                     }
 
