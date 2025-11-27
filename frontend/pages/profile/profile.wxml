@@ -25,7 +25,7 @@
         </view>
         <view class="user-info">
           <view class="user-name-section">
-            <text class="user-name">{{userInfo.company || '光谷人'}}</text>
+            <text class="user-name">{{userInfo.company || '未设置公司'}}</text>
             <view class="edit-indicator">
               <image class="edit-icon" src="/images/icons/edit.png" mode="aspectFit"></image>
             </view>
