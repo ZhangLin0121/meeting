@@ -310,6 +310,7 @@ class UserController {
                 const bookingEndDateTime = TimeHelper.combineDateAndTime(booking.bookingDate, booking.endTime);
                 // 将预约日期和开始时间合并，用于判断预约是否进行中
                 const bookingStartDateTime = TimeHelper.combineDateAndTime(booking.bookingDate, booking.startTime);
+                const isCancelled = booking.status === 'cancelled';
 
                 // 格式化数据，确保前端易于显示
                 const formattedBooking = {
@@ -331,21 +332,22 @@ class UserController {
                     createdAt: booking.createdAt,
                 };
 
+                // 已取消的预约直接归入历史记录，便于在“已取消”筛选中展示
+                if (isCancelled) {
+                    formattedBooking.displayStatus = '已取消';
+                    pastBookings.push(formattedBooking);
+                    continue;
+                }
+
                 // 根据当前时间判断预约的显示状态
                 if (bookingEndDateTime.isBefore(now)) {
                     // 预约已结束
-                    if (booking.status === 'cancelled') {
-                        formattedBooking.displayStatus = '已取消';
-                    } else {
-                        formattedBooking.displayStatus = '已完成';
-                    }
+                    formattedBooking.displayStatus = '已完成';
                     pastBookings.push(formattedBooking);
                 } else {
                     // 预约尚未结束或正在进行
                     if (bookingStartDateTime.isBefore(now) && bookingEndDateTime.isAfter(now)) {
                         formattedBooking.displayStatus = '进行中';
-                    } else if (booking.status === 'cancelled') {
-                        formattedBooking.displayStatus = '已取消'; // 如果是未来的预约但状态是已取消，也显示已取消
                     } else {
                         formattedBooking.displayStatus = '已预约';
                     }
