@@ -533,18 +533,26 @@ Page({
                 '12:00': 'noon',
                 '14:30': 'afternoon'
             };
+            const boundaryPrevPeriod = {
+                '12:00': 'morning',
+                '14:30': 'noon'
+            };
 
             const filtered = (points || [])
                 // 边界点在两侧分栏都展示，但在下一时段用 boundaryEnd 将其显示为可选
                 .filter(point => point && point.minutes >= startMinutes && point.minutes <= endMinutes)
                 .map(point => {
                     const naturalPeriod = this.getPeriodIdByTime(point.time);
+                    // 边界结束点归属前一个分栏，用于保持占用高亮
+                    const owningPeriod = (point.boundaryEnd && point.status === 'booked')
+                        ? (boundaryPrevPeriod[point.time] || naturalPeriod)
+                        : naturalPeriod;
                     // 非所属分栏的镜像点：不继承“占用”高亮，只有作为下一分栏起点时显示可选
-                    if (periodId !== naturalPeriod) {
+                    if (periodId !== owningPeriod) {
                         const isClosed = point.status === 'closed';
                         const nextPeriod = boundaryNextPeriod[point.time];
                         const isNext = nextPeriod && nextPeriod === periodId && point.boundaryEnd;
-                        const status = isClosed ? 'closed' : (isNext ? 'available' : 'available');
+                        const status = isClosed ? 'closed' : (isNext ? 'available' : point.status);
                         return {
                             ...point,
                             status,
