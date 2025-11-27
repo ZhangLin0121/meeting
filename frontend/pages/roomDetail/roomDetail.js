@@ -577,8 +577,8 @@ Page({
      */
     getPeriodIdByTime(timeStr) {
         const m = TimeService.timeToMinutes(timeStr);
-        if (m < TimeService.timeToMinutes('12:00')) return 'morning';
-        if (m < TimeService.timeToMinutes('14:30')) return 'noon';
+        if (m <= TimeService.timeToMinutes('12:00')) return 'morning'; // 边界归属前一时段，用于高亮
+        if (m <= TimeService.timeToMinutes('14:30')) return 'noon';
         return 'afternoon';
     },
 
