@@ -552,7 +552,7 @@ Page({
                         const isClosed = point.status === 'closed';
                         const nextPeriod = boundaryNextPeriod[point.time];
                         const isNext = nextPeriod && nextPeriod === periodId && point.boundaryEnd;
-                        const status = isClosed ? 'closed' : (isNext ? 'available' : point.status);
+                        const status = isClosed ? 'closed' : 'available';
                         return {
                             ...point,
                             status,
