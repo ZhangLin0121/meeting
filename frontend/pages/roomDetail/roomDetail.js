@@ -539,12 +539,14 @@ Page({
                 .filter(point => point && point.minutes >= startMinutes && point.minutes <= endMinutes)
                 .map(point => {
                     const naturalPeriod = this.getPeriodIdByTime(point.time);
-                    // 非所属分栏的镜像点：保持可选（起始/结束），但如果是关闭点则禁用
+                    // 非所属分栏的镜像点：如果是下一分栏起点且 boundaryEnd，则显示可选；否则保留原始状态（如已占用）
                     if (periodId !== naturalPeriod) {
                         const isClosed = point.status === 'closed';
+                        const nextPeriod = boundaryNextPeriod[point.time];
+                        const isNext = nextPeriod && nextPeriod === periodId && point.boundaryEnd;
                         return {
                             ...point,
-                            status: isClosed ? 'closed' : 'available',
+                            status: isClosed ? 'closed' : (isNext ? 'available' : point.status),
                             isDisabled: isClosed || point.isPastClient
                         };
                     }
