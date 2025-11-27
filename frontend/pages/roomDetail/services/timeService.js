@@ -205,7 +205,8 @@ class TimeService {
 
             const allowBoundaryStart = bookingEndSet.has(minutes);
             const boundaryEnd = allowBoundaryStart; // 标记边界点，供相邻时段判定可选起点
-            const status = originalStatus; // 保持原始状态，避免边界点在相邻分栏重复高亮为占用
+            // 边界点在所属时段仍显示为已占用，用于高亮整段；相邻时段再用 boundaryEnd 转为可选
+            const status = boundaryEnd ? 'booked' : originalStatus;
             points.push({
                 time: this.minutesToTime(minutes),
                 minutes,
