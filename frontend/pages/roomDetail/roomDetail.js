@@ -528,6 +528,7 @@ Page({
             const range = ranges[periodId] || ranges.morning;
             const startMinutes = TimeService.timeToMinutes(range.start);
             const endMinutes = TimeService.timeToMinutes(range.end);
+            const inclusiveEnd = periodId === 'afternoon'; // 最后一个时段包含 22:00
             // 边界刻度（12:00、14:30）也保留，用于跨时段衔接；在前一时段显示占用，下一时段显示可选
             const boundaryNextPeriod = {
                 '12:00': 'noon',
@@ -535,7 +536,12 @@ Page({
             };
 
             const filtered = (points || [])
-                .filter(point => point.minutes >= startMinutes && point.minutes <= endMinutes)
+                // 边界只在当前分栏显示：区间左闭右开（下午段右端例外为闭区间）
+                .filter(point => {
+                    if (!point) return false;
+                    if (inclusiveEnd) return point.minutes >= startMinutes && point.minutes <= endMinutes;
+                    return point.minutes >= startMinutes && point.minutes < endMinutes;
+                })
                 .map(point => {
                     let displayStatus = point.status;
                     const nextPeriod = boundaryNextPeriod[point.time];
