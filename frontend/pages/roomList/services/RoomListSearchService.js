@@ -1,5 +1,6 @@
 // 会议室列表搜索服务模块
 const request = require('../../../utils/request.js');
+const RoomListDataService = require('./RoomListDataService.js');
 
 class RoomListSearchService {
     /**
@@ -47,14 +48,18 @@ class RoomListSearchService {
             pageContext.setData({ loading: true });
             console.log('🔍 开始搜索会议室:', keyword);
 
-            const result = await request.get(`/api/rooms/search?keyword=${encodeURIComponent(keyword)}`);
+            const result = await request.get('/api/rooms', {
+                search: keyword
+            });
             
             if (result.success) {
+                const rooms = Array.isArray(result.data) ? result.data : [];
+                const processedRooms = await RoomListDataService.processRoomsData(pageContext, rooms);
                 pageContext.setData({
-                    rooms: result.data || [],
+                    rooms: processedRooms,
                     loading: false
                 });
-                console.log('✅ 搜索完成，结果数量:', result.data?.length || 0);
+                console.log('✅ 搜索完成，结果数量:', processedRooms.length);
             } else {
                 throw new Error(result.message || '搜索失败');
             }
@@ -130,16 +135,21 @@ class RoomListSearchService {
             pageContext.setData({ loading: true });
             console.log('🔍 按容量筛选:', { minCapacity, maxCapacity });
 
-            const result = await request.get(`/api/rooms/filter?minCapacity=${minCapacity}&maxCapacity=${maxCapacity}`);
+            const result = await request.get('/api/rooms', {
+                capacityMin: minCapacity,
+                capacityMax: maxCapacity
+            });
             
             if (result.success) {
+                const rooms = Array.isArray(result.data) ? result.data : [];
+                const processedRooms = await RoomListDataService.processRoomsData(pageContext, rooms);
                 pageContext.setData({
-                    rooms: result.data || [],
+                    rooms: processedRooms,
                     loading: false
                 });
                 
                 wx.showToast({
-                    title: `找到 ${result.data?.length || 0} 个会议室`,
+                    title: `找到 ${processedRooms.length} 个会议室`,
                     icon: 'success'
                 });
             } else {
@@ -180,16 +190,20 @@ class RoomListSearchService {
             pageContext.setData({ loading: true });
             console.log('🔍 按设备筛选:', equipment);
 
-            const result = await request.get(`/api/rooms/filter?equipment=${encodeURIComponent(equipment)}`);
+            const result = await request.get('/api/rooms', {
+                equipment: equipment
+            });
             
             if (result.success) {
+                const rooms = Array.isArray(result.data) ? result.data : [];
+                const processedRooms = await RoomListDataService.processRoomsData(pageContext, rooms);
                 pageContext.setData({
-                    rooms: result.data || [],
+                    rooms: processedRooms,
                     loading: false
                 });
                 
                 wx.showToast({
-                    title: `找到 ${result.data?.length || 0} 个会议室`,
+                    title: `找到 ${processedRooms.length} 个会议室`,
                     icon: 'success'
                 });
             } else {

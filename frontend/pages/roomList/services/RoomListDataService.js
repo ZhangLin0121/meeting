@@ -1,6 +1,7 @@
 // 会议室列表数据服务模块
 const request = require('../../../utils/request.js');
 const WechatAuth = require('../../../utils/auth.js');
+const { normalizeEquipmentList } = require('../../../utils/equipment.js');
 
 class RoomListDataService {
     /**
@@ -121,6 +122,9 @@ class RoomListDataService {
                 displayImage = imagePath.startsWith('http') ? imagePath : `${pageContext.data.apiBaseUrl}${imagePath}`;
             }
 
+            // 统一设备名称，避免展示不一致
+            normalizedRoom.equipment = normalizeEquipmentList(normalizedRoom.equipment || []);
+
             // 生成房间特性标签
             const features = this.generateRoomFeatures(normalizedRoom);
 
@@ -168,9 +172,8 @@ class RoomListDataService {
         const has = (name) => eq.includes(name);
 
         if (has('投屏设备')) features.push('投屏');
-        if (has('视频会议设备')) features.push('视频会议');
         if (has('白板') || has('电子白板')) features.push('白板');
-        if (has('网络接口/Wi-Fi')) features.push('Wi‑Fi');
+        if (has('Wi-Fi')) features.push('Wi-Fi');
         if (has('麦克风')) features.push('麦克风');
         if (has('音响系统')) features.push('音响');
         if (has('空调')) features.push('空调');

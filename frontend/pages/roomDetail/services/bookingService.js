@@ -129,7 +129,7 @@ class BookingService {
      */
     static async fetchUserBookingHistory(userOpenId) {
         try {
-            const response = await request.get('/api/user/bookings?limit=10&fields=contactName,contactPhone');
+            const response = await request.get('/api/user/bookings', { page: 1, pageSize: 10 });
 
             console.log('✅ 获取用户预约历史成功:', response);
             // 确保返回的是数组格式

@@ -1,6 +1,7 @@
 // 会议室管理（全新重构）
 const request = require('../../utils/request.js');
 const WechatAuth = require('../../utils/auth.js');
+const { normalizeEquipmentList } = require('../../utils/equipment.js');
 
 Page({
     data: {
@@ -31,7 +32,7 @@ Page({
 
         equipmentOptions: [
             '投屏设备','麦克风','音响系统','白板','电子白板',
-            '视频会议设备','网络接口/Wi-Fi','空调','电话','饮水设备'
+            'Wi-Fi','空调','电话'
         ],
         equipmentOptionsDisplay: []
     },
@@ -166,6 +167,7 @@ Page({
         const id = e.currentTarget.dataset.id;
         const room = this.data.rooms.find(r => r._id === id);
         if (!room) return;
+        const normalizedEquipment = normalizeEquipmentList(room.equipment || []);
         this.setData({
             showSheet: true,
             sheetVisible: true,
@@ -175,7 +177,7 @@ Page({
                 name: room.name || '',
                 capacity: String(room.capacity || ''),
                 location: room.location || '',
-                equipment: (room.equipment || []).slice(),
+                equipment: normalizedEquipment,
                 description: room.description || '',
                 imagePreview: room.displayImage || '',
                 uploadedPath: (room.images && room.images[0]) || ''
@@ -209,7 +211,7 @@ Page({
         const arr = this.data.form.equipment.slice();
         const idx = arr.indexOf(eq);
         if (idx > -1) arr.splice(idx, 1); else arr.push(eq);
-        this.setData({ 'form.equipment': arr });
+        this.setData({ 'form.equipment': normalizeEquipmentList(arr) });
         this.updateEquipmentDisplay();
     },
     updateEquipmentDisplay() {
@@ -259,7 +261,7 @@ Page({
             name: f.name.trim(),
             capacity: parseInt(f.capacity, 10),
             location: f.location.trim(),
-            equipment: f.equipment,
+            equipment: normalizeEquipmentList(f.equipment),
             description: (f.description || '').trim()
         };
         if (f.uploadedPath) payload.images = [f.uploadedPath];

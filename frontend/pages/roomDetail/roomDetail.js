@@ -1,6 +1,7 @@
 // pages/roomDetail/roomDetail.js - 模块化重构版
 const envConfig = require('../../config/env.js');
 const WechatAuth = require('../../utils/auth.js');
+const { normalizeEquipmentList } = require('../../utils/equipment.js');
 const SUBSCRIBE_TEMPLATE_ID = envConfig.subscribeTemplateId;
 const CANCEL_TEMPLATE_ID = envConfig.cancelTemplateId;
 
@@ -272,6 +273,9 @@ Page({
             if (!normalizedDetails._id && normalizedDetails.id) normalizedDetails._id = normalizedDetails.id;
             if (!normalizedDetails.id && normalizedDetails._id) normalizedDetails.id = normalizedDetails._id;
             normalizedDetails.displayImage = displayImage;
+            if (normalizedDetails.equipment) {
+                normalizedDetails.equipment = normalizeEquipmentList(normalizedDetails.equipment);
+            }
 
             this.setData({
                 roomDetails: normalizedDetails,

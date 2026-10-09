@@ -13,17 +13,23 @@ Page({
         userOpenId: '',
         statusBarHeight: 20,
         hasMore: false,
+        noMoreHintVisible: false,
         currentPage: 1,
         pageSize: 20,
         apiBaseUrl: '',
         // 跳转聚焦支持
         pendingFocus: '',
-        scrollIntoView: '',
         highlightUpcoming: false,
         highlightPast: false,
         filterStatus: 'all',
         displayUpcoming: [],
-        displayPast: []
+        displayPast: [],
+        stats: {
+            total: 0,
+            active: 0,
+            completed: 0,
+            cancelled: 0
+        }
     },
 
     async onLoad(options) {
@@ -91,7 +97,8 @@ Page({
                 ...b,
                 createdAtFmt: this.formatDate(b.createdAt),
                 // 拼接首图
-                roomImageUrl: b.roomImage ? (b.roomImage.startsWith('http') ? b.roomImage : `${this.data.apiBaseUrl}${b.roomImage}`) : '/images/default_room.png'
+                roomImageUrl: b.roomImage ? (b.roomImage.startsWith('http') ? b.roomImage : `${this.data.apiBaseUrl}${b.roomImage}`) : '/images/default_room.png',
+                displayStatusClass: this.getDisplayStatusClass(b)
             }));
 
             // 过滤掉已取消的记录，不计入“即将开始”
@@ -108,6 +115,7 @@ Page({
                     pastBookings: this.data.pastBookings.concat(formattedPast),
                     hasMore: !!(hasMore || (pagination && pagination.hasMore)),
                     currentPage: page,
+                    noMoreHintVisible: !((hasMore || (pagination && pagination.hasMore))) && (this.data.upcomingBookings.concat(formattedUpcoming).length + this.data.pastBookings.concat(formattedPast).length > 0),
                 });
             } else {
             this.setData({
@@ -115,7 +123,8 @@ Page({
                 pastBookings: formattedPast,
                 hasMore: !!(hasMore || (pagination && pagination.hasMore) || (page < pages)),
                 currentPage: 1,
-                isEmpty: formattedUpcoming.length === 0 && formattedPast.length === 0
+                isEmpty: formattedUpcoming.length === 0 && formattedPast.length === 0,
+                noMoreHintVisible: !(hasMore || (pagination && pagination.hasMore) || (page < pages)) && (formattedUpcoming.length + formattedPast.length > 0)
             });
             }
             this.applyFilter();
@@ -132,10 +141,12 @@ Page({
         const f = this.data.pendingFocus;
         if (!f) return;
         if (f === 'upcoming' && this.data.upcomingBookings.length) {
-            this.setData({ scrollIntoView: 'upcomingSection', highlightUpcoming: true });
+            this.setData({ highlightUpcoming: true });
+            this.scrollToSection('upcomingSection');
             setTimeout(() => this.setData({ highlightUpcoming: false }), 1000);
         } else if (f === 'past' && this.data.pastBookings.length) {
-            this.setData({ scrollIntoView: 'pastSection', highlightPast: true });
+            this.setData({ highlightPast: true });
+            this.scrollToSection('pastSection');
             setTimeout(() => this.setData({ highlightPast: false }), 1000);
         } else if (f === 'upcoming') {
             wx.showToast({ title: '暂无即将开始的预约', icon: 'none' });
@@ -158,19 +169,38 @@ Page({
      */
     applyFilter() {
         const { filterStatus, upcomingBookings, pastBookings } = this.data;
+        const allBookings = (upcomingBookings || []).concat(pastBookings || []);
+        const isActive = (item) => item && (item.displayStatus === '已预约' || item.displayStatus === '进行中');
+        const isCancelled = (item) => item && (item.status === 'cancelled' || item.displayStatus === '已取消');
+        const isCompleted = (item) => item && item.displayStatus === '已完成';
 
         const match = (item) => {
             if (!item) return false;
             if (filterStatus === 'all') return true;
-            if (filterStatus === 'active') return item.status !== 'cancelled';
-            if (filterStatus === 'cancelled') return item.status === 'cancelled';
+            if (filterStatus === 'active') return isActive(item);
+            if (filterStatus === 'cancelled') return isCancelled(item);
+            if (filterStatus === 'completed') return isCompleted(item);
             return true;
         };
 
         this.setData({
             displayUpcoming: (upcomingBookings || []).filter(match),
-            displayPast: (pastBookings || []).filter(match)
+            displayPast: (pastBookings || []).filter(match),
+            stats: {
+                total: allBookings.length,
+                active: allBookings.filter(isActive).length,
+                completed: allBookings.filter(isCompleted).length,
+                cancelled: allBookings.filter(isCancelled).length
+            }
         });
+    },
+
+    getDisplayStatusClass(booking) {
+        const status = booking && booking.displayStatus;
+        if (status === '进行中') return 'busy';
+        if (status === '已取消' || status === '已过期') return 'muted';
+        if (status === '已完成') return 'muted';
+        return 'ok';
     },
 
     /**
@@ -232,13 +262,20 @@ Page({
         this.fetchMyBookings(true);
     },
 
+    onPullDownRefresh() {
+        this.fetchMyBookings(true).finally(() => wx.stopPullDownRefresh());
+    },
+
     /**
      * 加载更多
      */
     loadMore() {
-        if (this.data.hasMore && !this.data.loadingMore) {
-            this.fetchMyBookings(false, true);
+        if (this.data.loadingMore) return;
+        if (!this.data.hasMore) {
+            this.showNoMoreHint();
+            return;
         }
+        this.fetchMyBookings(false, true);
     },
 
     /**
@@ -280,8 +317,31 @@ Page({
      * 页面滚动到底部
      */
     onReachBottom() {
-        if (this.data.hasMore && !this.data.loadingMore) {
-            this.loadMore();
+        this.loadMore();
+    },
+
+    showNoMoreHint() {
+        if (!this.data.noMoreHintVisible) {
+            this.setData({ noMoreHintVisible: true });
+        }
+    },
+    scrollToSection(id) {
+        const run = () => {
+            const query = wx.createSelectorQuery().in(this);
+            query.select(`#${id}`).boundingClientRect();
+            query.selectViewport().scrollOffset();
+            query.exec((res) => {
+                const targetRect = res && res[0];
+                const viewport = res && res[1];
+                if (!targetRect || !viewport) return;
+                const targetTop = targetRect.top + viewport.scrollTop - 12;
+                wx.pageScrollTo({ scrollTop: Math.max(targetTop, 0), duration: 260 });
+            });
+        };
+        if (wx.nextTick) {
+            wx.nextTick(run);
+        } else {
+            setTimeout(run, 0);
         }
     },
 
@@ -316,5 +376,8 @@ Page({
                 }
             }
         });
+    },
+
+    onUnload() {
     }
 });

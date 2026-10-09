@@ -3,11 +3,13 @@
     <image class="nav-back" src="/images/icons/back.png" mode="aspectFit"></image>
   </view>
 
-  <scroll-view class="content" scroll-y bindscrolltolower="loadMoreBookings" style="padding-top: {{statusBarHeight + 40}}px;">
+  <view class="content" style="padding-top: {{statusBarHeight + 40}}px;">
     <view class="toolbar">
       <text class="stats-text">预约记录</text>
-      <view class="btn ghost" bindtap="exportBookings" wx:if="{{!exporting}}">导出Excel</view>
-      <view class="btn ghost" wx:if="{{exporting}}">导出中...</view>
+      <view class="export-btn {{exporting ? 'disabled' : ''}}" bindtap="exportBookings">
+        <image class="export-icon" src="/images/icons/export.png" mode="aspectFit"></image>
+        <text class="export-text">{{exporting ? '导出中...' : '导出'}}</text>
+      </view>
     </view>
 
     <view class="stats-dash">
@@ -29,7 +31,7 @@
       </view>
     </view>
 
-    <view wx:if="{{bookingsLoading}}" class="loading-more"><view class="mini-spinner"></view><text class="loading-more-text">加载中...</text></view>
+    <view wx:if="{{bookingsLoading && filteredBookings.length === 0}}" class="loading-more"><view class="mini-spinner"></view><text class="loading-more-text">加载中...</text></view>
     <view wx:elif="{{!bookingsLoading && filteredBookings.length === 0}}" class="empty">
       <image class="empty-icon" src="/images/icons/empty.png"/>
       <text class="empty-title">暂无预约记录</text>
@@ -44,25 +46,21 @@
           <view class="b-chip {{item.displayStatusClass}}">{{item.displayStatus}}</view>
         </view>
         <view class="b-time">
-          <text class="b-date">{{item.bookingDate}}</text>
+          <text class="b-date">{{item.displayDate}}</text>
           <text class="b-range">{{item.startTime}} - {{item.endTime}}</text>
         </view>
-        <view class="b-detail">
-          <text wx:if="{{item.topic}}" class="b-text">主题：{{item.topic}}</text>
-          <text wx:if="{{item.attendeesCount}}" class="b-text">参会：{{item.attendeesCount}}人</text>
-          <text class="b-text">联系人：{{item.userName}} {{item.userPhone}}</text>
-          <text wx:if="{{item.userCompany}}" class="b-text">公司：{{item.userCompany}}</text>
-          <text wx:if="{{item.userDepartment}}" class="b-text">部门：{{item.userDepartment}}</text>
+        <view class="b-detail" wx:if="{{item.topic || item.userName || item.userPhone}}">
+          <text class="b-text">主题：{{item.topic}}</text>
+          <text class="b-text" wx:if="{{item.userName || item.userPhone}}">联系人：{{item.userName}} {{item.userPhone}}</text>
         </view>
         <view class="b-actions" wx:if="{{item.canCancel}}">
-          <button class="mini danger" data-id="{{item.id}}" catchtap="adminCancelBooking">取消预约</button>
+          <view class="mini danger" data-id="{{item.id}}" catchtap="adminCancelBooking" hover-class="mini-hover" hover-stay-time="80">取消预约</view>
         </view>
       </view>
-      <view wx:if="{{bookingsHasMore && filteredBookings.length}}" class="loading-more" bindtap="loadMoreBookings">
-        <view wx:if="{{bookingsLoading}}" class="mini-spinner"></view>
-        <text class="loading-more-text">{{bookingsLoading ? '加载中...' : '点击加载更多'}}</text>
+      <view wx:if="{{filteredBookings.length}}" class="loading-more no-more-hint {{noMoreHintVisible ? 'show' : 'hide'}}">
+        <text class="loading-more-text">已全部加载</text>
       </view>
       <view class="bottom-space"></view>
     </view>
-  </scroll-view>
+  </view>
 </view>

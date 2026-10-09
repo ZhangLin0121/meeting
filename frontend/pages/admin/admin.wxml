@@ -15,7 +15,7 @@
   </view>
 
   <!-- 内容区域 -->
-  <scroll-view class="content" scroll-y style="padding-top: {{statusBarHeight + 84}}px;" refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullDownRefresh">
+  <scroll-view class="content" scroll-y="{{!showSheet}}" style="top: {{statusBarHeight + 126}}px;" refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullDownRefresh">
     <!-- 统计与操作 -->
     <view class="stats-row">
       <text class="stats-text">共 {{rooms.length}} 间会议室</text>
@@ -59,9 +59,11 @@
               <text class="loc">{{item.location}}</text>
             </view>
           </view>
+          <image class="card-chevron" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
         </view>
       </view>
     </view>
+    <view wx:if="{{!loading && filteredRooms.length > 0}}" class="list-tip">长按卡片可快捷编辑或删除</view>
 
     <view class="bottom-space"></view>
   </scroll-view>
@@ -86,20 +88,21 @@
         <view class="form-section">
           <view class="section-header">
             <text class="section-title">基础信息</text>
-            <text class="section-caption">名称 / 容量 / 位置</text>
           </view>
-          <view class="form-grid">
-            <view class="form-item span-2">
+          <view class="basic-block">
+            <view class="field-item">
               <text class="label">名称</text>
               <input class="input" placeholder="请输入会议室名称" value="{{form.name}}" data-field="name" bindinput="onFormInput" />
             </view>
-            <view class="form-item">
-              <text class="label">容量</text>
-              <input class="input" type="number" placeholder="人数" value="{{form.capacity}}" data-field="capacity" bindinput="onFormInput" />
-            </view>
-            <view class="form-item">
-              <text class="label">位置</text>
-              <input class="input" placeholder="如 A 栋 5F" value="{{form.location}}" data-field="location" bindinput="onFormInput" />
+            <view class="field-row">
+              <view class="field-item half">
+                <text class="label">容量</text>
+                <input class="input" type="digit" placeholder="人数" value="{{form.capacity}}" data-field="capacity" bindinput="onFormInput" />
+              </view>
+              <view class="field-item half">
+                <text class="label">位置</text>
+                <input class="input" placeholder="如 A 栋 5F" value="{{form.location}}" data-field="location" bindinput="onFormInput" />
+              </view>
             </view>
           </view>
         </view>
@@ -107,14 +110,12 @@
         <view class="form-section">
           <view class="section-header">
             <text class="section-title">配置与视觉</text>
-            <text class="section-caption">设备与封面图</text>
           </view>
           <view class="form-grid">
             <view class="form-item span-2 tag-card">
               <text class="label">设备</text>
               <view class="tags">
                 <view wx:for="{{equipmentOptionsDisplay}}" wx:key="name" data-eq="{{item.name}}" bindtap="toggleEq" hover-class="tag-hover" class="tag {{item.selected ? 'sel' : ''}}">
-                  <text wx:if="{{item.selected}}" class="tag-check">✓</text>
                   <text class="tag-text">{{item.name}}</text>
                 </view>
               </view>
@@ -126,6 +127,10 @@
               </view>
               <view class="img-uploader" bindtap="chooseImage">
                 <image wx:if="{{form.imagePreview}}" class="preview" src="{{form.imagePreview}}" mode="aspectFill" />
+                <view wx:if="{{form.imagePreview}}" class="change-hint">
+                  <image class="change-icon" src="/images/icons/refresh.png" mode="aspectFit"/>
+                  <text class="change-text">更换图片</text>
+                </view>
                 <view wx:else class="upload-hint">
                   <image class="up-icon" src="/images/icons/camera.png"/>
                   <text>上传封面图</text>
@@ -137,12 +142,10 @@
 
         <view class="form-section">
           <view class="section-header">
-            <text class="section-title">更多描述</text>
-            <text class="section-caption">可选补充</text>
+            <text class="section-title">备注</text>
           </view>
           <view class="form-grid">
-            <view class="form-item span-2">
-              <text class="label">描述</text>
+            <view class="form-item span-2 plain-textarea">
               <textarea class="textarea" placeholder="补充说明（可选）" value="{{form.description}}" data-field="description" bindinput="onFormInput"/>
             </view>
           </view>
@@ -150,9 +153,12 @@
       </scroll-view>
 
       <view class="sheet-footer">
-        <view class="btn ghost" bindtap="closeSheet">取消</view>
-        <view wx:if="{{editing}}" class="btn danger" bindtap="confirmDelete">删除</view>
-        <view class="btn primary" bindtap="submit">{{ editing ? '保存' : '创建' }}</view>
+        <view class="sheet-actions">
+          <view class="btn cancel" bindtap="closeSheet">取消</view>
+          <view class="btn save" bindtap="submit">保存</view>
+        </view>
+        <view wx:if="{{editing}}" class="sheet-footer-divider"></view>
+        <view wx:if="{{editing}}" class="delete-link" bindtap="confirmDelete">删除会议室</view>
       </view>
     </view>
   </view>

@@ -110,7 +110,7 @@ class ProfileDataService {
         try {
             console.log('📅 获取即将到来的预约数量...');
 
-            const result = await request.get('/api/user/bookings', { page: 1, limit: 100 });
+            const result = await request.get('/api/user/bookings', { page: 1, pageSize: 100 });
 
             if (result.success && result.data) {
                 let upcomingCount = 0;

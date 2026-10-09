@@ -8,6 +8,9 @@ Page({
         bookingsLoading: false,
         bookingsPage: 1,
         bookingsHasMore: true,
+        loadMoreState: 'hidden',
+        noMoreHintVisible: false,
+        refreshing: false,
         exporting: false,
         filterStatus: 'active',
         filteredBookings: [],
@@ -25,8 +28,21 @@ Page({
             this.setData({ statusBarHeight: (wi && wi.statusBarHeight) || 20 });
         } catch (_) {}
         this.ensureAdmin().then((ok) => {
-            if (ok) this.loadBookings(true);
+            if (!ok) return;
+            this.fetchStats();
+            this.loadBookings(true);
         });
+    },
+
+    async fetchStats() {
+        try {
+            const res = await request.get('/api/bookings/stats');
+            if (res && res.success && res.data) {
+                this.setData({ stats: res.data });
+            }
+        } catch (e) {
+            // Stats failure should not block list rendering.
+        }
     },
 
     async ensureAdmin() {
@@ -73,16 +89,24 @@ Page({
                 const baseId = b.id || b._id || 'booking';
                 // uniqueKey 避免 wx:key 冲突（同一房间或重复数据也能区分）
                 const uniqueKey = `${baseId}-${page}-${idx}`;
-                return { ...b, displayStatus, displayStatusClass: cls, uniqueKey };
+                const displayDate = this.formatBookingDate(b.bookingDate);
+                return { ...b, displayStatus, displayStatusClass: cls, displayDate, uniqueKey };
             });
             const pages = (res.pagination && res.pagination.pages)
                 || (list.length === limit ? page + 1 : page);
             const merged = page === 1 ? list : this.data.bookings.concat(list);
+            const hasMore = page < pages;
+            const loadMoreState = this.getLoadMoreState(hasMore);
             this.setData({
                 bookings: merged,
                 bookingsPage: page + 1,
-                bookingsHasMore: page < pages
+                bookingsHasMore: hasMore,
+                noMoreHintVisible: !hasMore && merged.length > 0,
+                ...(loadMoreState ? { loadMoreState } : {})
             });
+            if (loadMoreState === 'hiding') {
+                this.scheduleLoadMoreHide();
+            }
             this.applyFilter();
         } catch (e) {
             wx.showToast({ title: '加载预约失败', icon: 'none' });
@@ -92,9 +116,90 @@ Page({
         }
     },
 
+    formatBookingDate(rawDate) {
+        if (!rawDate || typeof rawDate !== 'string') return rawDate || '';
+        const normalized = rawDate.trim().replace(/\//g, '-');
+        const datePart = normalized.split(' ')[0].split('T')[0];
+        const parts = datePart.split('-').map((part) => parseInt(part, 10));
+        if (parts.length < 3 || parts.some((num) => Number.isNaN(num))) {
+            return rawDate;
+        }
+        const [year, month, day] = parts;
+        const dateObj = new Date(year, month - 1, day);
+        if (Number.isNaN(dateObj.getTime())) return rawDate;
+        const weekMap = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const weekText = weekMap[dateObj.getDay()] || '';
+        const mm = String(month).padStart(2, '0');
+        const dd = String(day).padStart(2, '0');
+        const currentYear = new Date().getFullYear();
+        const dateText = year === currentYear ? `${mm}-${dd}` : `${year}-${mm}-${dd}`;
+        return weekText ? `${dateText} (${weekText})` : dateText;
+    },
+
     loadMoreBookings() {
-        if (this.data.bookingsHasMore && !this.data.bookingsLoading) {
-            this.loadBookings(false);
+        if (this.data.bookingsLoading) return;
+        if (!this.data.bookingsHasMore) {
+            this.showNoMoreHint();
+            return;
+        }
+        this.loadBookings(false);
+    },
+
+    onLoadMoreTap() {
+        this.loadMoreBookings();
+    },
+
+    onPullDownRefresh() {
+        if (this.data.bookingsLoading) {
+            this.setData({ refreshing: false });
+            wx.stopPullDownRefresh();
+            return;
+        }
+
+        this.setData({ refreshing: true });
+        this.loadBookings(true)
+            .finally(() => {
+                this.fetchStats();
+                this.setData({ refreshing: false });
+                wx.stopPullDownRefresh();
+            });
+    },
+
+    onReachBottom() {
+        this.loadMoreBookings();
+    },
+
+    showNoMoreHint() {
+        if (!this.data.noMoreHintVisible) {
+            this.setData({ noMoreHintVisible: true });
+        }
+    },
+
+    getLoadMoreState(hasMore) {
+        const current = this.data.loadMoreState;
+        if (hasMore) {
+            return current === 'visible' ? null : 'visible';
+        }
+        if (current === 'hidden' || current === 'hiding') {
+            return null;
+        }
+        return 'hiding';
+    },
+
+    scheduleLoadMoreHide() {
+        if (this.loadMoreHideTimer) {
+            clearTimeout(this.loadMoreHideTimer);
+        }
+        this.loadMoreHideTimer = setTimeout(() => {
+            this.setData({ loadMoreState: 'hidden' });
+            this.loadMoreHideTimer = null;
+        }, 220);
+    },
+
+    onUnload() {
+        if (this.loadMoreHideTimer) {
+            clearTimeout(this.loadMoreHideTimer);
+            this.loadMoreHideTimer = null;
         }
     },
 
@@ -145,6 +250,7 @@ Page({
                     if (r.success) {
                         wx.showToast({ title: '已取消', icon: 'success' });
                         this.setData({ bookingsPage: 1, bookings: [] });
+                        this.fetchStats();
                         this.loadBookings(true);
                     } else {
                         throw new Error(r.message || '取消失败');
@@ -154,10 +260,6 @@ Page({
                 }
             }
         });
-    },
-
-    onReachBottom() {
-        this.loadMoreBookings();
     },
 
     goBack() {
@@ -182,16 +284,12 @@ Page({
         const all = this.data.bookings || [];
         const filtered = all.filter(match);
 
-        const stats = {
-            total: all.length,
-            active: all.filter(b => b && (b.displayStatus === '已预约' || b.displayStatus === '进行中')).length,
-            completed: all.filter(b => b && b.displayStatus === '已完成').length,
-            cancelled: all.filter(b => b && (b.status === 'cancelled' || b.displayStatus === '已取消')).length
-        };
-
         this.setData({
-            filteredBookings: filtered,
-            stats
+            filteredBookings: filtered
         });
+
+        if (this.data.bookingsHasMore && filtered.length < 8) {
+            this.loadMoreBookings();
+        }
     }
 });

@@ -25,6 +25,10 @@ class TimeService {
                     available: slot.status === 'available'
                 }));
             }
+            // 兼容后端临时关闭字段名
+            if (data && !data.closures && Array.isArray(data.temporaryClosures)) {
+                data.closures = data.temporaryClosures;
+            }
 
             console.log('✅ 房间可用性数据获取成功并已转换');
             return data;
