@@ -88,7 +88,7 @@ const bookingSchema = new mongoose.Schema({
     // 预约状态
     status: {
         type: String,
-        enum: ['booked', 'cancelled'],
+        enum: ['booked', 'completed', 'cancelled'],
         default: 'booked',
         required: true,
         index: true

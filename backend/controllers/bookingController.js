@@ -2,6 +2,7 @@ const BookingValidationService = require('../services/BookingValidationService')
 const BookingOperationService = require('../services/BookingOperationService');
 const BookingExportService = require('../services/BookingExportService');
 const BookingUtilService = require('../services/BookingUtilService');
+const BookingStatsService = require('../services/BookingStatsService');
 
 /**
  * 预约控制器
@@ -92,6 +93,14 @@ class BookingController {
      */
     static generateFilename(extension, filters) {
         return BookingExportService.generateFilename(extension, filters);
+    }
+
+    /**
+     * 获取预约统计（管理员权限）
+     * GET /api/bookings/stats
+     */
+    static async getBookingStats(req, res) {
+        return await BookingStatsService.getAdminBookingStats(req, res);
     }
 
     /**

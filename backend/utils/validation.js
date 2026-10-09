@@ -131,7 +131,7 @@ const validationSchemas = {
             roomId: Joi.string().optional(),
             startDate: Joi.date().optional(),
             endDate: Joi.date().optional(),
-            status: Joi.string().valid('booked', 'cancelled').optional(),
+            status: Joi.string().valid('booked', 'completed', 'cancelled').optional(),
             page: Joi.number().integer().min(1).default(1),
             limit: Joi.number().integer().min(1).max(100).default(10)
         }),

@@ -36,6 +36,11 @@ router.delete('/:id',
 // 以下路由需要管理员权限
 router.use(requireAdmin);
 
+// 获取预约统计（管理员）
+router.get('/stats',
+    BookingController.getBookingStats
+);
+
 // 获取所有预约记录（管理员）
 router.get('/',
     validate(schemas.booking.list, 'query'),

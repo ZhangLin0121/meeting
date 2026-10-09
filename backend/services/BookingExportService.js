@@ -98,10 +98,18 @@ class BookingExportService {
     static async downloadExportFile(req, res) {
         try {
             const { filename } = req.params;
+            const safeName = path.basename(filename || '');
+            if (!safeName || safeName !== filename || !/^[A-Za-z0-9._-]+\.xlsx$/.test(safeName)) {
+                return ResponseHelper.error(res, '非法文件名', 400);
+            }
 
             // 确保使用与生成文件时相同的路径
             const tempDir = path.join(__dirname, '../temp');
-            const filePath = path.join(tempDir, filename);
+            const resolvedPath = path.resolve(tempDir, safeName);
+            if (!resolvedPath.startsWith(tempDir + path.sep)) {
+                return ResponseHelper.error(res, '非法文件路径', 400);
+            }
+            const filePath = resolvedPath;
 
             console.log('🔍 查找下载文件:', { filename, tempDir, filePath, exists: fs.existsSync(filePath) });
 

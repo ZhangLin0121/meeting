@@ -6,6 +6,7 @@ const TimeHelper = require('../utils/timeHelper');
 const BookingValidationService = require('./BookingValidationService');
 const config = require('../config');
 const WeChatAPIService = require('./WeChatAPIService'); // 引入微信API服务
+const EmailService = require('./EmailService');
 
 /**
  * 预约操作服务
@@ -93,6 +94,11 @@ class BookingOperationService {
 
             await booking.save();
             console.log('✅ 预约保存成功，预约ID:', booking._id);
+
+            // 邮件通知（可选）
+            EmailService.sendBookingCreated({ booking, room, user })
+                .catch(err => console.error('❌ 发送预约邮件失败:', err));
+
 
             // 尝试发送订阅消息
             if (user.openid && config.wechat.subscribeMessageTemplateId) {

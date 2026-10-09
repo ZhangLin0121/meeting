@@ -8,6 +8,7 @@ const config = require('./config');
 const { connectDatabase } = require('./database');
 const routes = require('./routes');
 const ResponseHelper = require('./utils/responseHelper');
+const BookingStatusService = require('./services/BookingStatusService');
 
 /**
  * 微信会议室预约小程序后端服务
@@ -95,6 +96,8 @@ async function startServer() {
     try {
         // 连接数据库
         await connectDatabase();
+
+        BookingStatusService.startCompletionScheduler();
 
         // 创建上传目录
         const fs = require('fs');
