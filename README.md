@@ -375,4 +375,4 @@ curl -X POST https://www.cacophonyem.me/meeting/api/user/wechat-login \
 | 服务器目录 | `/opt/meeting` |
 | 运行方式 | PM2 `meeting-backend`（端口 3000）+ 微信小程序前端 |
 
-> 本仓库是 s131 上「��的源码镜像，与服务器目录保持同步；改动请两边同步后提交。
+> 本仓库与 s131 服务器上的目录保持同步；改动请两边同步后提交。
