@@ -363,3 +363,16 @@ curl -X POST https://www.cacophonyem.me/meeting/api/user/wechat-login \
 **版本**: v1.0.0  
 **最后更新**: 2024年  
 **维护者**: 开发团队 
+
+---
+
+## 生产访问信息
+
+| 项目 | 值 |
+|---|---|
+| **线上入口** | https://www.cacophonyem.me/ |
+| 服务器 | s131（8.162.5.131） |
+| 服务器目录 | `/opt/meeting` |
+| 运行方式 | PM2 `meeting-backend`（端口 3000）+ 微信小程序前端 |
+
+> 本仓库是 s131 上「��的源码镜像，与服务器目录保持同步；改动请两边同步后提交。
