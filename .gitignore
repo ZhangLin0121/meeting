@@ -106,6 +106,12 @@ logs
 *.sqlite
 *.sqlite3
 
+# 运行时数据（仅存在于服务器，不进版本库）
+# backend/uploads 是用户上传的会议附件（线上 27 个文件 / 22M）
+backend/uploads/
+backend/temp/
+backup/
+
 # Environment files
 .env.local
 .env.development.local
