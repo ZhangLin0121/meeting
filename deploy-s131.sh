@@ -109,13 +109,13 @@ if [ -z "$env_md5_before" ] || [ -z "$env_md5_after" ]; then
   exit 1
 fi
 if [ "$env_md5_before" != "$env_md5_after" ]; then
-  echo "!! backend/.env 被改动了（$env_md5_before -> $env_md5_after），请立即检查"
+  echo "!! backend/.env 被改动了（$env_md5_before -> ${env_md5_after}），请立即检查"
   exit 1
 fi
 echo "    backend/.env            未被改动"
 
 if [ "$uploads_before" != "$uploads_after" ]; then
-  echo "!! backend/uploads 文件数变化（$uploads_before -> $uploads_after），请立即检查"
+  echo "!! backend/uploads 文件数变化（$uploads_before -> ${uploads_after}），请立即检查"
   exit 1
 fi
 echo "    backend/uploads         ${uploads_after} 个文件，未被改动"
